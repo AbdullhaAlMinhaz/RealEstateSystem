@@ -1,0 +1,454 @@
+﻿@{
+    ViewData["Title"] = "Real Estate Property Listing & Selling System";
+}
+
+<main>
+    <!-- HERO -->
+    <section class="hero" id="home">
+        <div class="container hero-inner">
+            <div class="hero-grid">
+                <!-- Left text -->
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        Find your best <span>spaces</span>.
+                    </h1>
+                    <p class="hero-subtitle">
+                        Search and find your dream home with verified listings from trusted
+                        sellers, approved by the admin of the system.
+                    </p>
+                    <div class="hero-small-meta">
+                        <p><strong>Real Estate Property Listing and Selling System</strong></p>
+                        <p>Admin • Seller • Buyer – connected inside one platform.</p>
+                    </div>
+
+                    <div class="hero-highlight">
+                        <span class="hero-badge">Featured property</span>
+                        <div class="hero-highlight-text">
+                            <p class="hero-highlight-title">Modern Open-Plan Apartment</p>
+                            <p class="hero-highlight-meta">3-bed · 2-bath · Dhaka, Bashundhara · $120,000</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right card (image) -->
+                <div class="hero-image-card">
+                    <div class="hero-image">
+                        <img src="~/images/appartment 01.jpg" alt="Modern open-plan apartment">
+                    </div>
+                    <div class="hero-image-info">
+                        <div>
+                            <p class="hero-image-title">Modern Open-Plan Apartment</p>
+                            <p class="hero-image-location">Dhaka • Bashundhara</p>
+                        </div>
+                        <p class="hero-image-price">$120,000</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title">How it works</h2>
+            <p class="section-subtitle">
+                A simple workflow that connects Admins, Sellers and Buyers inside your Real Estate
+                Property Listing and Selling System.
+            </p>
+
+            <div class="how-grid">
+                <article class="how-card">
+                    <div class="how-icon">🔎</div>
+                    <h3>Research</h3>
+                    <p>
+                        Buyers search properties using filters such as location, price,
+                        number of bedrooms and more.
+                    </p>
+                </article>
+
+                <article class="how-card">
+                    <div class="how-icon">📨</div>
+                    <h3>Contact</h3>
+                    <p>
+                        Buyers send inquiry emails and schedule property visits. Sellers respond
+                        and manage offers.
+                    </p>
+                </article>
+
+                <article class="how-card">
+                    <div class="how-icon">📅</div>
+                    <h3>Visit</h3>
+                    <p>
+                        Visits and negotiations are handled, offers are accepted, and Admin tracks
+                        approved &amp; sold properties in the system.
+                    </p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROPERTIES LIST -->
+    <section class="section" id="properties">
+        <div class="container">
+            <h2 class="section-title">Properties available for sale</h2>
+            <p class="section-subtitle">
+                Public visitors can preview featured properties here. After login, Buyers will see
+                full details, map view, offers and payment options.
+            </p>
+
+            <!-- Search strip -->
+            <section class="search-strip">
+                <div class="container search-strip-inner">
+                    <form class="hero-search" id="searchForm">
+                        <div class="search-field">
+                            <span class="search-label">Search</span>
+                            <input type="text" placeholder="City / Area (e.g., Dhanmondi, Gulshan)" />
+                        </div>
+                        <div class="search-field">
+                            <span class="search-label">Property Type</span>
+                            <select>
+                                <option value="">Any type</option>
+                                <option>Apartment</option>
+                                <option>House</option>
+                                <option>Commercial</option>
+                                <option>Land</option>
+                            </select>
+                        </div>
+                        <div class="search-field">
+                            <span class="search-label">Price (Min)</span>
+                            <input type="number" placeholder="$ Min" />
+                        </div>
+                        <div class="search-field">
+                            <span class="search-label">Price (Max)</span>
+                            <input type="number" placeholder="$ Max" />
+                        </div>
+                        <button type="submit" class="btn btn-primary search-btn">
+                            Search
+                        </button>
+                    </form>
+                    <p class="search-note">
+                        🔒 Full search results are available only after <strong>Login / Registration</strong>.
+                    </p>
+                </div>
+            </section>
+
+            <!-- PROPERTY CARDS (static sample for now) -->
+            <div class="properties-grid">
+                @* You can later replace these static cards with a loop over properties from the database *@
+
+                <!-- Example card 1 -->
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="~/images/appartment 01.jpg" alt="Spacious kitchen and living room">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,00,00,000 tk</p>
+                        <p class="property-type">3-bed, 2-bath</p>
+                        <p class="property-location">Dallas, TX</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="images/appartment 02.jpg" alt="Living room with balcony view">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,40,00,000 tk</p>
+                        <p class="property-type">4 beds, 3 baths</p>
+                        <p class="property-location">Los Angeles, CA</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="images/appartment 03.jpg" alt="Luxury apartment with dining and kitchen">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,60,00,000 tk</p>
+                        <p class="property-type">3-bed, 2-bath</p>
+                        <p class="property-location">Denver, CO</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="images/appartment 01.jpg" alt="Bright apartment with balcony">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,00,00,000 tk</p>
+                        <p class="property-type">2-beds, 1 bath</p>
+                        <p class="property-location">Orlando, FL</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="images/appartment 03.jpg" alt="Modern high-rise apartment">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,50,00,000 tk</p>
+                        <p class="property-type">3-bed, 2-bath</p>
+                        <p class="property-location">Chicago, IL</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="images/appartment 02.jpg" alt="Apartment with city view">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,00,00,000 tk</p>
+                        <p class="property-type">2-bed, 2-bath</p>
+                        <p class="property-location">Houston, TX</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+
+                <!-- PAGE 2 -->
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="images/appartment 01.jpg" alt="Large family kitchen and living">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,00,00,000 tk</p>
+                        <p class="property-type">4-bed, 3-bath</p>
+                        <p class="property-location">San Francisco, CA</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="images/appartment 02.jpg" alt="Cozy apartment with balcony">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,00,00,000 tk</p>
+                        <p class="property-type">2-bed, 1-bath</p>
+                        <p class="property-location">Seattle, WA</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="images/appartment 03.jpg" alt="Modern city apartment">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,00,00,000 tk</p>
+                        <p class="property-type">2-bed, 2-bath</p>
+                        <p class="property-location">Boston, MA</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="images/appartment 01.jpg" alt="Spacious apartment interior">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,00,00,000 tk</p>
+                        <p class="property-type">3-bed, 3-bath</p>
+                        <p class="property-location">New York, NY</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="images/appartment 02.jpg" alt="Apartment with open balcony">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,00,00,000 tk</p>
+                        <p class="property-type">2-bed, 2-bath</p>
+                        <p class="property-location">Phoenix, AZ</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="images/appartment 03.jpg" alt="Bright apartment with glass windows">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,00,00,000 tk</p>
+                        <p class="property-type">3-bed, 2-bath</p>
+                        <p class="property-location">Miami, FL</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+
+                <!-- PAGE 3 -->
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="images/appartment 01.jpg" alt="Luxury apartment with island kitchen">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,00,00,000 tk</p>
+                        <p class="property-type">4-bed, 3-bath</p>
+                        <p class="property-location">San Diego, CA</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="images/appartment 02.jpg" alt="Elegant living room with balcony">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,00,00,000 tk</p>
+                        <p class="property-type">3-bed, 2-bath</p>
+                        <p class="property-location">Atlanta, GA</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="images/appartment 03.jpg" alt="Apartment facing river view">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,00,00,000 tk</p>
+                        <p class="property-type">3-bed, 3-bath</p>
+                        <p class="property-location">Portland, OR</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="images/appartment 01.jpg" alt="Open-plan family apartment">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,00,00,000 tk</p>
+                        <p class="property-type">3-bed, 2-bath</p>
+                        <p class="property-location">Austin, TX</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="images/appartment 02.jpg" alt="Cozy modern apartment">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,00,00,000 tk</p>
+                        <p class="property-type">2-bed, 1-bath</p>
+                        <p class="property-location">Charlotte, NC</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="images/appartment 03.jpg" alt="City-view apartment with balcony">
+                    </div>
+                    <div class="property-body">
+                        <p class="property-price">1,00,00,000 tk</p>
+                        <p class="property-type">3-bed, 3-bath</p>
+                        <p class="property-location">Toronto, CA</p>
+                        <button class="btn btn-details">Details</button>
+                    </div>
+                </article>
+            </div>
+
+            </div>
+
+            <!-- PAGINATION -->
+            <div class="pagination">
+                <button class="pagination-btn active" data-page="1">1</button>
+                <button class="pagination-btn" data-page="2">2</button>
+                <button class="pagination-btn" data-page="3">3</button>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- ABOUT US -->
+<section class="section" id="about-us">
+    <div class="container">
+        <h2 class="section-title">About Us</h2>
+        <p class="section-subtitle">
+            EstateFlow is a university project that demonstrates a complete Real Estate
+            Property Listing and Selling System where Admins, Sellers and Buyers can
+            work together in a secure and organized platform.
+        </p>
+
+        <div class="about-grid">
+            <div class="about-left">
+                <h3>Our Purpose</h3>
+                <p>
+                    The main goal of this system is to connect property owners and buyers
+                    in a transparent way. Admin verifies Sellers and approves property
+                    listings before they go public so that buyers can trust the platform.
+                </p>
+
+                <h3>What You Can Showcase</h3>
+                <ul>
+                    <li>Role-based access: Admin, Seller (Agent / Owner), Buyer</li>
+                    <li>Secure login &amp; registration with controlled property search</li>
+                    <li>Property listing, offers, bookings and receipt generation</li>
+                    <li>Analytics dashboard for Admin and performance stats for Seller</li>
+                </ul>
+            </div>
+
+            <div class="about-right">
+                <div class="about-card">
+                    <h4>For Admin</h4>
+                    <p>
+                        Manage users, approve properties, mark listings as sold or
+                        removed, and generate monthly reports of activity.
+                    </p>
+                </div>
+                <div class="about-card">
+                    <h4>For Sellers</h4>
+                    <p>
+                        Create property listings with images, reply to inquiries,
+                        handle offers and track which listings perform best.
+                    </p>
+                </div>
+                <div class="about-card">
+                    <h4>For Buyers</h4>
+                    <p>
+                        Search properties after login, send inquiries by email,
+                        submit offers and download booking confirmations or receipts.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section" id="contact">
+    <div class="container">
+        <h2 class="section-title">Contact Us</h2>
+        <p class="section-subtitle">Need help? Have questions? Reach us anytime.</p>
+
+        <div class="contact-grid">
+            <div class="contact-card">
+                <h3>📍 Address</h3>
+                <p>Road #12, House #34, Bashundhara R/A, Dhaka, Bangladesh</p>
+
+                <h3>📞 Phone</h3>
+                <p>+880 1234 567 890</p>
+
+                <h3>📧 Email</h3>
+                <p>support@estateflow.com</p>
+            </div>
+
+            <div class="contact-map">
+                <iframe width="100%" height="100%"
+                        frameborder="0" style="border:0; border-radius:16px;"
+                        src="https://maps.google.com/maps?q=Bashundhara%20Dhaka&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                        allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+    </div>
+</section>

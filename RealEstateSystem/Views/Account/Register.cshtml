@@ -1,0 +1,107 @@
+﻿@model RealEstateSystem.ViewModels.RegisterViewModel
+@using RealEstateSystem.Models
+
+@{
+    ViewData["Title"] = "Create an account";
+    ViewData["BodyClass"] = "auth-body";
+}
+
+<main class="auth-main">
+    <div class="auth-card">
+        <h1 class="auth-title">Create an account</h1>
+        <p class="auth-subtitle">
+            Register as Seller and Buyer to use the system.
+        </p>
+
+        <form asp-action="Register" method="post" class="auth-form" id="registrationForm">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <!-- Register as -->
+            <div class="auth-field">
+                <label asp-for="Role">Register as</label>
+                <select asp-for="Role">
+                    <option value="3">Buyer</option>
+                    <option value="2">Seller</option>
+                    <option value="1">Admin</option>
+                </select>
+                <span asp-validation-for="Role" class="text-danger"></span>
+            </div>
+
+            <!-- First + Last Name -->
+            <div class="Name">
+                <div class="auth-field">
+                    <label asp-for="FirstName">First Name</label>
+                    <input asp-for="FirstName" placeholder="Your First Name" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="LastName">Last Name</label>
+                    <input asp-for="LastName" placeholder="Your Last Name" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- Gender -->
+            <div class="auth-field">
+                <label asp-for="Gender">Gender</label>
+                <select asp-for="Gender">
+                    <option value="1">Male</option>
+                    <option value="2">Female</option>
+                </select>
+                <span asp-validation-for="Gender" class="text-danger"></span>
+            </div>
+
+            <!-- DOB -->
+            <div class="auth-field">
+                <label asp-for="DateOfBirth">Date Of Birth</label>
+                <input asp-for="DateOfBirth" type="date" placeholder="Date Of Birth" />
+                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+            </div>
+
+            <!-- Email -->
+            <div class="auth-field">
+                <label asp-for="Email">Email address</label>
+                <input asp-for="Email" placeholder="you@example.com" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <!-- Phone -->
+            <div class="auth-field">
+                <label asp-for="PhoneNumber">Phone number</label>
+                <input asp-for="PhoneNumber" placeholder="+880 1XXX-XXXXXX" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+
+            <!-- Password + Confirm -->
+            <div class="auth-field auth-field-inline">
+                <div>
+                    <label asp-for="Password">Password</label>
+                    <input asp-for="Password" placeholder="••••••••" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div>
+                    <label asp-for="ConfirmPassword">Confirm password</label>
+                    <input asp-for="ConfirmPassword" placeholder="••••••••" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+            </div>
+
+            <p class="auth-note">
+                Note: this is a university project. In this implementation, the data is stored
+                securely in SQL Server using ASP.NET Core and Entity Framework Core.
+            </p>
+
+            <button type="submit" class="btn btn-primary auth-submit">Create account</button>
+
+            <p class="auth-switch">
+                Already have an account?
+                <a asp-action="Login">Login here</a>
+            </p>
+        </form>
+    </div>
+</main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
