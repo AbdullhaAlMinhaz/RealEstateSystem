@@ -1,0 +1,62 @@
+﻿@model RealEstateSystem.ViewModels.AdminPropertyListViewModel
+@{
+    Layout = "_AdminLayout";
+}
+
+<section class="card">
+    <div class="card-header">
+        <div>
+            <h2>@Model.Title</h2>
+            <p class="card-subtitle">@Model.Subtitle</p>
+        </div>
+        <input type="text" id="propertySearch" class="table-search" placeholder="Search properties..." />
+    </div>
+
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Property</th>
+                    <th>Seller</th>
+                    <th>City</th>
+                    <th>Price</th>
+                    <th>Bedrooms</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody id="propertyTableBody">
+                @foreach (var p in Model.Properties)
+                {
+                    <tr>
+                        <td>@p.PropertyId</td>
+                        <td>@p.Title</td>
+                        <td>
+                            @p.Seller?.User?.FirstName @p.Seller?.User?.LastName
+                        </td>
+                        <td>@p.City</td>
+                        <td>@p.Price.ToString("N0")</td>
+                        <td>@(p.Bedrooms?.ToString() ?? "-")</td>
+                        <td>
+                            <span class="badge badge-active">Active</span>
+                        </td>
+                        <td>@p.CreatedDate.ToString("yyyy-MM-dd")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.getElementById('propertySearch')?.addEventListener('input', function (e) {
+            const q = e.target.value.toLowerCase();
+            document.querySelectorAll('#propertyTableBody tr').forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(q) ? '' : 'none';
+            });
+        });
+    </script>
+}

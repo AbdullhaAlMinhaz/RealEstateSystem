@@ -1,0 +1,61 @@
+﻿@model RealEstateSystem.ViewModels.AdminUserListViewModel
+@{
+    Layout = "_AdminLayout";
+}
+
+<section class="card">
+    <div class="card-header">
+        <div>
+            <h2>@Model.Title</h2>
+            <p class="card-subtitle">@Model.Subtitle</p>
+        </div>
+        <input type="text" id="userSearch" class="table-search" placeholder="Search users..." />
+    </div>
+
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                @foreach (var u in Model.Users)
+                {
+                    <tr>
+                        <td>@u.UserId</td>
+                        <td>@(u.FirstName + " " + u.LastName)</td>
+                        <td>@u.Email</td>
+                        <td>@u.Role</td>
+                        <td>@u.PhoneNumber</td>
+                        <td>
+                            <span class="badge @(u.IsActive ? "badge-active" : "badge-disabled")">
+                                @(u.IsActive ? "Active" : "Inactive")
+                            </span>
+                        </td>
+                        <td>@u.CreatedDate.ToString("yyyy-MM-dd")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // simple client-side search
+        document.getElementById('userSearch')?.addEventListener('input', function (e) {
+            const q = e.target.value.toLowerCase();
+            document.querySelectorAll('#userTableBody tr').forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(q) ? '' : 'none';
+            });
+        });
+    </script>
+}

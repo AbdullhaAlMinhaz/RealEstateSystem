@@ -1,0 +1,125 @@
+﻿@{
+    Layout = null;
+    var pageTitle = ViewData["PageTitle"] as string ?? "Dashboard";
+    var pageSubtitle = ViewData["PageSubtitle"] as string ?? "Overview of users, listings and system activity.";
+    string currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>@pageTitle – EstateFlow Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/admin-dashboard.css" />
+    <link rel="icon" type="images" href="~/images/Favicon.jpg">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">RE</div>
+                <div class="logo-text">
+                    <span class="logo-title">EstateFlow</span>
+                    <span class="logo-subtitle">Admin Panel</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a asp-controller="AdminDashboard" asp-action="Index"
+                   class="nav-item @(currentController == "AdminDashboard" ? "is-active" : "")">
+                    Dashboard
+                </a>
+
+                <a asp-controller="AdminUsers" asp-action="Index"
+                   class="nav-item @(currentController == "AdminUsers" ? "is-active" : "")">
+                    All Users
+                </a>
+
+                <a asp-controller="AdminUsers" asp-action="Buyers"
+                   class="nav-item">
+                    Buyers
+                </a>
+
+                <a asp-controller="AdminUsers" asp-action="Sellers"
+                   class="nav-item">
+                    Sellers
+                </a>
+
+                <a asp-controller="AdminProperties" asp-action="ActiveListings"
+                   class="nav-item @(currentController == "AdminProperties" ? "is-active" : "")">
+                    Properties
+                </a>
+
+                <a href="#" class="nav-item">Approvals</a>
+                <a href="#" class="nav-item">Reports</a>
+                <a href="#" class="nav-item">My Profile</a>
+                <a href="#" class="nav-item">Settings</a>
+
+                <div class="sidebar-footer">
+                    <a asp-controller="Account" asp-action="Logout" class="btn-logout">Logout</a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- MAIN AREA -->
+        <div class="main">
+            <!-- Top bar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="btn-menu" id="btnMenu" aria-label="Toggle menu">
+                        ☰
+                    </button>
+                    <div>
+                        <h1 class="page-title">@pageTitle</h1>
+                        <p class="page-subtitle">@pageSubtitle</p>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="topbar-search">
+                        <input type="text" id="globalSearch" placeholder="Search users, properties, activity..." />
+                    </div>
+                    <button class="btn-icon" id="themeToggle" aria-label="Toggle dark theme">
+                        🌙
+                    </button>
+                    <div class="topbar-user">
+                        <div class="avatar">A</div>
+                        <div class="topbar-user-info">
+                            <span class="topbar-user-name">Admin Abrar</span>
+                            <span class="topbar-user-role">Super Admin</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Simple theme toggle + sidebar open for all admin pages
+        document.addEventListener('DOMContentLoaded', function () {
+            var themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', function () {
+                    document.body.classList.toggle('dark-theme');
+                });
+            }
+
+            var btnMenu = document.getElementById('btnMenu');
+            if (btnMenu) {
+                btnMenu.addEventListener('click', function () {
+                    document.body.classList.toggle('sidebar-open');
+                });
+            }
+        });
+    </script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

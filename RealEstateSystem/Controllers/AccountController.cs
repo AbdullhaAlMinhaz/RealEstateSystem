@@ -88,7 +88,13 @@ namespace RealEstateSystem.Controllers
             _context.SaveChanges();
 
             TempData["SuccessMessage"] = "Registration successful. Please login.";
-            return RedirectToAction("Login");
+
+            // tell Home/Index.cshtml to open the login modal
+            TempData["OpenLoginModal"] = true;
+
+            // go to your designed Home page (which contains the login modal UI)
+            return RedirectToAction("Index", "Home");
+
         }
 
         // ========== LOGIN (GET) ==========

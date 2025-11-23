@@ -452,11 +452,26 @@
         </div>
     </div>
 
+    
     @await Html.PartialAsync("~/Views/Account/Login.cshtml", new RealEstateSystem.ViewModels.LoginViewModel())
     @await Html.PartialAsync("~/Views/Account/Register.cshtml", new RealEstateSystem.ViewModels.RegisterViewModel())
 
-
+    @if (TempData["OpenLoginModal"] != null)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var modal = document.getElementById('loginModal');
+                if (modal) {
+                    modal.classList.add('open');
+                    modal.setAttribute('aria-hidden', 'false');
+                    document.body.classList.add('no-scroll');
+                }
+            });
+        </script>
+    }
 </section>
+
+
 
 
 
