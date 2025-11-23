@@ -451,4 +451,12 @@
             </div>
         </div>
     </div>
+
+    @await Html.PartialAsync("~/Views/Account/Login.cshtml", new RealEstateSystem.ViewModels.LoginViewModel())
+    @await Html.PartialAsync("~/Views/Account/Register.cshtml", new RealEstateSystem.ViewModels.RegisterViewModel())
+
+
 </section>
+
+
+

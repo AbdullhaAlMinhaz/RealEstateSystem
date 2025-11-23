@@ -996,3 +996,47 @@ footer {
     }
 }
 
+
+/* ===== Modal base styles ===== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+    .modal-overlay.open {
+        display: flex;
+    }
+
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45); /* dark transparent */
+    backdrop-filter: blur(3px);
+}
+
+.modal-dialog {
+    position: relative;
+    z-index: 1001;
+    max-width: 480px;
+    width: 100%;
+    padding: 16px;
+}
+
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    border: none;
+    background: transparent;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* Prevent background scroll when modal open */
+body.no-scroll {
+    overflow: hidden;
+}

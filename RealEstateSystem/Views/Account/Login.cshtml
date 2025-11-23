@@ -1,4 +1,4 @@
-﻿@model RealEstateSystem.ViewModels.LoginViewModel
+﻿@*  @model RealEstateSystem.ViewModels.LoginViewModel
 
 @{
     ViewData["Title"] = "Login";
@@ -52,4 +52,62 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+}  *@
+
+
+@model RealEstateSystem.ViewModels.LoginViewModel
+
+@{
+    Layout = null;   // important – we are using this as a partial inside Home/Index
 }
+
+<div id="loginModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-backdrop js-close-login"></div>
+
+    <div class="modal-dialog">
+        <div class="auth-card">
+            <button type="button" class="modal-close js-close-login">✕</button>
+
+            <h1 class="auth-title">Welcome back</h1>
+            <p class="auth-subtitle">
+                Login to manage your properties, offers and inquiries.
+            </p>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+            }
+
+            <form asp-controller="Account" asp-action="Login" method="post" class="auth-form" id="loginForm">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="auth-field">
+                    <label asp-for="Email">Email address</label>
+                    <input asp-for="Email" placeholder="you@example.com" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="Password">Password</label>
+                    <input asp-for="Password" placeholder="••••••••" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="auth-footer-row">
+                    <label class="auth-checkbox">
+                        <input asp-for="RememberMe" />
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" class="forgot-link">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary auth-submit">Login</button>
+
+                <p class="auth-switch">
+                    Don’t have an account?
+                    <a href="#" class="js-open-register js-close-login">Create one</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</div>

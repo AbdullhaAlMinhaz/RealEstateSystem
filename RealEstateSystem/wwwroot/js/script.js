@@ -103,3 +103,50 @@ document.addEventListener("DOMContentLoaded", () => {
     buildPagination();
     showPage(1);
 });
+
+
+// =============== MODAL HANDLING (Login & Register) ===============
+function setupModal(triggerSelector, modalId, closeSelector) {
+    const triggers = document.querySelectorAll(triggerSelector);
+    const modal = document.getElementById(modalId);
+    if (!modal || !triggers.length) return;
+
+    const closes = modal.querySelectorAll(closeSelector);
+
+    const open = () => {
+        modal.classList.add("open");
+        modal.setAttribute("aria-hidden", "false");
+        document.body.classList.add("no-scroll");
+    };
+
+    const close = () => {
+        modal.classList.remove("open");
+        modal.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("no-scroll");
+    };
+
+    triggers.forEach(t => {
+        t.addEventListener("click", e => {
+            e.preventDefault();
+            open();
+        });
+    });
+
+    closes.forEach(c => {
+        c.addEventListener("click", e => {
+            e.preventDefault();
+            close();
+        });
+    });
+
+    document.addEventListener("keydown", e => {
+        if (e.key === "Escape" && modal.classList.contains("open")) {
+            close();
+        }
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    setupModal(".js-open-login", "loginModal", ".js-close-login");
+    setupModal(".js-open-register", "registerModal", ".js-close-register");
+});
