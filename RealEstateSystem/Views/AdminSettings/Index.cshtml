@@ -1,0 +1,422 @@
+﻿@{
+    Layout = "_AdminLayout";
+    ViewData["PageTitle"] = "Settings";
+    ViewData["PageSubtitle"] = "Configure system-wide preferences for EstateFlow.";
+}
+
+<style>
+    .settings-page {
+        display: flex;
+        flex-direction: column;
+        gap: 1.75rem;
+    }
+
+    .settings-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+        gap: 1.5rem;
+    }
+
+    .settings-section-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
+    .settings-section-subtitle {
+        font-size: 0.8rem;
+        color: #8a95b5;
+        margin-bottom: 1rem;
+    }
+
+    .settings-field {
+        margin-bottom: 0.9rem;
+    }
+
+        .settings-field label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #4a5674;
+            margin-bottom: 0.25rem;
+        }
+
+        .settings-field input,
+        .settings-field select {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid #e0e4f2;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.9rem;
+            outline: none;
+            background-color: #f9fbff;
+            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+        }
+
+            .settings-field input:focus,
+            .settings-field select:focus {
+                border-color: #4f8bff;
+                box-shadow: 0 0 0 3px rgba(79,139,255,0.18);
+                background-color: #ffffff;
+            }
+
+    .settings-inline-note {
+        font-size: 0.75rem;
+        color: #a0aac9;
+        margin-top: 0.15rem;
+    }
+
+    .settings-actions {
+        margin-top: 0.8rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.6rem;
+    }
+
+    .btn {
+        border-radius: 999px;
+        border: none;
+        padding: 0.5rem 1.2rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: transform 0.1s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #4f8bff, #2651ff);
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(79,139,255,0.35);
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 11px 26px rgba(79,139,255,0.45);
+        }
+
+    .btn-secondary {
+        background: #eef2ff;
+        color: #394264;
+    }
+
+        .btn-secondary:hover {
+            background: #e0e6ff;
+        }
+
+    /* toggles */
+    .setting-toggle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.55rem 0;
+        border-bottom: 1px dashed #e2e6f2;
+    }
+
+        .setting-toggle-row:last-child {
+            border-bottom: none;
+        }
+
+    .setting-toggle-text {
+        flex: 1;
+    }
+
+    .setting-toggle-title {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #3b4466;
+    }
+
+    .setting-toggle-desc {
+        font-size: 0.78rem;
+        color: #929ac0;
+        margin-top: 0.15rem;
+    }
+
+    .toggle-switch {
+        position: relative;
+        width: 42px;
+        height: 22px;
+    }
+
+        .toggle-switch input {
+            display: none;
+        }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        background-color: #d3d9f2;
+        border-radius: 999px;
+        transition: background-color 0.2s;
+    }
+
+        .toggle-slider::before {
+            content: "";
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            left: 3px;
+            top: 2px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+            transition: transform 0.2s;
+        }
+
+    .toggle-switch input:checked + .toggle-slider {
+        background: linear-gradient(135deg, #4f8bff, #2651ff);
+    }
+
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(18px);
+        }
+
+    /* toast */
+    .settings-toast {
+        position: fixed;
+        right: 1.75rem;
+        bottom: 1.75rem;
+        padding: 0.7rem 1.1rem;
+        background: #1f9254;
+        color: #ffffff;
+        font-size: 0.85rem;
+        border-radius: 999px;
+        box-shadow: 0 15px 32px rgba(0,0,0,0.25);
+        display: none;
+        align-items: center;
+        gap: 0.45rem;
+        z-index: 2000;
+    }
+
+        .settings-toast.show {
+            display: inline-flex;
+            animation: settings-toast-in 0.25s ease-out;
+        }
+
+    @@keyframes settings-toast-in {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    
+
+    .settings-toast-icon {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 2px solid #ffffff;
+        font-size: 0.7rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+<section class="settings-page">
+    <section class="settings-grid">
+        <!-- GENERAL SETTINGS -->
+        <article class="card">
+            <div class="card-header">
+                <div>
+                    <h2>General</h2>
+                    <p class="card-subtitle">Basic configuration for the real estate system.</p>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="settings-section-title">Application</div>
+                <div class="settings-section-subtitle">
+                    These settings control how EstateFlow is displayed to all users.
+                </div>
+
+                <form id="generalSettingsForm">
+                    <div class="settings-field">
+                        <label>Site Name</label>
+                        <input type="text" value="EstateFlow Real Estate System" />
+                        <div class="settings-inline-note">
+                            Shown in page titles, email templates and login screen.
+                        </div>
+                    </div>
+
+                    <div class="settings-field">
+                        <label>Default Currency</label>
+                        <select>
+                            <option>BDT (৳)</option>
+                            <option>USD ($)</option>
+                            <option>EUR (€)</option>
+                        </select>
+                        <div class="settings-inline-note">
+                            Used for property prices and reports. Sellers can override per listing.
+                        </div>
+                    </div>
+
+                    <div class="settings-field">
+                        <label>Listing Visibility</label>
+                        <select>
+                            <option>Require admin approval before going live</option>
+                            <option>Publish immediately (auto approved)</option>
+                        </select>
+                        <div class="settings-inline-note">
+                            Choose how new listings from sellers appear to buyers.
+                        </div>
+                    </div>
+
+                    <div class="settings-field">
+                        <label>Session Timeout (minutes)</label>
+                        <input type="number" value="30" />
+                        <div class="settings-inline-note">
+                            After this time of inactivity, admins will be logged out automatically.
+                        </div>
+                    </div>
+
+                    <div class="settings-actions">
+                        <button type="button" class="btn btn-secondary" id="btnGeneralReset">Reset</button>
+                        <button type="button" class="btn btn-primary" id="btnGeneralSave">Save General Settings</button>
+                    </div>
+                </form>
+            </div>
+        </article>
+
+        <!-- NOTIFICATIONS / EMAIL -->
+        <article class="card">
+            <div class="card-header">
+                <div>
+                    <h2>Notifications &amp; Email</h2>
+                    <p class="card-subtitle">Control how admins, buyers and sellers receive updates.</p>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="settings-section-title">Email alerts</div>
+                <div class="settings-section-subtitle">
+                    Toggle which events will send automatic email notifications.
+                </div>
+
+                <div id="notificationSettings">
+                    <div class="setting-toggle-row">
+                        <div class="setting-toggle-text">
+                            <div class="setting-toggle-title">
+                                New seller registration
+                            </div>
+                            <div class="setting-toggle-desc">
+                                Email admin when a new seller account is created.
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-toggle-row">
+                        <div class="setting-toggle-text">
+                            <div class="setting-toggle-title">
+                                New property submitted
+                            </div>
+                            <div class="setting-toggle-desc">
+                                Notify admins when a property is waiting for approval.
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-toggle-row">
+                        <div class="setting-toggle-text">
+                            <div class="setting-toggle-title">
+                                Buyer booking confirmation
+                            </div>
+                            <div class="setting-toggle-desc">
+                                Send confirmation emails to buyers when they book a visit.
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-toggle-row">
+                        <div class="setting-toggle-text">
+                            <div class="setting-toggle-title">
+                                Weekly summary email
+                            </div>
+                            <div class="setting-toggle-desc">
+                                Email admins a summary of new users, listings and approvals.
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section-title" style="margin-top:1.2rem;">Support contact</div>
+
+                <form id="emailSettingsForm">
+                    <div class="settings-field">
+                        <label>Support Email</label>
+                        <input type="email" value="support@estateflow.com" />
+                        <div class="settings-inline-note">
+                            Buyers and sellers will see this email for help &amp; support.
+                        </div>
+                    </div>
+
+                    <div class="settings-field">
+                        <label>From Name (emails)</label>
+                        <input type="text" value="EstateFlow Support" />
+                    </div>
+
+                    <div class="settings-actions">
+                        <button type="button" class="btn btn-primary" id="btnNotificationSave">Save Notification Settings</button>
+                    </div>
+                </form>
+            </div>
+        </article>
+    </section>
+
+    <!-- maybe later: more sections like Payments, Integrations etc. -->
+</section>
+
+<div id="settingsToast" class="settings-toast">
+    <span class="settings-toast-icon">✓</span>
+    <span id="settingsToastText">Settings saved</span>
+</div>
+
+@section Scripts {
+    <script>
+        function showSettingsToast(message) {
+            const toast = document.getElementById("settingsToast");
+            const text = document.getElementById("settingsToastText");
+            text.textContent = message;
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 2300);
+        }
+
+        document.getElementById("btnGeneralSave")?.addEventListener("click", function () {
+            // here you would send data to backend later
+            showSettingsToast("General settings saved (demo)");
+        });
+
+        document.getElementById("btnGeneralReset")?.addEventListener("click", function () {
+            document.getElementById("generalSettingsForm").reset();
+            showSettingsToast("General settings reset (demo)");
+        });
+
+        document.getElementById("btnNotificationSave")?.addEventListener("click", function () {
+            showSettingsToast("Notification settings saved (demo)");
+        });
+    </script>
+}

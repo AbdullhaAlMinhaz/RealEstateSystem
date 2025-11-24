@@ -1,0 +1,390 @@
+﻿@{
+    Layout = "_AdminLayout";
+    ViewData["PageTitle"] = "My Profile";
+    ViewData["PageSubtitle"] = "Manage your admin account details and security.";
+}
+
+<!-- extra styling only for this page -->
+<style>
+    .profile-page {
+        display: flex;
+        flex-direction: column;
+        gap: 1.75rem;
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+        gap: 1.75rem;
+    }
+
+    @@media (max-width: 960px) {
+        .profile-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    .profile-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .profile-main {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .avatar-large {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.5rem;
+        color: #fff;
+        background: radial-gradient(circle at 30% 30%, #4f8bff, #1c3374);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+    }
+
+    .profile-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.15rem;
+    }
+
+    .profile-role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.8rem;
+        padding: 0.2rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(46, 213, 115, 0.12);
+        color: #1f9254;
+        font-weight: 500;
+    }
+
+    .profile-role-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #1f9254;
+    }
+
+    .profile-meta {
+        font-size: 0.85rem;
+        color: #7c8db5;
+        margin-top: 0.25rem;
+    }
+
+    .profile-form {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 1.25rem 1.5rem;
+    }
+
+    @@media (max-width: 768px) {
+        .profile-form {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    .profile-field label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #4a5674;
+        margin-bottom: 0.3rem;
+    }
+
+    .profile-field input {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid #e0e4f2;
+        padding: 0.55rem 0.7rem;
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+        background-color: #f9fbff;
+    }
+
+        .profile-field input:focus {
+            border-color: #4f8bff;
+            box-shadow: 0 0 0 3px rgba(79,139,255,0.18);
+            background-color: #ffffff;
+        }
+
+        .profile-field input[readonly] {
+            background-color: #f3f6ff;
+            cursor: default;
+        }
+
+    .form-actions {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+    }
+
+    .btn {
+        border-radius: 999px;
+        border: none;
+        padding: 0.55rem 1.3rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: transform 0.1s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #4f8bff, #2651ff);
+        color: #fff;
+        box-shadow: 0 10px 25px rgba(79,139,255,0.35);
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 30px rgba(79,139,255,0.45);
+        }
+
+    .btn-secondary {
+        background: #eef2ff;
+        color: #394264;
+    }
+
+        .btn-secondary:hover {
+            background: #e0e6ff;
+        }
+
+    .security-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .password-row {
+        position: relative;
+    }
+
+        .password-row input {
+            padding-right: 2.5rem;
+        }
+
+    .toggle-password {
+        position: absolute;
+        right: 0.7rem;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: none;
+        font-size: 0.8rem;
+        color: #7c8db5;
+        cursor: pointer;
+    }
+
+    .security-note {
+        font-size: 0.8rem;
+        color: #8a95b5;
+        margin-top: 0.75rem;
+    }
+
+    /* tiny toast for feedback */
+    .profile-toast {
+        position: fixed;
+        right: 1.75rem;
+        bottom: 1.75rem;
+        padding: 0.75rem 1.1rem;
+        background: #1f9254;
+        color: #fff;
+        font-size: 0.85rem;
+        border-radius: 999px;
+        box-shadow: 0 16px 35px rgba(0,0,0,0.25);
+        display: none;
+        align-items: center;
+        gap: 0.55rem;
+        z-index: 2000;
+    }
+
+        .profile-toast.show {
+            display: inline-flex;
+            animation: toast-in 0.25s ease-out;
+        }
+
+    @@keyframes toast-in {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .profile-toast-icon {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+    }
+</style>
+
+<section class="profile-page">
+    <div class="profile-grid">
+        <!-- LEFT: PROFILE INFO -->
+        <article class="card">
+            <div class="card-header profile-card-header">
+                <div>
+                    <h2>Profile Information</h2>
+                    <p class="card-subtitle">Update your name and contact details.</p>
+                </div>
+                <span class="profile-meta">Last updated: just now</span>
+            </div>
+
+            <div class="card-body">
+                <div class="profile-main">
+                    <div class="avatar avatar-large">A</div>
+                    <div>
+                        <div class="profile-name">Minhaz (Admin) </div>
+                        <div class="profile-role-badge">
+                            <span class="profile-role-dot"></span>
+                            Super Admin
+                        </div>
+                        <div class="profile-meta">Full access to EstateFlow admin panel</div>
+                    </div>
+                </div>
+
+                <form class="profile-form" id="profileForm">
+                    <div class="profile-field">
+                        <label>First Name</label>
+                        <input type="text" value="Admin" />
+                    </div>
+
+                    <div class="profile-field">
+                        <label>Last Name</label>
+                        <input type="text" value="Abrar" />
+                    </div>
+
+                    <div class="profile-field">
+                        <label>Email Address</label>
+                        <input type="email" value="admin@gmail.com" />
+                    </div>
+
+                    <div class="profile-field">
+                        <label>Phone Number</label>
+                        <input type="text" value="+8801XXXXXXXXX" />
+                    </div>
+
+                    <div class="profile-field">
+                        <label>Account ID</label>
+                        <input type="text" value="#ADM-0001" readonly />
+                    </div>
+
+                    <div class="profile-field">
+                        <label>Status</label>
+                        <input type="text" value="Active · Verified" readonly />
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="btnProfileReset">Reset</button>
+                        <button type="button" class="btn btn-primary" id="btnProfileSave">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </article>
+
+        <!-- RIGHT: SECURITY -->
+        <article class="card">
+            <div class="card-header">
+                <div>
+                    <h2>Security</h2>
+                    <p class="card-subtitle">Change your password and keep your account secure.</p>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <form class="security-form" id="securityForm">
+                    <div class="profile-field password-row">
+                        <label>Current Password</label>
+                        <input type="password" id="currentPassword" />
+                        <button type="button" class="toggle-password" data-target="currentPassword">Show</button>
+                    </div>
+
+                    <div class="profile-field password-row">
+                        <label>New Password</label>
+                        <input type="password" id="newPassword" />
+                        <button type="button" class="toggle-password" data-target="newPassword">Show</button>
+                    </div>
+
+                    <div class="profile-field password-row">
+                        <label>Confirm New Password</label>
+                        <input type="password" id="confirmPassword" />
+                        <button type="button" class="toggle-password" data-target="confirmPassword">Show</button>
+                    </div>
+
+                    <div class="form-actions" style="justify-content:flex-start;">
+                        <button type="button" class="btn btn-primary" id="btnPasswordUpdate">Update Password</button>
+                    </div>
+
+                    <div class="security-note">
+                        Tip: Use at least 8 characters, mixing letters, numbers, and symbols.
+                    </div>
+                </form>
+            </div>
+        </article>
+    </div>
+</section>
+
+<!-- tiny toast -->
+<div id="profileToast" class="profile-toast">
+    <span class="profile-toast-icon">✓</span>
+    <span id="profileToastText">Changes saved</span>
+</div>
+
+@section Scripts {
+    <script>
+        function showProfileToast(message) {
+            const toast = document.getElementById("profileToast");
+            const text = document.getElementById("profileToastText");
+            text.textContent = message;
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 2500);
+        }
+
+        document.getElementById("btnProfileSave")?.addEventListener("click", function () {
+            showProfileToast("Profile details saved (demo)");
+        });
+
+        document.getElementById("btnProfileReset")?.addEventListener("click", function () {
+            document.getElementById("profileForm").reset();
+            showProfileToast("Profile form reset (demo)");
+        });
+
+        document.getElementById("btnPasswordUpdate")?.addEventListener("click", function () {
+            showProfileToast("Password update request sent (demo)");
+        });
+
+        document.querySelectorAll(".toggle-password").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const targetId = this.getAttribute("data-target");
+                const input = document.getElementById(targetId);
+                if (!input) return;
+                const isPassword = input.type === "password";
+                input.type = isPassword ? "text" : "password";
+                this.textContent = isPassword ? "Hide" : "Show";
+            });
+        });
+    </script>
+}

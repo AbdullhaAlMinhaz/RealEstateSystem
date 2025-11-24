@@ -1,396 +1,223 @@
 ﻿@model RealEstateSystem.ViewModels.AdminDashboardViewModel
 @{
-    Layout = null;
+    Layout = "_AdminLayout";
+    ViewData["PageTitle"] = "Dashboard";
+    ViewData["PageSubtitle"] = "Overview of users, listings and system activity.";
 }
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <title>Admin Dashboard – EstateFlow</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="~/css/admin-dashboard.css" />
-    <link rel="icon" type="images" href="~/images/Favicon.jpg">
-</head>
-<body>
 
-    <div class="admin-layout">
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo-icon">RE</div>
-                <div class="logo-text">
-                    <span class="logo-title">EstateFlow</span>
-                    <span class="logo-subtitle">Admin Panel</span>
-                </div>
+<!-- OVERVIEW CARDS -->
+<section class="grid grid-4 overview">
+    <article class="stat-card is-active"
+             style="cursor:pointer;"
+             onclick="window.location='@Url.Action("Index", "AdminUsers")'">
+        <p class="stat-label">Total Users</p>
+        <p class="stat-value" id="totalUsers"
+           data-counter data-target="@Model.TotalUsers">
+            @Model.TotalUsers
+        </p>
+        <p class="stat-meta">Admins, Sellers &amp; Buyers</p>
+    </article>
+
+    <article class="stat-card"
+             style="cursor:pointer;"
+             onclick="window.location='@Url.Action("Buyers", "AdminUsers")'">
+        <p class="stat-label">Total Buyers</p>
+        <p class="stat-value" id="totalBuyers"
+           data-counter data-target="@Model.TotalBuyers">
+            @Model.TotalBuyers
+        </p>
+        <p class="stat-meta">Registered customers</p>
+    </article>
+
+    <article class="stat-card"
+             style="cursor:pointer;"
+             onclick="window.location='@Url.Action("Sellers", "AdminUsers")'">
+        <p class="stat-label">Total Sellers</p>
+        <p class="stat-value" id="totalSellers"
+           data-counter data-target="@Model.TotalSellers">
+            @Model.TotalSellers
+        </p>
+        <p class="stat-meta">Agents &amp; property owners</p>
+    </article>
+
+    <article class="stat-card"
+             style="cursor:pointer;"
+             onclick="window.location='@Url.Action("ActiveListings", "AdminProperties")'">
+        <p class="stat-label">Active Listings</p>
+        <p class="stat-value" id="activeListings"
+           data-counter data-target="@Model.ActiveListings">
+            @Model.ActiveListings
+        </p>
+        <p class="stat-meta">Currently visible to buyers</p>
+    </article>
+</section>
+
+<!-- MIDDLE ROW -->
+<section class="grid grid-2 middle">
+    <article class="card">
+        <div class="card-header">
+            <h2>Listing &amp; Sales Overview</h2>
+            <span class="card-tag">Last 6 months</span>
+        </div>
+
+        <div class="chart-sample">
+            <div class="chart-legend">
+                <span><span class="legend-dot legend-listings"></span> New listings</span>
+                <span><span class="legend-dot legend-sold"></span> Sold properties</span>
             </div>
 
-            <nav class="sidebar-nav">
-                <!-- MAIN DASHBOARD -->
-                <a href="#" class="nav-item is-active"
-                   data-page-title="Dashboard"
-                   data-page-subtitle="Overview of users, listings and system activity.">
-                    <span class="nav-dot"></span>
-                    Dashboard
-                </a>
-
-                <!-- USERS BY ROLE -->
-                <a href="#" class="nav-item"
-                   data-page-title="All Users"
-                   data-page-subtitle="Manage all users registered on EstateFlow.">
-                    All Users
-                </a>
-                <a href="#" class="nav-item"
-                   data-page-title="Buyers"
-                   data-page-subtitle="Overview of registered buyers and their activity.">
-                    Buyers
-                </a>
-                <a href="#" class="nav-item"
-                   data-page-title="Sellers"
-                   data-page-subtitle="Manage sellers and their property listings.">
-                    Sellers
-                </a>
-
-                <!-- OTHER PAGES -->
-                <a href="#" class="nav-item"
-                   data-page-title="Properties"
-                   data-page-subtitle="View and manage all property listings.">
-                    Properties
-                </a>
-                <a href="#" class="nav-item"
-                   data-page-title="Approvals"
-                   data-page-subtitle="Review pending properties and seller applications.">
-                    Approvals
-                </a>
-                <a href="#" class="nav-item"
-                   data-page-title="Reports"
-                   data-page-subtitle="Generate insights and activity reports.">
-                    Reports
-                </a>
-
-                <a href="#" class="nav-item"
-                   data-page-title="My Profile"
-                   data-page-subtitle="Manage your admin profile details.">
-                    My Profile
-                </a>
-                <a href="#" class="nav-item"
-                   data-page-title="Settings"
-                   data-page-subtitle="Settings of EstateFlow System">
-                    Settings
-                </a>
-
-                <div class="sidebar-footer">
-                    <a asp-controller="Account" asp-action="Logout" class="btn-logout">Logout</a>
-                </div>
-            </nav>
-        </aside>
-
-        <!-- MAIN AREA -->
-        <div class="main">
-            <!-- Top bar -->
-            <header class="topbar">
-                <div class="topbar-left">
-                    <!-- mobile menu button -->
-                    <button class="btn-menu" id="btnMenu" aria-label="Toggle menu">
-                        ☰
-                    </button>
-
-                    <div>
-                        <h1 class="page-title">Dashboard</h1>
-                        <p class="page-subtitle">Overview of users, listings and system activity.</p>
+            <div class="chart-bars">
+                <div class="chart-col">
+                    <div class="bar-group">
+                        <div class="bar bar-listings" style="height: 90px;"></div>
+                        <div class="bar bar-sold" style="height: 60px;"></div>
                     </div>
+                    <span class="chart-label">Jan</span>
                 </div>
-
-                <div class="topbar-right">
-                    <div class="topbar-search">
-                        <input type="text" id="globalSearch" placeholder="Search users, properties, activity..." />
+                <div class="chart-col">
+                    <div class="bar-group">
+                        <div class="bar bar-listings" style="height: 110px;"></div>
+                        <div class="bar bar-sold" style="height: 80px;"></div>
                     </div>
-                    <button class="btn-icon" id="themeToggle" aria-label="Toggle dark theme">
-                        🌙
-                    </button>
-                    <div class="topbar-user">
-                        <div class="avatar">A</div>
-                        <div class="topbar-user-info">
-                            <span class="topbar-user-name">Admin Abrar</span>
-                            <span class="topbar-user-role">Super Admin</span>
-                        </div>
-                    </div>
+                    <span class="chart-label">Feb</span>
                 </div>
-            </header>
-
-            <!-- CONTENT -->
-            <main class="content">
-
-                <!-- OVERVIEW CARDS (HOVERABLE) -->
-                <section class="grid grid-4 overview">
-                    <!-- TOTAL USERS -->
-                    <article class="stat-card is-active"
-                             style="cursor:pointer;"
-                             onclick="window.location='@Url.Action("Index", "AdminUsers")'">
-                        <p class="stat-label">Total Users</p>
-                        <p class="stat-value"
-                           id="totalUsers"
-                           data-counter
-                           data-target="@Model.TotalUsers">
-                            @Model.TotalUsers
-                        </p>
-                        <p class="stat-meta">Admins, Sellers &amp; Buyers</p>
-                    </article>
-
-                    <!-- TOTAL BUYERS -->
-                    <article class="stat-card"
-                             style="cursor:pointer;"
-                             onclick="window.location='@Url.Action("Buyers", "AdminUsers")'">
-                        <p class="stat-label">Total Buyers</p>
-                        <p class="stat-value"
-                           id="totalBuyers"
-                           data-counter
-                           data-target="@Model.TotalBuyers">
-                            @Model.TotalBuyers
-                        </p>
-                        <p class="stat-meta">Registered customers</p>
-                    </article>
-
-                    <!-- TOTAL SELLERS -->
-                    <article class="stat-card"
-                             style="cursor:pointer;"
-                             onclick="window.location='@Url.Action("Sellers", "AdminUsers")'">
-                        <p class="stat-label">Total Sellers</p>
-                        <p class="stat-value"
-                           id="totalSellers"
-                           data-counter
-                           data-target="@Model.TotalSellers">
-                            @Model.TotalSellers
-                        </p>
-                        <p class="stat-meta">Agents &amp; property owners</p>
-                    </article>
-
-                    <!-- ACTIVE LISTINGS -->
-                    <article class="stat-card"
-                             style="cursor:pointer;"
-                             onclick="window.location='@Url.Action("ActiveListings", "AdminProperties")'">
-                        <p class="stat-label">Active Listings</p>
-                        <p class="stat-value"
-                           id="activeListings"
-                           data-counter
-                           data-target="@Model.ActiveListings">
-                            @Model.ActiveListings
-                        </p>
-                        <p class="stat-meta">Currently visible to buyers</p>
-                    </article>
-                </section>
-
-                <!-- MIDDLE ROW: CHART + CATEGORY DISTRIBUTION -->
-                <section class="grid grid-2 middle">
-                    <!-- Chart with sample data -->
-                    <article class="card">
-                        <div class="card-header">
-                            <h2>Listing &amp; Sales Overview</h2>
-                            <span class="card-tag">Last 6 months</span>
-                        </div>
-
-                        <div class="chart-sample">
-                            <div class="chart-legend">
-                                <span><span class="legend-dot legend-listings"></span> New listings</span>
-                                <span><span class="legend-dot legend-sold"></span> Sold properties</span>
-                            </div>
-
-                            <div class="chart-bars">
-                                <!-- Month 1 -->
-                                <div class="chart-col">
-                                    <div class="bar-group">
-                                        <div class="bar bar-listings" style="height: 90px;"></div>
-                                        <div class="bar bar-sold" style="height: 60px;"></div>
-                                    </div>
-                                    <span class="chart-label">Jan</span>
-                                </div>
-                                <!-- Month 2 -->
-                                <div class="chart-col">
-                                    <div class="bar-group">
-                                        <div class="bar bar-listings" style="height: 110px;"></div>
-                                        <div class="bar bar-sold" style="height: 80px;"></div>
-                                    </div>
-                                    <span class="chart-label">Feb</span>
-                                </div>
-                                <!-- Month 3 -->
-                                <div class="chart-col">
-                                    <div class="bar-group">
-                                        <div class="bar bar-listings" style="height: 75px;"></div>
-                                        <div class="bar bar-sold" style="height: 50px;"></div>
-                                    </div>
-                                    <span class="chart-label">Mar</span>
-                                </div>
-                                <!-- Month 4 -->
-                                <div class="chart-col">
-                                    <div class="bar-group">
-                                        <div class="bar bar-listings" style="height: 120px;"></div>
-                                        <div class="bar bar-sold" style="height: 90px;"></div>
-                                    </div>
-                                    <span class="chart-label">Apr</span>
-                                </div>
-                                <!-- Month 5 -->
-                                <div class="chart-col">
-                                    <div class="bar-group">
-                                        <div class="bar bar-listings" style="height: 95px;"></div>
-                                        <div class="bar bar-sold" style="height: 70px;"></div>
-                                    </div>
-                                    <span class="chart-label">May</span>
-                                </div>
-                                <!-- Month 6 -->
-                                <div class="chart-col">
-                                    <div class="bar-group">
-                                        <div class="bar bar-listings" style="height: 85px;"></div>
-                                        <div class="bar bar-sold" style="height: 65px;"></div>
-                                    </div>
-                                    <span class="chart-label">Jun</span>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- Pie-style category distribution -->
-                    <article class="card">
-                        <div class="card-header">
-                            <h2>Property Category Distribution</h2>
-                            <span class="card-tag">Current listings</span>
-                        </div>
-
-                        <div class="pie-wrapper">
-                            <div class="pie-chart">
-                                <div class="pie-hole"></div>
-                            </div>
-
-                            <div class="pie-legend">
-                                <div class="legend-row">
-                                    <span class="legend-color legend-apartments"></span>
-                                    <span class="legend-label">Apartments</span>
-                                    <span class="legend-value">45%</span>
-                                </div>
-                                <div class="legend-row">
-                                    <span class="legend-color legend-houses"></span>
-                                    <span class="legend-label">Houses</span>
-                                    <span class="legend-value">30%</span>
-                                </div>
-                                <div class="legend-row">
-                                    <span class="legend-color legend-commercial"></span>
-                                    <span class="legend-label">Commercial</span>
-                                    <span class="legend-value">15%</span>
-                                </div>
-                                <div class="legend-row">
-                                    <span class="legend-color legend-land"></span>
-                                    <span class="legend-label">Land</span>
-                                    <span class="legend-value">10%</span>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-                </section>
-
-                <!-- BOTTOM SECTIONS -->
-                <section class="bottom">
-                    <!-- Pending Property Approvals -->
-                    <article class="card">
-                        <div class="card-header">
-                            <div>
-                                <h2>Pending Property Approvals</h2>
-                                <p class="card-subtitle">Review recent property submissions from sellers.</p>
-                            </div>
-                            <button class="card-link">View all</button>
-                        </div>
-
-                        <div class="table-wrapper">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Property</th>
-                                        <th>Seller</th>
-                                        <th>Submitted</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="pendingPropertiesBody">
-                                    <tr>
-                                        <td>Modern Open-Plan Apartment</td>
-                                        <td>Rahim Real Estate</td>
-                                        <td>Today, 10:24 AM</td>
-                                        <td><span class="badge badge-pending">Waiting</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>City View Family Flat</td>
-                                        <td>DreamHome Ltd.</td>
-                                        <td>Yesterday</td>
-                                        <td><span class="badge badge-review">In review</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Commercial Space in Banani</td>
-                                        <td>Elite Properties</td>
-                                        <td>2 days ago</td>
-                                        <td><span class="badge badge-pending">Waiting</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Land Plot in Purbachal</td>
-                                        <td>GreenFields</td>
-                                        <td>3 days ago</td>
-                                        <td><span class="badge badge-pending">Waiting</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </article>
-                </section>
-            </main>
+                <div class="chart-col">
+                    <div class="bar-group">
+                        <div class="bar bar-listings" style="height: 75px;"></div>
+                        <div class="bar bar-sold" style="height: 50px;"></div>
+                    </div>
+                    <span class="chart-label">Mar</span>
+                </div>
+                <div class="chart-col">
+                    <div class="bar-group">
+                        <div class="bar bar-listings" style="height: 120px;"></div>
+                        <div class="bar bar-sold" style="height: 90px;"></div>
+                    </div>
+                    <span class="chart-label">Apr</span>
+                </div>
+                <div class="chart-col">
+                    <div class="bar-group">
+                        <div class="bar bar-listings" style="height: 95px;"></div>
+                        <div class="bar bar-sold" style="height: 70px;"></div>
+                    </div>
+                    <span class="chart-label">May</span>
+                </div>
+                <div class="chart-col">
+                    <div class="bar-group">
+                        <div class="bar bar-listings" style="height: 85px;"></div>
+                        <div class="bar bar-sold" style="height: 65px;"></div>
+                    </div>
+                    <span class="chart-label">Jun</span>
+                </div>
+            </div>
         </div>
-    </div>
+    </article>
 
+    <article class="card">
+        <div class="card-header">
+            <h2>Property Category Distribution</h2>
+            <span class="card-tag">Current listings</span>
+        </div>
+
+        <div class="pie-wrapper">
+            <div class="pie-chart">
+                <div class="pie-hole"></div>
+            </div>
+
+            <div class="pie-legend">
+                <div class="legend-row">
+                    <span class="legend-color legend-apartments"></span>
+                    <span class="legend-label">Apartments</span>
+                    <span class="legend-value">45%</span>
+                </div>
+                <div class="legend-row">
+                    <span class="legend-color legend-houses"></span>
+                    <span class="legend-label">Houses</span>
+                    <span class="legend-value">30%</span>
+                </div>
+                <div class="legend-row">
+                    <span class="legend-color legend-commercial"></span>
+                    <span class="legend-label">Commercial</span>
+                    <span class="legend-value">15%</span>
+                </div>
+                <div class="legend-row">
+                    <span class="legend-color legend-land"></span>
+                    <span class="legend-label">Land</span>
+                    <span class="legend-value">10%</span>
+                </div>
+            </div>
+        </div>
+    </article>
+</section>
+
+<!-- BOTTOM -->
+<section class="bottom">
+    <article class="card">
+        <div class="card-header">
+            <div>
+                <h2>Pending Property Approvals</h2>
+                <p class="card-subtitle">Review recent property submissions from sellers.</p>
+            </div>
+            <button class="card-link">View all</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Seller</th>
+                        <th>Submitted</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="pendingPropertiesBody">
+                    <tr>
+                        <td>Modern Open-Plan Apartment</td>
+                        <td>Rahim Real Estate</td>
+                        <td>Today, 10:24 AM</td>
+                        <td><span class="badge badge-pending">Waiting</span></td>
+                    </tr>
+                    <tr>
+                        <td>City View Family Flat</td>
+                        <td>DreamHome Ltd.</td>
+                        <td>Yesterday</td>
+                        <td><span class="badge badge-review">In review</span></td>
+                    </tr>
+                    <tr>
+                        <td>Commercial Space in Banani</td>
+                        <td>Elite Properties</td>
+                        <td>2 days ago</td>
+                        <td><span class="badge badge-pending">Waiting</span></td>
+                    </tr>
+                    <tr>
+                        <td>Land Plot in Purbachal</td>
+                        <td>GreenFields</td>
+                        <td>3 days ago</td>
+                        <td><span class="badge badge-pending">Waiting</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+
+@section Scripts {
     <script>
-        // simple counter animation for the overview cards (now uses data-target from model)
         document.querySelectorAll("[data-counter]").forEach(counter => {
             const target = parseInt(counter.getAttribute("data-target")) || 0;
             let current = 0;
             const increment = Math.max(1, Math.ceil(target / 80));
-
             const update = () => {
                 current += increment;
                 if (current >= target) {
                     current = target;
-                    counter.textContent = target.toLocaleString();
                 } else {
-                    counter.textContent = current.toLocaleString();
                     requestAnimationFrame(update);
                 }
+                counter.textContent = current.toLocaleString();
             };
             requestAnimationFrame(update);
         });
-
-        // sidebar link click: update heading text
-        const navItems = document.querySelectorAll(".nav-item");
-        const pageTitle = document.querySelector(".page-title");
-        const pageSubtitle = document.querySelector(".page-subtitle");
-
-        navItems.forEach(item => {
-            item.addEventListener("click", (e) => {
-                e.preventDefault();
-                navItems.forEach(i => i.classList.remove("is-active"));
-                item.classList.add("is-active");
-
-                const title = item.getAttribute("data-page-title");
-                const subtitle = item.getAttribute("data-page-subtitle");
-
-                if (title) pageTitle.textContent = title;
-                if (subtitle) pageSubtitle.textContent = subtitle;
-            });
-        });
-
-        // simple theme toggle
-        document.getElementById("themeToggle")?.addEventListener("click", () => {
-            document.body.classList.toggle("dark-theme");
-        });
-
-        // mobile menu toggle
-        document.getElementById("btnMenu")?.addEventListener("click", () => {
-            document.body.classList.toggle("sidebar-open");
-        });
     </script>
-
-</body>
-</html>
+}

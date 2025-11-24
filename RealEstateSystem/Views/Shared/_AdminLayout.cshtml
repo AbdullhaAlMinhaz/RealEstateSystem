@@ -1,10 +1,10 @@
 ﻿@{
     Layout = null;
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
     var pageTitle = ViewData["PageTitle"] as string ?? "Dashboard";
     var pageSubtitle = ViewData["PageSubtitle"] as string ?? "Overview of users, listings and system activity.";
-    string currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
 }
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,17 +34,17 @@
                 </a>
 
                 <a asp-controller="AdminUsers" asp-action="Index"
-                   class="nav-item @(currentController == "AdminUsers" ? "is-active" : "")">
+                   class="nav-item @(currentController == "AdminUsers" && currentAction == "Index" ? "is-active" : "")">
                     All Users
                 </a>
 
                 <a asp-controller="AdminUsers" asp-action="Buyers"
-                   class="nav-item">
+                   class="nav-item @(currentController == "AdminUsers" && currentAction == "Buyers" ? "is-active" : "")">
                     Buyers
                 </a>
 
                 <a asp-controller="AdminUsers" asp-action="Sellers"
-                   class="nav-item">
+                   class="nav-item @(currentController == "AdminUsers" && currentAction == "Sellers" ? "is-active" : "")">
                     Sellers
                 </a>
 
@@ -53,10 +53,24 @@
                     Properties
                 </a>
 
-                <a href="#" class="nav-item">Approvals</a>
-                <a href="#" class="nav-item">Reports</a>
-                <a href="#" class="nav-item">My Profile</a>
-                <a href="#" class="nav-item">Settings</a>
+                <a href="#" class="nav-item">
+                    Approvals
+                </a>
+
+                <a asp-controller="AdminReports" asp-action="Index"
+                   class="nav-item @(currentController == "AdminReports" ? "is-active" : "")">
+                    Reports
+                </a>
+
+                <a asp-controller="AdminProfile" asp-action="Index"
+                   class="nav-item @(currentController == "AdminProfile" ? "is-active" : "")">
+                    My Profile
+                </a>
+
+                <a asp-controller="AdminSettings" asp-action="Index"
+                   class="nav-item @(currentController == "AdminSettings" ? "is-active" : "")">
+                    Settings
+                </a>
 
                 <div class="sidebar-footer">
                     <a asp-controller="Account" asp-action="Logout" class="btn-logout">Logout</a>
@@ -66,12 +80,9 @@
 
         <!-- MAIN AREA -->
         <div class="main">
-            <!-- Top bar -->
             <header class="topbar">
                 <div class="topbar-left">
-                    <button class="btn-menu" id="btnMenu" aria-label="Toggle menu">
-                        ☰
-                    </button>
+                    <button class="btn-menu" id="btnMenu" aria-label="Toggle menu">☰</button>
                     <div>
                         <h1 class="page-title">@pageTitle</h1>
                         <p class="page-subtitle">@pageSubtitle</p>
@@ -80,15 +91,13 @@
 
                 <div class="topbar-right">
                     <div class="topbar-search">
-                        <input type="text" id="globalSearch" placeholder="Search users, properties, activity..." />
+                        <input type="text" placeholder="Search users, properties, activity..." />
                     </div>
-                    <button class="btn-icon" id="themeToggle" aria-label="Toggle dark theme">
-                        🌙
-                    </button>
+                    <button class="btn-icon" id="themeToggle" aria-label="Toggle dark theme">🌙</button>
                     <div class="topbar-user">
                         <div class="avatar">A</div>
                         <div class="topbar-user-info">
-                            <span class="topbar-user-name">Admin Abrar</span>
+                            <span class="topbar-user-name">Minhaz (Admin)</span>
                             <span class="topbar-user-role">Super Admin</span>
                         </div>
                     </div>
@@ -102,21 +111,12 @@
     </div>
 
     <script>
-        // Simple theme toggle + sidebar open for all admin pages
-        document.addEventListener('DOMContentLoaded', function () {
-            var themeToggle = document.getElementById('themeToggle');
-            if (themeToggle) {
-                themeToggle.addEventListener('click', function () {
-                    document.body.classList.toggle('dark-theme');
-                });
-            }
+        document.getElementById("themeToggle")?.addEventListener("click", () => {
+            document.body.classList.toggle("dark-theme");
+        });
 
-            var btnMenu = document.getElementById('btnMenu');
-            if (btnMenu) {
-                btnMenu.addEventListener('click', function () {
-                    document.body.classList.toggle('sidebar-open');
-                });
-            }
+        document.getElementById("btnMenu")?.addEventListener("click", () => {
+            document.body.classList.toggle("sidebar-open");
         });
     </script>
 

@@ -1,0 +1,524 @@
+﻿@{
+    Layout = "_AdminLayout";
+    ViewData["PageTitle"] = "Reports";
+    ViewData["PageSubtitle"] = "Generate insights and activity reports.";
+}
+
+<style>
+    .report-page {
+        display: flex;
+        flex-direction: column;
+        gap: 1.75rem;
+    }
+
+    .report-overview {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.25rem;
+    }
+
+    .report-card-main {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .stat-card.report-stat {
+        position: relative;
+        overflow: hidden;
+    }
+
+        .stat-card.report-stat .stat-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            opacity: 0.8;
+        }
+
+        .stat-card.report-stat .stat-meta {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+    .trend-pill {
+        position: absolute;
+        right: 1rem;
+        top: 1rem;
+        font-size: 0.75rem;
+        padding: 0.15rem 0.55rem;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .trend-up {
+        background: rgba(46, 213, 115, 0.12);
+        color: #1f9254;
+    }
+
+    .trend-down {
+        background: rgba(230, 73, 128, 0.12);
+        color: #c0395e;
+    }
+
+    .trend-arrow {
+        font-size: 0.9rem;
+    }
+
+    .report-filters-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .report-filters-left {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .filter-select,
+    .filter-input {
+        border-radius: 999px;
+        border: 1px solid #e0e4f2;
+        padding: 0.4rem 0.9rem;
+        font-size: 0.85rem;
+        background-color: #f9fbff;
+        outline: none;
+    }
+
+        .filter-select:focus,
+        .filter-input:focus {
+            border-color: #4f8bff;
+            box-shadow: 0 0 0 3px rgba(79,139,255,0.18);
+            background-color: #ffffff;
+        }
+
+    .report-type-tabs {
+        display: inline-flex;
+        background: #f3f6ff;
+        border-radius: 999px;
+        padding: 0.15rem;
+        gap: 0.15rem;
+    }
+
+    .report-tab {
+        border: none;
+        background: transparent;
+        padding: 0.35rem 0.85rem;
+        font-size: 0.8rem;
+        border-radius: 999px;
+        cursor: pointer;
+        color: #5b668c;
+    }
+
+        .report-tab.is-active {
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(82, 101, 255, 0.18);
+            color: #2741ff;
+            font-weight: 500;
+        }
+
+    .report-main-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+        gap: 1.75rem;
+        margin-top: 0.25rem;
+    }
+
+    .table-compact .table th,
+    .table-compact .table td {
+        padding-top: 0.55rem;
+        padding-bottom: 0.55rem;
+        font-size: 0.85rem;
+    }
+
+    .quick-stat-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .quick-stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.75rem;
+    }
+
+    .quick-stat-label {
+        font-size: 0.85rem;
+        color: #6d7393;
+    }
+
+    .quick-stat-value {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #1d2340;
+    }
+
+    .quick-stat-note {
+        font-size: 0.75rem;
+        color: #9aa3c3;
+        margin-top: 0.15rem;
+    }
+
+    .export-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+        gap: 1.5rem;
+    }
+
+    .export-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+    }
+
+    .btn-export {
+        border-radius: 999px;
+        border: none;
+        padding: 0.45rem 1.1rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: #eef2ff;
+        color: #313d6b;
+    }
+
+    .btn-export-primary {
+        background: linear-gradient(135deg, #4f8bff, #2651ff);
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(79,139,255,0.35);
+    }
+
+    .btn-export span.icon {
+        font-size: 0.9rem;
+    }
+
+    .export-note {
+        font-size: 0.8rem;
+        color: #8b94b6;
+        margin-top: 0.4rem;
+    }
+
+    .legend-dot-small {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 0.35rem;
+    }
+
+    .legend-new {
+        background: #4f8bff;
+    }
+
+    .legend-sold {
+        background: #2ecc71;
+    }
+
+    .legend-cancelled {
+        background: #e74c3c;
+    }
+
+    @* keep it simple: no @media / @keyframes here to avoid Razor conflicts *@
+</style>
+
+<section class="report-page">
+
+    <!-- TOP SUMMARY CARDS -->
+    <section class="report-overview">
+        <article class="stat-card report-stat">
+            <p class="stat-label">Total Revenue</p>
+            <p class="stat-value">৳ 4,85,000</p>
+            <p class="stat-meta">Commission earned from confirmed sales</p>
+            <div class="trend-pill trend-up">
+                <span class="trend-arrow">▲</span>
+                <span>+18% vs last month</span>
+            </div>
+        </article>
+
+        <article class="stat-card report-stat">
+            <p class="stat-label">Completed Sales</p>
+            <p class="stat-value">42</p>
+            <p class="stat-meta">Properties marked as sold in this period</p>
+            <div class="trend-pill trend-up">
+                <span class="trend-arrow">▲</span>
+                <span>+9 deals</span>
+            </div>
+        </article>
+
+        <article class="stat-card report-stat">
+            <p class="stat-label">New Listings</p>
+            <p class="stat-value">124</p>
+            <p class="stat-meta">Fresh properties published by sellers</p>
+            <div class="trend-pill trend-down">
+                <span class="trend-arrow">▼</span>
+                <span>-6% vs last month</span>
+            </div>
+        </article>
+    </section>
+
+    <!-- FILTER BAR -->
+    <section class="card">
+        <div class="card-header">
+            <div class="report-card-main">
+                <div>
+                    <h2>Listing &amp; Sales Reports</h2>
+                    <p class="card-subtitle">
+                        Filter system activity by time range and report type, then export for presentations.
+                    </p>
+                </div>
+
+                <div class="report-filters-bar">
+                    <div class="report-filters-left">
+                        <select class="filter-select" id="rangeFilter">
+                            <option>Last 7 days</option>
+                            <option selected>Last 30 days</option>
+                            <option>Last 3 months</option>
+                            <option>Last 12 months</option>
+                            <option>Custom range</option>
+                        </select>
+
+                        <input type="date" class="filter-input" id="fromDate" />
+                        <span style="font-size:0.8rem;color:#7b84a4;">to</span>
+                        <input type="date" class="filter-input" id="toDate" />
+                    </div>
+
+                    <div class="report-type-tabs">
+                        <button type="button" class="report-tab is-active" data-report="listings">Listings</button>
+                        <button type="button" class="report-tab" data-report="sales">Sales</button>
+                        <button type="button" class="report-tab" data-report="users">Users</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN GRID -->
+        <div class="card-body report-main-grid">
+            <!-- LEFT: TABLE -->
+            <div class="table-wrapper table-compact">
+                <table class="table" id="reportTable">
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th>New listings</th>
+                            <th>Sold</th>
+                            <th>Cancelled</th>
+                            <th>Conversion</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Week 1</td>
+                            <td>32</td>
+                            <td>9</td>
+                            <td>3</td>
+                            <td>28%</td>
+                        </tr>
+                        <tr>
+                            <td>Week 2</td>
+                            <td>27</td>
+                            <td>11</td>
+                            <td>2</td>
+                            <td>33%</td>
+                        </tr>
+                        <tr>
+                            <td>Week 3</td>
+                            <td>29</td>
+                            <td>8</td>
+                            <td>4</td>
+                            <td>27%</td>
+                        </tr>
+                        <tr>
+                            <td>Week 4</td>
+                            <td>36</td>
+                            <td>14</td>
+                            <td>1</td>
+                            <td>39%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- RIGHT: QUICK STATS -->
+            <aside>
+                <h3 style="font-size:1rem;font-weight:600;margin-bottom:0.7rem;">Quick insights</h3>
+                <ul class="quick-stat-list">
+                    <li class="quick-stat-item">
+                        <div>
+                            <div class="quick-stat-label">
+                                Highest performing week
+                            </div>
+                            <div class="quick-stat-note">
+                                Based on conversion of listings to sales
+                            </div>
+                        </div>
+                        <div class="quick-stat-value">Week 4 · 39%</div>
+                    </li>
+
+                    <li class="quick-stat-item">
+                        <div>
+                            <div class="quick-stat-label">
+                                Average time to sell
+                            </div>
+                            <div class="quick-stat-note">
+                                From listing approval to marked as sold
+                            </div>
+                        </div>
+                        <div class="quick-stat-value">18 days</div>
+                    </li>
+
+                    <li class="quick-stat-item">
+                        <div>
+                            <div class="quick-stat-label">
+                                Top category this period
+                            </div>
+                            <div class="quick-stat-note">
+                                By number of sold properties
+                            </div>
+                        </div>
+                        <div class="quick-stat-value">Apartments</div>
+                    </li>
+
+                    <li class="quick-stat-item">
+                        <div>
+                            <div class="quick-stat-label">
+                                Activity breakdown
+                            </div>
+                            <div class="quick-stat-note">
+                                New vs sold vs cancelled listings
+                            </div>
+                        </div>
+                        <div>
+                            <span class="legend-dot-small legend-new"></span>
+                            <span style="font-size:0.8rem;margin-right:0.4rem;">New</span>
+                            <span class="legend-dot-small legend-sold"></span>
+                            <span style="font-size:0.8rem;margin-right:0.4rem;">Sold</span>
+                            <span class="legend-dot-small legend-cancelled"></span>
+                            <span style="font-size:0.8rem;">Cancelled</span>
+                        </div>
+                    </li>
+                </ul>
+            </aside>
+        </div>
+    </section>
+
+    <!-- EXPORT CENTER -->
+    <section class="card">
+        <div class="card-header">
+            <div>
+                <h2>Export &amp; share</h2>
+                <p class="card-subtitle">
+                    Download ready-made reports to share with management, investors or clients.
+                </p>
+            </div>
+        </div>
+        <div class="card-body export-grid">
+            <div>
+                <h3 style="font-size:0.95rem;font-weight:600;margin-bottom:0.7rem;">
+                    Choose export format
+                </h3>
+                <div class="export-actions">
+                    <button type="button" class="btn-export btn-export-primary">
+                        <span class="icon">⬇</span>
+                        Export as PDF
+                    </button>
+                    <button type="button" class="btn-export">
+                        <span class="icon">📊</span>
+                        Export as Excel
+                    </button>
+                    <button type="button" class="btn-export">
+                        <span class="icon">🧾</span>
+                        Export as CSV
+                    </button>
+                </div>
+                <p class="export-note">
+                    Exports include listing details, seller info, buyer offers and status history for the selected period.
+                </p>
+            </div>
+
+            <div>
+                <h3 style="font-size:0.95rem;font-weight:600;margin-bottom:0.7rem;">
+                    Scheduled reports
+                </h3>
+                <div class="table-wrapper table-compact">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Report</th>
+                                <th>Frequency</th>
+                                <th>Next run</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Monthly admin summary</td>
+                                <td>1st of every month</td>
+                                <td>01 Jul, 09:00 AM</td>
+                            </tr>
+                            <tr>
+                                <td>Weekly new listings</td>
+                                <td>Every Monday</td>
+                                <td>Next Monday</td>
+                            </tr>
+                            <tr>
+                                <td>Top sellers performance</td>
+                                <td>Monthly</td>
+                                <td>01 Jul, 10:00 AM</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
+
+@section Scripts {
+    <script>
+        // very small interactive behaviour for tabs (just visual in this demo)
+        document.querySelectorAll(".report-tab").forEach(tab => {
+            tab.addEventListener("click", function () {
+                document.querySelectorAll(".report-tab").forEach(t => t.classList.remove("is-active"));
+                this.classList.add("is-active");
+                // In a real app you would load different data here (AJAX / reload).
+            });
+        });
+
+        // If range is "Custom range", enable date inputs; otherwise clear them.
+        const rangeFilter = document.getElementById("rangeFilter");
+        const fromDate = document.getElementById("fromDate");
+        const toDate = document.getElementById("toDate");
+
+        if (rangeFilter) {
+            rangeFilter.addEventListener("change", function () {
+                const isCustom = this.value === "Custom range";
+                fromDate.disabled = !isCustom;
+                toDate.disabled = !isCustom;
+
+                if (!isCustom) {
+                    fromDate.value = "";
+                    toDate.value = "";
+                }
+            });
+
+            // initial state
+            if (rangeFilter.value !== "Custom range") {
+                fromDate.disabled = true;
+                toDate.disabled = true;
+            }
+        }
+    </script>
+}
