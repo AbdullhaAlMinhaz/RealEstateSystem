@@ -1,16 +1,27 @@
 ﻿@model RealEstateSystem.ViewModels.AdminUserListViewModel
 @{
     Layout = "_AdminLayout";
+    var pageTitle = Model.Title ?? "Users";
+    var pageSubtitle = Model.Subtitle ?? "Manage users.";
 }
 
 <section class="card">
     <div class="card-header">
         <div>
-            <h2>@Model.Title</h2>
-            <p class="card-subtitle">@Model.Subtitle</p>
+            <h2>@pageTitle</h2>
+            <p class="card-subtitle">@pageSubtitle</p>
         </div>
         <input type="text" id="userSearch" class="table-search" placeholder="Search users..." />
     </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
 
     <div class="table-wrapper">
         <table class="table">
@@ -23,6 +34,7 @@
                     <th>Phone</th>
                     <th>Status</th>
                     <th>Created</th>
+                    <th style="width: 140px;">Actions</th>
                 </tr>
             </thead>
             <tbody id="userTableBody">
@@ -40,6 +52,24 @@
                             </span>
                         </td>
                         <td>@u.CreatedDate.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            <a asp-controller="AdminUsers"
+                               asp-action="Edit"
+                               asp-route-id="@u.UserId"
+                               class="btn-table">
+                                Edit
+                            </a>
+
+                            <form asp-controller="AdminUsers"
+                                  asp-action="Delete"
+                                  asp-route-id="@u.UserId"
+                                  method="post"
+                                  style="display:inline;"
+                                  onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-table btn-danger">Delete</button>
+                            </form>
+                        </td>
                     </tr>
                 }
             </tbody>

@@ -1,0 +1,131 @@
+﻿@model RealEstateSystem.ViewModels.AdminPropertyEditViewModel
+@{
+    Layout = "_AdminLayout";
+}
+
+<section class="card">
+    <div class="card-header">
+        <div>
+            <h2>Edit Property</h2>
+            <p class="card-subtitle">Update listing details and status.</p>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="PropertyId" />
+
+            <div class="form-grid">
+                <div class="auth-field">
+                    <label asp-for="Title"></label>
+                    <input asp-for="Title" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="Description"></label>
+                    <textarea asp-for="Description"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="PropertyType"></label>
+                    <select asp-for="PropertyType"
+                            asp-items="Html.GetEnumSelectList<RealEstateSystem.Models.PropertyType>()"></select>
+                    <span asp-validation-for="PropertyType" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="Price"></label>
+                    <input asp-for="Price" />
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="Address"></label>
+                    <input asp-for="Address" />
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="City"></label>
+                    <input asp-for="City" />
+                    <span asp-validation-for="City" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="AreaOrLocation"></label>
+                    <input asp-for="AreaOrLocation" />
+                    <span asp-validation-for="AreaOrLocation" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="State"></label>
+                    <input asp-for="State" />
+                    <span asp-validation-for="State" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="ZipCode"></label>
+                    <input asp-for="ZipCode" />
+                    <span asp-validation-for="ZipCode" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="Bedrooms"></label>
+                    <input asp-for="Bedrooms" />
+                    <span asp-validation-for="Bedrooms" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="Bathrooms"></label>
+                    <input asp-for="Bathrooms" />
+                    <span asp-validation-for="Bathrooms" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="AreaSqft"></label>
+                    <input asp-for="AreaSqft" />
+                    <span asp-validation-for="AreaSqft" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="YearBuilt"></label>
+                    <input asp-for="YearBuilt" />
+                    <span asp-validation-for="YearBuilt" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="Status"></label>
+                    <select asp-for="Status"
+                            asp-items="Html.GetEnumSelectList<RealEstateSystem.Models.PropertyStatus>()"></select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="ApprovalStatus"></label>
+                    <select asp-for="ApprovalStatus"
+                            asp-items="Html.GetEnumSelectList<RealEstateSystem.Models.PropertyApprovalStatus>()"></select>
+                    <span asp-validation-for="ApprovalStatus" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label>
+                        <input asp-for="IsFeatured" />
+                        Featured listing
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a asp-action="ActiveListings" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

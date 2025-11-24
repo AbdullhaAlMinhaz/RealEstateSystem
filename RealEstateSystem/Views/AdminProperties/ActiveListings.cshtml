@@ -1,16 +1,27 @@
 ﻿@model RealEstateSystem.ViewModels.AdminPropertyListViewModel
 @{
     Layout = "_AdminLayout";
+    var pageTitle = Model.Title ?? "Active Listings";
+    var pageSubtitle = Model.Subtitle ?? "Properties currently visible to buyers.";
 }
 
 <section class="card">
     <div class="card-header">
         <div>
-            <h2>@Model.Title</h2>
-            <p class="card-subtitle">@Model.Subtitle</p>
+            <h2>@pageTitle</h2>
+            <p class="card-subtitle">@pageSubtitle</p>
         </div>
         <input type="text" id="propertySearch" class="table-search" placeholder="Search properties..." />
     </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
 
     <div class="table-wrapper">
         <table class="table">
@@ -24,6 +35,7 @@
                     <th>Bedrooms</th>
                     <th>Status</th>
                     <th>Created</th>
+                    <th style="width: 160px;">Actions</th>
                 </tr>
             </thead>
             <tbody id="propertyTableBody">
@@ -32,9 +44,7 @@
                     <tr>
                         <td>@p.PropertyId</td>
                         <td>@p.Title</td>
-                        <td>
-                            @p.Seller?.User?.FirstName @p.Seller?.User?.LastName
-                        </td>
+                        <td>@(p.Seller?.User?.FirstName) @(p.Seller?.User?.LastName)</td>
                         <td>@p.City</td>
                         <td>@p.Price.ToString("N0")</td>
                         <td>@(p.Bedrooms?.ToString() ?? "-")</td>
@@ -42,6 +52,24 @@
                             <span class="badge badge-active">Active</span>
                         </td>
                         <td>@p.CreatedDate.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            <a asp-controller="AdminProperties"
+                               asp-action="Edit"
+                               asp-route-id="@p.PropertyId"
+                               class="btn-table">
+                                Edit
+                            </a>
+
+                            <form asp-controller="AdminProperties"
+                                  asp-action="Delete"
+                                  asp-route-id="@p.PropertyId"
+                                  method="post"
+                                  style="display:inline;"
+                                  onsubmit="return confirm('Are you sure you want to delete this property?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-table btn-danger">Delete</button>
+                            </form>
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -51,6 +79,7 @@
 
 @section Scripts {
     <script>
+        // simple client-side search for properties
         document.getElementById('propertySearch')?.addEventListener('input', function (e) {
             const q = e.target.value.toLowerCase();
             document.querySelectorAll('#propertyTableBody tr').forEach(row => {
