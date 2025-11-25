@@ -1,0 +1,42 @@
+﻿@model IEnumerable<RealEstateSystem.Models.Appointment>
+@{
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<main class="content">
+    <section class="card">
+        <div class="card-header">
+            <h2>Appointments</h2>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Buyer</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model)
+                {
+                    <tr>
+                        <td>@a.Property?.Title</td>
+                        <td>@(a.Buyer?.User != null ? a.Buyer.User.FirstName + " " + a.Buyer.User.LastName : "Unknown")</td>
+                        <td>@a.AppointmentDate.ToString("dd MMM yyyy")</td>
+                        <td>@a.AppointmentTime</td>
+                        <td>@a.Status</td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5">No appointments scheduled.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+</main>

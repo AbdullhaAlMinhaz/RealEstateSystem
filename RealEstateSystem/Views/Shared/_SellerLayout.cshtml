@@ -1,0 +1,345 @@
+﻿@{
+    Layout = null;
+
+    var pageTitle = ViewData["PageTitle"] as string ?? "Seller Dashboard";
+    var pageSubtitle = ViewData["PageSubtitle"] as string ??
+                       "Manage your listings, inquiries and offers in one place.";
+    var sellerName = ViewData["SellerDisplayName"] as string ?? "Seller Name";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>@pageTitle – EstateFlow Seller</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet" />
+    <!-- Use the same CSS file name as your design -->
+    <link rel="stylesheet" href="~/css/seller-dashboard.css" />
+    <link rel="icon" type="images" href="~/images/Favicon.jpg" />
+</head>
+<body>
+
+    <div class="seller-layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">RE</div>
+                    <div class="logo-text">
+                        <span class="logo-title">EstateFlow</span>
+                        <span class="logo-subtitle">Seller Panel</span>
+                    </div>
+                </div>
+            </div>
+
+            @{
+                var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+            }
+
+            <nav class="sidebar-nav">
+                <a asp-controller="SellerDashboard" asp-action="Index"
+                   class="nav-item @(currentController == "SellerDashboard" ? "active" : "")"
+                   data-page-title="Seller Dashboard"
+                   data-page-subtitle="Manage your listings, inquiries and offers in one place.">
+                    <span class="nav-dot"></span>
+                    Dashboard
+                </a>
+
+                <a asp-controller="SellerProperties" asp-action="Index"
+                   class="nav-item @(currentController == "SellerProperties" ? "active" : "")"
+                   data-page-title="My Properties"
+                   data-page-subtitle="View and manage all your listed properties.">
+                    My Properties
+                </a>
+
+                <a asp-controller="SellerProperties" asp-action="Create"
+                   class="nav-item @(currentController == "SellerProperties" ? "active" : "")"
+                   data-page-title="Add New Property"
+                   data-page-subtitle="Create a new listing and submit for approval.">
+                    Add New Property
+                </a>
+
+                <a asp-controller="SellerInquiries" asp-action="Index"
+                   class="nav-item @(currentController == "SellerInquiries" ? "active" : "")"
+                   data-page-title="Inquiries"
+                   data-page-subtitle="Handle buyer questions and messages.">
+                    Inquiries
+                </a>
+
+                <a asp-controller="SellerOffers" asp-action="Index"
+                   class="nav-item @(currentController == "SellerOffers" ? "active" : "")"
+                   data-page-title="Offers"
+                   data-page-subtitle="Review and respond to buyer offers.">
+                    Offers
+                </a>
+
+                <a asp-controller="SellerAppointments" asp-action="Index"
+                   class="nav-item @(currentController == "SellerAppointments" ? "active" : "")"
+                   data-page-title="Appointments"
+                   data-page-subtitle="View scheduled property visits.">
+                    Appointments
+                </a>
+
+                <a asp-controller="SellerAnalytics" asp-action="Index"
+                   class="nav-item @(currentController == "SellerAnalytics" ? "active" : "")"
+                   data-page-title="Analytics"
+                   data-page-subtitle="See performance metrics for your listings.">
+                    Analytics
+                </a>
+
+                <a asp-controller="SellerProfile" asp-action="Index"
+                   class="nav-item @(currentController == "SellerProfile" ? "active" : "")"
+                   data-page-title="My Profile"
+                   data-page-subtitle="Update your seller profile and company details.">
+                    My Profile
+                </a>
+
+                <a asp-controller="SellerSettings" asp-action="Index"
+                   class="nav-item @(currentController == "SellerSettings" ? "active" : "")"
+                   data-page-title="Settings"
+                   data-page-subtitle="Notification and account settings.">
+                    Settings
+                </a>
+
+                <div class="sidebar-footer">
+                    <a asp-controller="Account" asp-action="Logout" class="btn-logout">Logout</a>
+                </div>
+            </nav>
+
+
+        </aside>
+
+        <!-- MAIN AREA -->
+        <div class="main">
+            <!-- TOPBAR -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <!-- mobile menu button -->
+                    <button class="btn-menu" id="btnMenu" aria-label="Toggle menu">
+                        ☰
+                    </button>
+
+                    <div>
+                        <h1 class="page-title">@pageTitle</h1>
+                        <p class="page-subtitle">
+                            @pageSubtitle
+                        </p>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="topbar-search">
+                        <input type="text"
+                               id="globalSearch"
+                               placeholder="Search inquiries, offers, properties..." />
+                    </div>
+                    <button class="btn-icon" id="themeToggle" aria-label="Toggle theme">
+                        🌙
+                    </button>
+                    <div class="topbar-user">
+                        <div class="avatar">
+                            @sellerName.FirstOrDefault()
+                        </div>
+                        <div class="topbar-user-info">
+                            <span class="topbar-user-name">@sellerName</span>
+                            <span class="topbar-user-role">Verified Seller</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            @RenderBody()
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- JS: interactions (matching your original HTML behaviour) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const menuBtn = document.getElementById('btnMenu');
+            const sidebar = document.getElementById('sidebar');
+            const navItems = document.querySelectorAll('.sidebar .nav-item');
+            const pageTitle = document.querySelector('.page-title');
+            const pageSubtitle = document.querySelector('.page-subtitle');
+            const themeToggle = document.getElementById('themeToggle');
+            const statCards = document.querySelectorAll('.stat-card');
+            const counters = document.querySelectorAll('[data-counter]');
+            const globalSearch = document.getElementById('globalSearch');
+            const inquiryList = document.getElementById('inquiryList');
+            const offersBody = document.getElementById('offersBody');
+            const topPropertiesBody = document.getElementById('topPropertiesBody');
+            const toast = document.getElementById('toast');
+
+            /* SIDEBAR TOGGLE (mobile) */
+            if (menuBtn && sidebar) {
+                menuBtn.addEventListener('click', function () {
+                    sidebar.classList.toggle('is-open');
+                });
+            }
+
+            /* SIDEBAR NAV: update title/subtitle + active state */
+            // navItems.forEach(item => {
+            //     item.addEventListener('click', function (e) {
+            //         e.preventDefault();
+
+            //         navItems.forEach(i => i.classList.remove('active'));
+            //         item.classList.add('active');
+
+            //         const title = item.getAttribute('data-page-title');
+            //         const subtitle = item.getAttribute('data-page-subtitle');
+
+            //         if (pageTitle && title) pageTitle.textContent = title;
+            //         if (pageSubtitle && subtitle) pageSubtitle.textContent = subtitle;
+
+            //         close sidebar on small screens
+            //         if (window.innerWidth <= 720 && sidebar) {
+            //             sidebar.classList.remove('is-open');
+            //         }
+            //     });
+            // });
+
+            /* STAT CARDS: active highlight */
+            statCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    statCards.forEach(c => c.classList.remove('is-active'));
+                    card.classList.add('is-active');
+                });
+            });
+
+            /* COUNTER ANIMATION (uses data-target from Razor) */
+            function animateCounter(el, target) {
+                const duration = 900;
+                const start = 0;
+                const startTime = performance.now();
+
+                function update(now) {
+                    const elapsed = now - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const value = Math.floor(start + (target - start) * progress);
+                    el.textContent = value.toLocaleString();
+
+                    if (progress < 1) {
+                        requestAnimationFrame(update);
+                    }
+                }
+
+                requestAnimationFrame(update);
+            }
+
+            counters.forEach(el => {
+                const target = parseInt(el.dataset.target || '0', 10);
+                if (!isNaN(target)) {
+                    animateCounter(el, target);
+                }
+            });
+
+            /* THEME TOGGLE */
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    document.body.classList.toggle('theme-dark');
+                });
+            }
+
+            /* SIMPLE TOAST */
+            function showToast(message) {
+                if (!toast) return;
+                toast.textContent = message;
+                toast.classList.add('is-visible');
+                setTimeout(() => {
+                    toast.classList.remove('is-visible');
+                }, 2000);
+            }
+
+            /* LATEST INQUIRIES: click to mark opened */
+            if (inquiryList) {
+                inquiryList.addEventListener('click', function (e) {
+                    const li = e.target.closest('li');
+                    if (!li) return;
+
+                    const titleEl = li.querySelector('.inquiry-title');
+                    const title = titleEl ? titleEl.textContent.trim() : 'Inquiry';
+
+                    const pill = li.querySelector('.pill');
+                    if (pill && pill.classList.contains('pill-new')) {
+                        pill.classList.remove('pill-new');
+                        pill.classList.add('pill-open');
+                        pill.textContent = 'Opened';
+                    }
+
+                    showToast('Opening details for "' + title + '"');
+                });
+            }
+
+            /* GLOBAL SEARCH: filter inquiries + offers + top properties */
+            function rowMatchesQuery(text, query) {
+                return text.toLowerCase().includes(query.toLowerCase());
+            }
+
+            function filterListByQuery(listElement, query) {
+                if (!listElement) return;
+                const items = Array.from(listElement.children);
+                items.forEach(li => {
+                    const text = li.textContent || '';
+                    li.style.display = rowMatchesQuery(text, query) ? '' : 'none';
+                });
+            }
+
+            function filterTableBodyByQuery(tbody, query) {
+                if (!tbody) return;
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                rows.forEach(row => {
+                    const text = row.textContent || '';
+                    row.style.display = rowMatchesQuery(text, query) ? '' : 'none';
+                });
+            }
+
+            if (globalSearch) {
+                globalSearch.addEventListener('input', function (e) {
+                    const q = e.target.value || '';
+                    filterListByQuery(inquiryList, q);
+                    filterTableBodyByQuery(offersBody, q);
+                    filterTableBodyByQuery(topPropertiesBody, q);
+                });
+            }
+
+            /* CHART: use data-* from Razor for views/inquiries/offers */
+            const chartCols = document.querySelectorAll('.chart-col');
+            if (chartCols.length > 0) {
+                let maxValue = 0;
+
+                chartCols.forEach(col => {
+                    const views = parseInt(col.dataset.views || '0', 10);
+                    const inquiries = parseInt(col.dataset.inquiries || '0', 10);
+                    const offers = parseInt(col.dataset.offers || '0', 10);
+                    maxValue = Math.max(maxValue, views, inquiries, offers);
+                });
+
+                chartCols.forEach(col => {
+                    const views = parseInt(col.dataset.views || '0', 10);
+                    const inquiries = parseInt(col.dataset.inquiries || '0', 10);
+                    const offers = parseInt(col.dataset.offers || '0', 10);
+
+                    const group = col.querySelector('.bar-group');
+                    if (!group || maxValue === 0) return;
+
+                    const bars = group.querySelectorAll('.bar');
+                    const values = [views, inquiries, offers];
+
+                    bars.forEach((bar, index) => {
+                        const value = values[index];
+                        const height = maxValue > 0 ? (value / maxValue) * 100 : 0;
+                        bar.style.height = height + '%';
+                    });
+                });
+            }
+        });
+    </script>
+
+    @RenderSection("Scripts", required: false)
+
+</body>
+</html>

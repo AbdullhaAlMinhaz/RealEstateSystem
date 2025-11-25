@@ -1,0 +1,42 @@
+﻿@model IEnumerable<RealEstateSystem.Models.Inquiry>
+@{
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<main class="content">
+    <section class="card">
+        <div class="card-header">
+            <h2>Inquiries</h2>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Buyer</th>
+                    <th>Message</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var i in Model)
+                {
+                    <tr>
+                        <td>@i.Property?.Title</td>
+                        <td>@(i.Buyer?.User != null ? i.Buyer.User.FirstName + " " + i.Buyer.User.LastName : "Unknown")</td>
+                        <td>@i.Message</td>
+                        <td>@i.InquiryStatus</td>
+                        <td>@i.InquiryDate.ToString("dd MMM yyyy HH:mm")</td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5">No inquiries yet.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+</main>

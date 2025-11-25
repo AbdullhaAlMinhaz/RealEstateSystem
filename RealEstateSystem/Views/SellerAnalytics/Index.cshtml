@@ -1,0 +1,44 @@
+﻿@model IEnumerable<RealEstateSystem.Models.PropertyAnalytics>
+@{
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<main class="content">
+    <section class="card">
+        <div class="card-header">
+            <h2>Analytics</h2>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Month</th>
+                    <th>Year</th>
+                    <th>Views</th>
+                    <th>Inquiries</th>
+                    <th>Offers</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model)
+                {
+                    <tr>
+                        <td>@a.Property?.Title</td>
+                        <td>@a.Month</td>
+                        <td>@a.Year</td>
+                        <td>@a.ViewCount</td>
+                        <td>@a.InquiryCount</td>
+                        <td>@a.OfferCount</td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6">No analytics data yet.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+</main>

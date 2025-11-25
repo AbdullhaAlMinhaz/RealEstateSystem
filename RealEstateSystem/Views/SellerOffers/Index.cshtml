@@ -1,0 +1,42 @@
+﻿@model IEnumerable<RealEstateSystem.Models.Offer>
+@{
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<main class="content">
+    <section class="card">
+        <div class="card-header">
+            <h2>Offers</h2>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Buyer</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model)
+                {
+                    <tr>
+                        <td>@o.Property?.Title</td>
+                        <td>@(o.Buyer?.User != null ? o.Buyer.User.FirstName + " " + o.Buyer.User.LastName : "Unknown")</td>
+                        <td>BDT @o.OfferAmount.ToString("N2")</td>
+                        <td>@o.OfferStatus</td>
+                        <td>@o.OfferDate.ToString("dd MMM yyyy HH:mm")</td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5">No offers found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+</main>

@@ -1,0 +1,49 @@
+﻿@model RealEstateSystem.ViewModels.SellerPropertyListViewModel
+
+@{
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<main class="content">
+    <section class="card">
+        <div class="card-header">
+            <h2>@Model.Title</h2>
+            <a asp-action="Create" class="card-link">Add new property</a>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Approval</th>
+                    <th>Price</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Properties != null && Model.Properties.Any())
+                {
+                    foreach (var p in Model.Properties)
+                    {
+                        <tr>
+                            <td>@p.Title</td>
+                            <td>@p.PropertyType</td>
+                            <td>@p.Status</td>
+                            <td>@p.ApprovalStatus</td>
+                            <td>BDT @p.Price.ToString("N2")</td>
+                            <td>@p.CreatedDate.ToString("dd MMM yyyy")</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6">You have not listed any properties yet.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+</main>
