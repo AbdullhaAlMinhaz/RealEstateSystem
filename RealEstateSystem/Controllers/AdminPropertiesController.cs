@@ -7,8 +7,41 @@ using RealEstateSystem.ViewModels;
 
 namespace RealEstateSystem.Controllers
 {
+
+
     public class AdminPropertiesController : Controller
     {
+        //........................................................................................................
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Approve(int id)
+        {
+            var property = _context.Properties.FirstOrDefault(p => p.PropertyId == id);
+            if (property == null) return NotFound();
+
+            property.ApprovalStatus = PropertyApprovalStatus.Approved;
+            property.Status = PropertyStatus.Available; // if you have this property
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = "Property approved successfully.";
+            return RedirectToAction("Index", "AdminDashboard");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Reject(int id)
+        {
+            var property = _context.Properties.FirstOrDefault(p => p.PropertyId == id);
+            if (property == null) return NotFound();
+
+            property.ApprovalStatus = PropertyApprovalStatus.Rejected;
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = "Property rejected.";
+            return RedirectToAction("Index", "AdminDashboard");
+        }
+        //,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+
         private readonly ApplicationDbContext _context;
 
         public AdminPropertiesController(ApplicationDbContext context)

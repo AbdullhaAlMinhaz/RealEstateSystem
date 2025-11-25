@@ -5,6 +5,107 @@
     ViewData["PageSubtitle"] = "Overview of users, listings and system activity.";
 }
 
+<style>
+    .pending-actions {
+        white-space: nowrap;
+        display: flex;
+        gap: 0.35rem;
+    }
+
+        .pending-actions .inline-form {
+            display: inline;
+        }
+
+    .btn-small {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+    }
+
+    .btn-danger {
+        background-color: #ffe5e5;
+        color: #c0392b;
+    }
+
+    .btn-secondary {
+        background-color: #eef2ff;
+        color: #344266;
+    }
+
+    .badge-approved {
+        background: rgba(46, 213, 115, 0.12);
+        color: #1f9254;
+    }
+
+    .badge-rejected {
+        background: rgba(231, 76, 60, 0.12);
+        color: #c0392b;
+    }
+
+    /* simple modal */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.55);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+    }
+
+        .modal-overlay.is-visible {
+            display: flex;
+        }
+
+    .modal-card {
+        background: #ffffff;
+        border-radius: 20px;
+        max-width: 640px;
+        width: 94%;
+        padding: 1.5rem 1.75rem;
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.35);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .modal-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .modal-close {
+        border: none;
+        background: transparent;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #64748b;
+    }
+
+    .modal-body-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        font-size: 0.9rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .modal-label {
+        color: #7b84a4;
+        min-width: 110px;
+    }
+
+    .modal-value {
+        font-weight: 500;
+        color: #111827;
+    }
+</style>
+
+
 <!-- OVERVIEW CARDS -->
 <section class="grid grid-4 overview">
     <article class="stat-card is-active"
@@ -169,34 +270,108 @@
                         <th>Seller</th>
                         <th>Submitted</th>
                         <th>Status</th>
+                        <th>Actions</th>
+
+                        <div id="propertyModal" class="modal-overlay">
+                            <div class="modal-card">
+                                <div class="modal-header">
+                                    <div class="modal-title" id="modalPropertyTitle">Property title</div>
+                                    <button type="button" class="modal-close" id="propertyModalClose">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="modal-body-row">
+                                        <div class="modal-label">Seller</div>
+                                        <div class="modal-value" id="modalPropertySeller"></div>
+                                    </div>
+                                    <div class="modal-body-row">
+                                        <div class="modal-label">Submitted</div>
+                                        <div class="modal-value" id="modalPropertySubmitted"></div>
+                                    </div>
+                                    <div class="modal-body-row">
+                                        <div class="modal-label">Status</div>
+                                        <div class="modal-value" id="modalPropertyStatus"></div>
+                                    </div>
+                                    <div style="margin-top:0.8rem;font-size:0.8rem;color:#9aa3c3;">
+                                        For full details, open the property in the Properties page.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
                     </tr>
                 </thead>
                 <tbody id="pendingPropertiesBody">
-                    <tr>
-                        <td>Modern Open-Plan Apartment</td>
-                        <td>Rahim Real Estate</td>
-                        <td>Today, 10:24 AM</td>
-                        <td><span class="badge badge-pending">Waiting</span></td>
-                    </tr>
-                    <tr>
-                        <td>City View Family Flat</td>
-                        <td>DreamHome Ltd.</td>
-                        <td>Yesterday</td>
-                        <td><span class="badge badge-review">In review</span></td>
-                    </tr>
-                    <tr>
-                        <td>Commercial Space in Banani</td>
-                        <td>Elite Properties</td>
-                        <td>2 days ago</td>
-                        <td><span class="badge badge-pending">Waiting</span></td>
-                    </tr>
-                    <tr>
-                        <td>Land Plot in Purbachal</td>
-                        <td>GreenFields</td>
-                        <td>3 days ago</td>
-                        <td><span class="badge badge-pending">Waiting</span></td>
-                    </tr>
+                    @if (Model.PendingApprovals != null && Model.PendingApprovals.Any())
+                    {
+                        foreach (var p in Model.PendingApprovals)
+                        {
+                            var statusClass = "badge-pending";
+                            var statusText = "Waiting";
+
+                            if (p.ApprovalStatus == RealEstateSystem.Models.PropertyApprovalStatus.Approved)
+                            {
+                                statusClass = "badge-approved";
+                                statusText = "Approved";
+                            }
+                            else if (p.ApprovalStatus == RealEstateSystem.Models.PropertyApprovalStatus.Rejected)
+                            {
+                                statusClass = "badge-rejected";
+                                statusText = "Rejected";
+                            }
+
+                            var submittedText = p.SubmittedAt.ToString("dd MMM yyyy, HH:mm");
+
+                            <tr>
+                                <td>@p.Title</td>
+                                <td>@p.SellerName</td>
+                                <td>@submittedText</td>
+                                <td>
+                                    <span class="badge @statusClass">@statusText</span>
+                                </td>
+                                <td class="pending-actions">
+                                    <form asp-controller="AdminProperties"
+                                          asp-action="Approve"
+                                          asp-route-id="@p.PropertyId"
+                                          method="post"
+                                          class="inline-form"
+                                          onsubmit="return confirm('Approve this property?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn-table btn-small">Approve</button>
+                                    </form>
+
+                                    <form asp-controller="AdminProperties"
+                                          asp-action="Reject"
+                                          asp-route-id="@p.PropertyId"
+                                          method="post"
+                                          class="inline-form"
+                                          onsubmit="return confirm('Reject this property?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn-table btn-danger btn-small">Reject</button>
+                                    </form>
+
+                                    <button type="button"
+                                            class="btn-table btn-secondary btn-small js-view-property"
+                                            data-property-id="@p.PropertyId"
+                                            data-property-title="@p.Title"
+                                            data-property-seller="@p.SellerName"
+                                            data-property-submitted="@submittedText"
+                                            data-property-status="@statusText">
+                                        View
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5">No pending properties right now 🎉</td>
+                        </tr>
+                    }
                 </tbody>
+
+
             </table>
         </div>
     </article>
@@ -204,10 +379,12 @@
 
 @section Scripts {
     <script>
+        // number counters for the four stat cards
         document.querySelectorAll("[data-counter]").forEach(counter => {
             const target = parseInt(counter.getAttribute("data-target")) || 0;
             let current = 0;
             const increment = Math.max(1, Math.ceil(target / 80));
+
             const update = () => {
                 current += increment;
                 if (current >= target) {
@@ -218,6 +395,34 @@
                 counter.textContent = current.toLocaleString();
             };
             requestAnimationFrame(update);
+        });
+
+        // property preview modal
+        const modal = document.getElementById("propertyModal");
+        const modalTitle = document.getElementById("modalPropertyTitle");
+        const modalSeller = document.getElementById("modalPropertySeller");
+        const modalSubmitted = document.getElementById("modalPropertySubmitted");
+        const modalStatus = document.getElementById("modalPropertyStatus");
+        const modalClose = document.getElementById("propertyModalClose");
+
+        document.querySelectorAll(".js-view-property").forEach(btn => {
+            btn.addEventListener("click", () => {
+                modalTitle.textContent = btn.getAttribute("data-property-title") || "";
+                modalSeller.textContent = btn.getAttribute("data-property-seller") || "";
+                modalSubmitted.textContent = btn.getAttribute("data-property-submitted") || "";
+                modalStatus.textContent = btn.getAttribute("data-property-status") || "";
+                modal.classList.add("is-visible");
+            });
+        });
+
+        modalClose?.addEventListener("click", () => {
+            modal.classList.remove("is-visible");
+        });
+
+        modal?.addEventListener("click", (e) => {
+            if (e.target === modal) {
+                modal.classList.remove("is-visible");
+            }
         });
     </script>
 }

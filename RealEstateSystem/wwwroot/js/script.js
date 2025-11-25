@@ -74,11 +74,14 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.classList.toggle("active", btnPage === currentPage);
         });
 
-        // Optional: scroll back to top of properties section
-        const propertiesSection = document.getElementById("properties");
-        if (propertiesSection) {
-            propertiesSection.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
+        // Optional: scroll back to top of properties section.................................................................
+
+
+        //const propertiesSection = document.getElementById("properties");
+        //if (propertiesSection) {
+        //    propertiesSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        //}
+        //.....................................................................................................................
     }
 
     function buildPagination() {
