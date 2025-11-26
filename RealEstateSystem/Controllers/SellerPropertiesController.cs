@@ -40,6 +40,58 @@ namespace RealEstateSystem.Controllers
             return View(model);
         }
 
+        public IActionResult Pending()
+        {
+            if (RedirectToLoginIfNotSeller(out var seller) is IActionResult redirect)
+                return redirect;
+
+            var properties = _context.Properties
+                .Where(p => p.SellerId == seller.SellerId &&
+                            p.ApprovalStatus == PropertyApprovalStatus.Pending)
+                .OrderByDescending(p => p.CreatedDate)
+                .ToList();
+
+            var model = new SellerPropertyListViewModel
+            {
+                Title = "Pending Approval",
+                Subtitle = "Properties waiting for admin review.",
+                Properties = properties
+            };
+
+            ViewData["PageTitle"] = model.Title;
+            ViewData["PageSubtitle"] = model.Subtitle;
+            ViewData["SellerDisplayName"] = $"{seller.User.FirstName} {seller.User.LastName}";
+
+            return View("Index", model);   // reuse the same table view
+        }
+
+        public IActionResult SoldOrRented()
+        {
+            if (RedirectToLoginIfNotSeller(out var seller) is IActionResult redirect)
+                return redirect;
+
+            var properties = _context.Properties
+                .Where(p => p.SellerId == seller.SellerId &&
+                           (p.Status == PropertyStatus.Sold ||
+                            p.Status == PropertyStatus.Rented))
+                .OrderByDescending(p => p.CreatedDate)
+                .ToList();
+
+            var model = new SellerPropertyListViewModel
+            {
+                Title = "Sold / Rented",
+                Subtitle = "Properties that have been sold or rented.",
+                Properties = properties
+            };
+
+            ViewData["PageTitle"] = model.Title;
+            ViewData["PageSubtitle"] = model.Subtitle;
+            ViewData["SellerDisplayName"] = $"{seller.User.FirstName} {seller.User.LastName}";
+
+            return View("Index", model);   // reuse same table view
+        }
+
+
         // ========== ADD NEW PROPERTY (GET) ==========
         [HttpGet]
         public IActionResult Create()
@@ -112,5 +164,113 @@ namespace RealEstateSystem.Controllers
             }
 
         }
+
+        // ========== EDIT PROPERTY (GET) ==========
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            if (RedirectToLoginIfNotSeller(out var seller) is IActionResult redirect)
+                return redirect;
+
+            var property = _context.Properties
+                .FirstOrDefault(p => p.PropertyId == id && p.SellerId == seller.SellerId);
+
+            if (property == null)
+                return NotFound();
+
+            var model = new SellerPropertyEditViewModel
+            {
+                PropertyId = property.PropertyId,
+                Title = property.Title,
+                PropertyType = property.PropertyType,
+                Price = property.Price,
+                AreaOrLocation = property.AreaOrLocation,
+                State = property.State,
+                Description = property.Description,
+                Address = property.Address,
+                City = property.City,
+                ZipCode = property.ZipCode,
+                Bedrooms = property.Bedrooms,
+                Bathrooms = property.Bathrooms,
+                AreaSqft = property.AreaSqft
+            };
+
+            ViewData["PageTitle"] = "Edit Property";
+            ViewData["PageSubtitle"] = "Update details of your listing.";
+            ViewData["SellerDisplayName"] = $"{seller.User.FirstName} {seller.User.LastName}";
+
+            return View(model);
+        }
+
+        // ========== EDIT PROPERTY (POST) ==========
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(SellerPropertyEditViewModel model)
+        {
+            if (RedirectToLoginIfNotSeller(out var seller) is IActionResult redirect)
+                return redirect;
+
+            ViewData["PageTitle"] = "Edit Property";
+            ViewData["PageSubtitle"] = "Update details of your listing.";
+            ViewData["SellerDisplayName"] = $"{seller.User.FirstName} {seller.User.LastName}";
+
+            if (!ModelState.IsValid)
+                return View(model);
+
+            try
+            {
+                var property = _context.Properties
+                    .FirstOrDefault(p => p.PropertyId == model.PropertyId &&
+                                         p.SellerId == seller.SellerId);
+
+                if (property == null)
+                    return NotFound();
+
+                property.Title = model.Title;
+                property.PropertyType = model.PropertyType;
+                property.Price = model.Price;
+                property.AreaOrLocation = model.AreaOrLocation;
+                property.State = model.State;
+                property.Description = model.Description;
+                property.Address = model.Address;
+                property.City = model.City;
+                property.ZipCode = model.ZipCode;
+                property.Bedrooms = model.Bedrooms;
+                property.Bathrooms = model.Bathrooms;
+                property.AreaSqft = model.AreaSqft;
+
+                _context.SaveChanges();
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                var msg = ex.InnerException?.Message ?? ex.Message;
+                ModelState.AddModelError(string.Empty, "Error updating property: " + msg);
+                return View(model);
+            }
+        }
+
+
+        // ========== DELETE PROPERTY (POST) ==========
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(int id)
+        {
+            if (RedirectToLoginIfNotSeller(out var seller) is IActionResult redirect)
+                return redirect;
+
+            var property = _context.Properties
+                .FirstOrDefault(p => p.PropertyId == id && p.SellerId == seller.SellerId);
+
+            if (property == null)
+                return NotFound();
+
+            _context.Properties.Remove(property);
+            _context.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }

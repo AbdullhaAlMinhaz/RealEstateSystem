@@ -1,12 +1,11 @@
-﻿@model RealEstateSystem.ViewModels.SellerPropertyCreateViewModel
+﻿@model RealEstateSystem.ViewModels.SellerPropertyEditViewModel
 
 @{
     Layout = "~/Views/Shared/_SellerLayout.cshtml";
 }
 
 <style>
-   
-
+    /* reuse styling similar to Add New Property */
     .card-form {
         padding: 24px 28px 28px;
     }
@@ -28,7 +27,6 @@
         color: #7b8497;
     }
 
-    /* server error box */
     .form-alert {
         margin: 16px 0 8px;
         padding: 10px 12px;
@@ -38,7 +36,6 @@
         font-size: 0.88rem;
     }
 
-    /* main layout */
     .property-form {
         margin-top: 12px;
         display: flex;
@@ -94,7 +91,6 @@
             box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.18);
         }
 
-    /* price / area with prefix/suffix */
     .input-with-prefix,
     .input-with-suffix {
         display: flex;
@@ -122,13 +118,11 @@
         white-space: nowrap;
     }
 
-    /* validation error text */
     .field-error {
         font-size: 0.78rem;
         color: #d12b3f;
     }
 
-    /* footer buttons */
     .property-form-footer {
         display: flex;
         justify-content: flex-end;
@@ -170,7 +164,6 @@
             background: #e5e7eb;
         }
 
-    /* responsive: stack columns on small screens */
     @@media (max-width: 900px) {
         .property-form-grid {
             grid-template-columns: 1fr;
@@ -195,14 +188,13 @@
     <section class="card card-form">
         <div class="card-header card-header-between">
             <div>
-                <h2>Add New Property</h2>
+                <h2>Edit Property</h2>
                 <p class="card-subtitle">
-                    Fill in the details below to create a new listing.
+                    Update the information for this listing.
                 </p>
             </div>
         </div>
 
-        <!-- model-level error (DB / server) -->
         @if (!ViewData.ModelState.IsValid &&
                 ViewData.ModelState[string.Empty]?.Errors.Count > 0)
         {
@@ -214,11 +206,11 @@
             </div>
         }
 
-        <form asp-action="Create" asp-controller="SellerProperties" method="post" class="property-form">
+        <form asp-action="Edit" asp-controller="SellerProperties" method="post" class="property-form">
             @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="PropertyId" />
 
             <div class="property-form-grid">
-                <!-- Column 1 -->
                 <div class="property-field">
                     <label asp-for="Title"></label>
                     <input asp-for="Title" />
@@ -251,7 +243,6 @@
                     <span asp-validation-for="AreaSqft" class="field-error"></span>
                 </div>
 
-                <!-- Column 2 -->
                 <div class="property-field">
                     <label asp-for="AreaOrLocation"></label>
                     <input asp-for="AreaOrLocation" />
@@ -276,7 +267,6 @@
                     <span asp-validation-for="Bathrooms" class="field-error"></span>
                 </div>
 
-                <!-- Full width rows -->
                 <div class="property-field property-field-full">
                     <label asp-for="Description"></label>
                     <textarea asp-for="Description" rows="4"></textarea>
@@ -303,7 +293,7 @@
             </div>
 
             <div class="property-form-footer">
-                <button type="submit" class="btn-primary">Save Property</button>
+                <button type="submit" class="btn-primary">Save Changes</button>
                 <a asp-action="Index" asp-controller="SellerProperties" class="btn-secondary">Cancel</a>
             </div>
         </form>

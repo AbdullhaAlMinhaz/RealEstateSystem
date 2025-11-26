@@ -50,4 +50,43 @@ namespace RealEstateSystem.ViewModels
         public int AreaSqft { get; set; }
     }
 
+    public class SellerPropertyEditViewModel
+    {
+        public int PropertyId { get; set; }
+
+        [Required, MaxLength(200)]
+        public string Title { get; set; }
+
+        [Required]
+        public PropertyType PropertyType { get; set; }
+
+        [Required]
+        [Range(0, double.MaxValue)]
+        public decimal Price { get; set; }
+
+        [Required, MaxLength(100)]
+        public string AreaOrLocation { get; set; }
+
+        [Required, MaxLength(100)]
+        public string State { get; set; }
+
+        [Required]
+        public string Description { get; set; }
+
+        [Required, MaxLength(250)]
+        public string Address { get; set; }
+
+        [Required, MaxLength(100)]
+        public string City { get; set; }
+
+        [Required, MaxLength(20)]
+        public string ZipCode { get; set; }
+
+        public int? Bedrooms { get; set; }
+        public int? Bathrooms { get; set; }
+
+        public int AreaSqft { get; set; }
+    }
+
+
 }

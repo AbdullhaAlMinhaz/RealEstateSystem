@@ -14,37 +14,52 @@
 
     <!-- TOP OVERVIEW CARDS -->
     <section class="grid grid-4 overview">
-        <article class="stat-card is-active">
-            <p class="stat-label">Active Listings</p>
-            <p class="stat-value"
-               data-counter
-               data-target="@Model.ActiveListings">0</p>
-            <p class="stat-meta">Visible to buyers</p>
-        </article>
+       
+        <!-- Active Listings -->
+<article class="stat-card is-active"
+         style="cursor:pointer;"
+         onclick="window.location='@Url.Action("Index","SellerProperties")'">
+    <p class="stat-label">Active Listings</p>
+    <p class="stat-value"
+       data-counter
+       data-target="@Model.ActiveListings">0</p>
+    <p class="stat-meta">Visible to buyers</p>
+</article>
 
-        <article class="stat-card">
-            <p class="stat-label">Pending Approval</p>
-            <p class="stat-value"
-               data-counter
-               data-target="@Model.PendingApproval">0</p>
-            <p class="stat-meta">Waiting for admin review</p>
-        </article>
+<!-- Pending Approval -->
+<article class="stat-card"
+         style="cursor:pointer;"
+         onclick="window.location='@Url.Action("Pending","SellerProperties")'">
+    <p class="stat-label">Pending Approval</p>
+    <p class="stat-value"
+       data-counter
+       data-target="@Model.PendingApproval">0</p>
+    <p class="stat-meta">Waiting for admin review</p>
+</article>
 
-        <article class="stat-card">
-            <p class="stat-label">Sold / Rented</p>
-            <p class="stat-value"
-               data-counter
-               data-target="@Model.SoldOrRented">0</p>
-            <p class="stat-meta">Completed deals</p>
-        </article>
+<!-- Sold / Rented -->
+<article class="stat-card"
+         style="cursor:pointer;"
+         onclick="window.location='@Url.Action("SoldOrRented","SellerProperties")'">
+    <p class="stat-label">Sold / Rented</p>
+    <p class="stat-value"
+       data-counter
+       data-target="@Model.SoldOrRented">0</p>
+    <p class="stat-meta">Completed deals</p>
+</article>
 
-        <article class="stat-card">
+
+        <!-- Total Inquiries -->
+        <article class="stat-card"
+                 style="cursor:pointer;"
+                 onclick="window.location='@Url.Action("Index", "SellerInquiries")'">
             <p class="stat-label">Total Inquiries</p>
             <p class="stat-value"
                data-counter
                data-target="@Model.TotalInquiriesLast30Days">0</p>
             <p class="stat-meta">Last 30 days</p>
         </article>
+
     </section>
 
     <!-- MIDDLE ROW: LISTINGS OVERVIEW + LATEST INQUIRIES -->
@@ -87,8 +102,9 @@
         <article class="card">
             <div class="card-header">
                 <h2>Latest Inquiries</h2>
-                <a href="#" class="card-link">View all inquiries</a>
+                 <a asp-controller="SellerInquiries" asp-action="Index" class="card-link">View all inquiries</a>
             </div>
+
 
             <ul class="inquiry-list" id="inquiryList">
                 @if (Model.LatestInquiries != null && Model.LatestInquiries.Any())
@@ -126,8 +142,11 @@
         <article class="card">
             <div class="card-header">
                 <h2>Recent Offers</h2>
-                <a href="#" class="card-link">Manage offers</a>
+                <a asp-controller="SellerOffers"
+                   asp-action="Index"
+                   class="card-link">Manage offers</a>
             </div>
+
 
             <table class="table">
                 <thead>
