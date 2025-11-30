@@ -82,9 +82,17 @@
                             <td>@p.CreatedDate.ToString("dd MMM yyyy")</td>
                             <td>
                                 <div class="table-actions">
+                                    <a asp-action="Details"
+                                       asp-route-id="@p.PropertyId"
+                                       class="table-link">
+                                        View
+                                    </a>
+
                                     <a asp-action="Edit"
                                        asp-route-id="@p.PropertyId"
-                                       class="table-link">Edit</a>
+                                       class="table-link">
+                                        Edit
+                                    </a>
 
                                     <form asp-action="Delete"
                                           asp-route-id="@p.PropertyId"
@@ -99,6 +107,7 @@
                                     </form>
                                 </div>
                             </td>
+
                         </tr>
                     }
                 }

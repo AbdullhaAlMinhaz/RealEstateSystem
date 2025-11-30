@@ -35,7 +35,7 @@
                     <th>Bedrooms</th>
                     <th>Status</th>
                     <th>Created</th>
-                    <th style="width: 160px;">Actions</th>
+                    <th style="width: 200px;">Actions</th>
                 </tr>
             </thead>
             <tbody id="propertyTableBody">
@@ -53,6 +53,13 @@
                         </td>
                         <td>@p.CreatedDate.ToString("yyyy-MM-dd")</td>
                         <td>
+                            <a asp-controller="AdminProperties"
+                               asp-action="Details"
+                               asp-route-id="@p.PropertyId"
+                               class="btn-table">
+                                View
+                            </a>
+
                             <a asp-controller="AdminProperties"
                                asp-action="Edit"
                                asp-route-id="@p.PropertyId"

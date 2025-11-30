@@ -1,0 +1,9 @@
+﻿@model RealEstateSystem.ViewModels.PropertyDetailsViewModel
+
+@{
+    Layout = "_AdminLayout";
+}
+
+<section class="card">
+    @await Html.PartialAsync("_PropertyDetailsContent", Model)
+</section>

@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RealEstateSystem.Data;
@@ -10,9 +14,12 @@ namespace RealEstateSystem.Controllers
 {
     public class SellerPropertiesController : BaseSellerController
     {
-        public SellerPropertiesController(ApplicationDbContext context)
+        private readonly IWebHostEnvironment _environment;
+
+        public SellerPropertiesController(ApplicationDbContext context, IWebHostEnvironment environment)
             : base(context)
         {
+            _environment = environment;
         }
 
         // ========== MY PROPERTIES ==========
@@ -29,7 +36,7 @@ namespace RealEstateSystem.Controllers
             var model = new SellerPropertyListViewModel
             {
                 Title = "My Properties",
-                Subtitle = "View and manage all your listed properties.",
+                Subtitle = "Manage your listed properties.",
                 Properties = properties
             };
 
@@ -40,6 +47,7 @@ namespace RealEstateSystem.Controllers
             return View(model);
         }
 
+        // ========== PENDING PROPERTIES (OPTIONAL TAB) ==========
         public IActionResult Pending()
         {
             if (RedirectToLoginIfNotSeller(out var seller) is IActionResult redirect)
@@ -54,7 +62,7 @@ namespace RealEstateSystem.Controllers
             var model = new SellerPropertyListViewModel
             {
                 Title = "Pending Approval",
-                Subtitle = "Properties waiting for admin review.",
+                Subtitle = "Listings waiting for admin review.",
                 Properties = properties
             };
 
@@ -62,35 +70,8 @@ namespace RealEstateSystem.Controllers
             ViewData["PageSubtitle"] = model.Subtitle;
             ViewData["SellerDisplayName"] = $"{seller.User.FirstName} {seller.User.LastName}";
 
-            return View("Index", model);   // reuse the same table view
+            return View("Index", model);
         }
-
-        public IActionResult SoldOrRented()
-        {
-            if (RedirectToLoginIfNotSeller(out var seller) is IActionResult redirect)
-                return redirect;
-
-            var properties = _context.Properties
-                .Where(p => p.SellerId == seller.SellerId &&
-                           (p.Status == PropertyStatus.Sold ||
-                            p.Status == PropertyStatus.Rented))
-                .OrderByDescending(p => p.CreatedDate)
-                .ToList();
-
-            var model = new SellerPropertyListViewModel
-            {
-                Title = "Sold / Rented",
-                Subtitle = "Properties that have been sold or rented.",
-                Properties = properties
-            };
-
-            ViewData["PageTitle"] = model.Title;
-            ViewData["PageSubtitle"] = model.Subtitle;
-            ViewData["SellerDisplayName"] = $"{seller.User.FirstName} {seller.User.LastName}";
-
-            return View("Index", model);   // reuse same table view
-        }
-
 
         // ========== ADD NEW PROPERTY (GET) ==========
         [HttpGet]
@@ -99,11 +80,13 @@ namespace RealEstateSystem.Controllers
             if (RedirectToLoginIfNotSeller(out var seller) is IActionResult redirect)
                 return redirect;
 
+            var model = new SellerPropertyCreateViewModel();
+
             ViewData["PageTitle"] = "Add New Property";
             ViewData["PageSubtitle"] = "Create a new listing and submit for admin approval.";
             ViewData["SellerDisplayName"] = $"{seller.User.FirstName} {seller.User.LastName}";
 
-            return View(new SellerPropertyCreateViewModel());
+            return View(model);
         }
 
         // ========== ADD NEW PROPERTY (POST) ==========
@@ -119,10 +102,7 @@ namespace RealEstateSystem.Controllers
             ViewData["SellerDisplayName"] = $"{seller.User.FirstName} {seller.User.LastName}";
 
             if (!ModelState.IsValid)
-            {
-                // Validation errors – just show the form again
                 return View(model);
-            }
 
             try
             {
@@ -135,13 +115,12 @@ namespace RealEstateSystem.Controllers
                     Price = model.Price,
                     Address = model.Address,
                     City = model.City,
+                    AreaOrLocation = model.AreaOrLocation,
+                    State = model.State,
                     ZipCode = model.ZipCode,
                     Bedrooms = model.Bedrooms,
                     Bathrooms = model.Bathrooms,
                     AreaSqft = model.AreaSqft,
-                    AreaOrLocation = model.AreaOrLocation,
-                    State = model.State,
-
                     Status = PropertyStatus.Available,
                     ApprovalStatus = PropertyApprovalStatus.Pending,
                     CreatedDate = DateTime.Now,
@@ -153,7 +132,8 @@ namespace RealEstateSystem.Controllers
                 _context.Properties.Add(property);
                 _context.SaveChanges();
 
-                // ✅ success: go back to My Properties
+                SaveUploadedImages(property, model.Photos);
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -162,7 +142,6 @@ namespace RealEstateSystem.Controllers
                 ModelState.AddModelError(string.Empty, "Error saving property: " + msg);
                 return View(model);
             }
-
         }
 
         // ========== EDIT PROPERTY (GET) ==========
@@ -238,8 +217,11 @@ namespace RealEstateSystem.Controllers
                 property.Bedrooms = model.Bedrooms;
                 property.Bathrooms = model.Bathrooms;
                 property.AreaSqft = model.AreaSqft;
+                property.UpdatedDate = DateTime.Now;
 
                 _context.SaveChanges();
+
+                SaveUploadedImages(property, model.Photos);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -251,8 +233,42 @@ namespace RealEstateSystem.Controllers
             }
         }
 
+        // ========== DETAILS (seller view) ==========
+        [HttpGet]
+        public IActionResult Details(int id)
+        {
+            if (RedirectToLoginIfNotSeller(out var seller) is IActionResult redirect)
+                return redirect;
 
-        // ========== DELETE PROPERTY (POST) ==========
+            var property = _context.Properties
+                .Include(p => p.Images)
+                .Include(p => p.Seller)
+                    .ThenInclude(s => s.User)
+                .FirstOrDefault(p => p.PropertyId == id &&
+                                     p.SellerId == seller.SellerId);
+
+            if (property == null)
+                return NotFound();
+
+            var user = property.Seller?.User;
+
+            var model = new PropertyDetailsViewModel
+            {
+                Property = property,
+                Images = property.Images ?? new List<PropertyImage>(),
+                SellerName = user != null ? $"{user.FirstName} {user.LastName}" : null,
+                SellerEmail = user?.Email,
+                SellerPhone = user?.PhoneNumber
+            };
+
+            ViewData["PageTitle"] = "Property Details";
+            ViewData["PageSubtitle"] = property.Title;
+            ViewData["SellerDisplayName"] = $"{seller.User.FirstName} {seller.User.LastName}";
+
+            return View(model);
+        }
+
+        // ========== DELETE PROPERTY ==========
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
@@ -261,10 +277,23 @@ namespace RealEstateSystem.Controllers
                 return redirect;
 
             var property = _context.Properties
-                .FirstOrDefault(p => p.PropertyId == id && p.SellerId == seller.SellerId);
+                .Include(p => p.Images)
+                .FirstOrDefault(p => p.PropertyId == id &&
+                                     p.SellerId == seller.SellerId);
 
             if (property == null)
                 return NotFound();
+
+            if (property.Images != null && property.Images.Any())
+            {
+                var folder = Path.Combine(_environment.WebRootPath, "uploads", "properties", property.PropertyId.ToString());
+                if (Directory.Exists(folder))
+                {
+                    Directory.Delete(folder, recursive: true);
+                }
+
+                _context.PropertyImages.RemoveRange(property.Images);
+            }
 
             _context.Properties.Remove(property);
             _context.SaveChanges();
@@ -272,5 +301,48 @@ namespace RealEstateSystem.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // ========== HELPER: SAVE UPLOADED IMAGES ==========
+        private void SaveUploadedImages(Property property, List<IFormFile> photos)
+        {
+            if (photos == null || photos.Count == 0)
+                return;
+
+            var uploadRoot = Path.Combine(_environment.WebRootPath, "uploads", "properties", property.PropertyId.ToString());
+            Directory.CreateDirectory(uploadRoot);
+
+            int nextOrder = _context.PropertyImages
+                .Where(i => i.PropertyId == property.PropertyId)
+                .Select(i => (int?)i.DisplayOrder)
+                .Max() ?? 0;
+
+            string[] allowedExt = { ".jpg", ".jpeg", ".png", ".webp" };
+
+            foreach (var file in photos.Where(f => f != null && f.Length > 0))
+            {
+                var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+                if (!allowedExt.Contains(ext))
+                    continue;
+
+                var fileName = $"{Guid.NewGuid()}{ext}";
+                var filePath = Path.Combine(uploadRoot, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    file.CopyTo(stream);
+                }
+
+                var image = new PropertyImage
+                {
+                    PropertyId = property.PropertyId,
+                    ImageUrl = $"/uploads/properties/{property.PropertyId}/{fileName}",
+                    IsPrimary = nextOrder == 0 && !_context.PropertyImages.Any(i => i.PropertyId == property.PropertyId),
+                    DisplayOrder = nextOrder++
+                };
+
+                _context.PropertyImages.Add(image);
+            }
+
+            _context.SaveChanges();
+        }
     }
 }

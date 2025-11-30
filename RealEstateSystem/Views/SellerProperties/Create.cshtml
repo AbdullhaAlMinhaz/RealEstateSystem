@@ -214,8 +214,8 @@
             </div>
         }
 
-        <form asp-action="Create" asp-controller="SellerProperties" method="post" class="property-form">
-            @Html.AntiForgeryToken()
+                <form asp-action="Create" asp-controller="SellerProperties" method="post" enctype="multipart/form-data" class="property-form">
+                    @Html.AntiForgeryToken()
 
             <div class="property-form-grid">
                 <!-- Column 1 -->
@@ -288,6 +288,12 @@
                     <input asp-for="Address" />
                     <span asp-validation-for="Address" class="field-error"></span>
                 </div>
+                <div class="property-field property-field-full">
+                    <label asp-for="Photos">Property photos</label>
+                    <input asp-for="Photos" type="file" multiple />
+                    <small class="field-hint">You can select multiple images from your device.</small>
+                    <span asp-validation-for="Photos" class="field-error"></span>
+                </div>
 
                 <div class="property-field">
                     <label asp-for="City"></label>
@@ -300,6 +306,7 @@
                     <input asp-for="ZipCode" />
                     <span asp-validation-for="ZipCode" class="field-error"></span>
                 </div>
+                
             </div>
 
             <div class="property-form-footer">

@@ -1,0 +1,9 @@
+﻿@model RealEstateSystem.ViewModels.PropertyDetailsViewModel
+
+@{
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<main class="content">
+    @await Html.PartialAsync("_PropertyDetailsContent", Model)
+</main>

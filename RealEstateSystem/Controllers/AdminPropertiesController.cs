@@ -1,81 +1,4 @@
-﻿//using System.Linq;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.EntityFrameworkCore;
-//using RealEstateSystem.Data;
-//using RealEstateSystem.Models;
-//using RealEstateSystem.ViewModels;
-
-//namespace RealEstateSystem.Controllers
-//{
-
-
-//    public class AdminPropertiesController : Controller
-//    {
-//        //........................................................................................................
-//        [HttpPost]
-//        [ValidateAntiForgeryToken]
-//        public IActionResult Approve(int id)
-//        {
-//            var property = _context.Properties.FirstOrDefault(p => p.PropertyId == id);
-//            if (property == null) return NotFound();
-
-//            property.ApprovalStatus = PropertyApprovalStatus.Approved;
-//            property.Status = PropertyStatus.Available; // if you have this property
-//            _context.SaveChanges();
-
-//            TempData["SuccessMessage"] = "Property approved successfully.";
-//            return RedirectToAction("Index", "AdminDashboard");
-//        }
-
-//        [HttpPost]
-//        [ValidateAntiForgeryToken]
-//        public IActionResult Reject(int id)
-//        {
-//            var property = _context.Properties.FirstOrDefault(p => p.PropertyId == id);
-//            if (property == null) return NotFound();
-
-//            property.ApprovalStatus = PropertyApprovalStatus.Rejected;
-//            _context.SaveChanges();
-
-//            TempData["SuccessMessage"] = "Property rejected.";
-//            return RedirectToAction("Index", "AdminDashboard");
-//        }
-//        //,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-
-//        private readonly ApplicationDbContext _context;
-
-//        public AdminPropertiesController(ApplicationDbContext context)
-//        {
-//            _context = context;
-//        }
-
-//        public IActionResult ActiveListings()
-//        {
-//            var properties = _context.Properties
-//                .Include(p => p.Seller)
-//                    .ThenInclude(s => s.User)
-//                .Where(p => p.Status == PropertyStatus.Available &&
-//                            p.ApprovalStatus == PropertyApprovalStatus.Approved)
-//                .OrderByDescending(p => p.CreatedDate)
-//                .ToList();
-
-//            var model = new AdminPropertyListViewModel
-//            {
-//                Title = "Active Listings",
-//                Subtitle = "Properties currently visible to buyers.",
-//                Properties = properties
-//            };
-
-//            ViewData["PageTitle"] = model.Title;
-//            ViewData["PageSubtitle"] = model.Subtitle;
-
-//            return View("ActiveListings", model);
-//        }
-//    }
-//}
-
-
-using System;
+﻿using System;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -94,9 +17,7 @@ namespace RealEstateSystem.Controllers
             _context = context;
         }
 
-        // --------------------------------------------------------------------
-        // Approve / Reject actions used from the admin dashboard
-        // --------------------------------------------------------------------
+        // ---------- APPROVE ----------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Approve(int id)
@@ -106,12 +27,15 @@ namespace RealEstateSystem.Controllers
 
             property.ApprovalStatus = PropertyApprovalStatus.Approved;
             property.Status = PropertyStatus.Available;
+            property.ApprovalDate = DateTime.Now;
+
             _context.SaveChanges();
 
             TempData["SuccessMessage"] = "Property approved successfully.";
-            return RedirectToAction("Index", "AdminDashboard");
+            return RedirectToAction("Pending", "AdminApprovals");
         }
 
+        // ---------- REJECT ----------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Reject(int id)
@@ -120,21 +44,19 @@ namespace RealEstateSystem.Controllers
             if (property == null) return NotFound();
 
             property.ApprovalStatus = PropertyApprovalStatus.Rejected;
+            property.Status = PropertyStatus.Available;
+
             _context.SaveChanges();
 
             TempData["SuccessMessage"] = "Property rejected.";
-            return RedirectToAction("Index", "AdminDashboard");
+            return RedirectToAction("Pending", "AdminApprovals");
         }
 
-        // --------------------------------------------------------------------
-        // GET: /AdminProperties/Edit/19
-        // --------------------------------------------------------------------
+        // ---------- EDIT (GET) ----------
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            var property = _context.Properties
-                .FirstOrDefault(p => p.PropertyId == id);
-
+            var property = _context.Properties.FirstOrDefault(p => p.PropertyId == id);
             if (property == null)
                 return NotFound();
 
@@ -159,12 +81,10 @@ namespace RealEstateSystem.Controllers
                 IsFeatured = property.IsFeatured
             };
 
-            return View(model); // Views/AdminProperties/Edit.cshtml
+            return View(model);
         }
 
-        // --------------------------------------------------------------------
-        // POST: /AdminProperties/Edit/19
-        // --------------------------------------------------------------------
+        // ---------- EDIT (POST) ----------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, AdminPropertyEditViewModel model)
@@ -175,9 +95,7 @@ namespace RealEstateSystem.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var property = _context.Properties
-                .FirstOrDefault(p => p.PropertyId == id);
-
+            var property = _context.Properties.FirstOrDefault(p => p.PropertyId == id);
             if (property == null)
                 return NotFound();
 
@@ -205,9 +123,34 @@ namespace RealEstateSystem.Controllers
             return RedirectToAction("ActiveListings");
         }
 
-        // --------------------------------------------------------------------
-        // Active listings page (list used in your screenshot)
-        // --------------------------------------------------------------------
+        // ---------- DETAILS (ADMIN VIEW) ----------
+        [HttpGet]
+        public IActionResult Details(int id)
+        {
+            var property = _context.Properties
+                .Include(p => p.Images)
+                .Include(p => p.Seller)
+                    .ThenInclude(s => s.User)
+                .FirstOrDefault(p => p.PropertyId == id);
+
+            if (property == null)
+                return NotFound();
+
+            var user = property.Seller?.User;
+
+            var model = new PropertyDetailsViewModel
+            {
+                Property = property,
+                Images = property.Images ?? Enumerable.Empty<PropertyImage>(),
+                SellerName = user != null ? $"{user.FirstName} {user.LastName}" : null,
+                SellerEmail = user?.Email,
+                SellerPhone = user?.PhoneNumber
+            };
+
+            return View(model);
+        }
+
+        // ---------- ACTIVE LISTINGS ----------
         public IActionResult ActiveListings()
         {
             var properties = _context.Properties

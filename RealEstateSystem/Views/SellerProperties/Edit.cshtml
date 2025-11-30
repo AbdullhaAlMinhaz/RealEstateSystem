@@ -206,9 +206,9 @@
             </div>
         }
 
-        <form asp-action="Edit" asp-controller="SellerProperties" method="post" class="property-form">
+                    <form asp-action="Edit" asp-controller="SellerProperties" method="post" enctype="multipart/form-data" class="property-form">
             @Html.AntiForgeryToken()
-            <input type="hidden" asp-for="PropertyId" />
+                <input type="hidden" asp-for="PropertyId" />
 
             <div class="property-form-grid">
                 <div class="property-field">
@@ -289,6 +289,14 @@
                     <label asp-for="ZipCode"></label>
                     <input asp-for="ZipCode" />
                     <span asp-validation-for="ZipCode" class="field-error"></span>
+                </div>
+
+                <!-- 🔹 NEW: upload more photos while editing -->
+                <div class="property-field property-field-full">
+                    <label asp-for="Photos">Add more photos</label>
+                    <input asp-for="Photos" type="file" multiple />
+                    <small class="field-hint">Upload additional images for this property.</small>
+                    <span asp-validation-for="Photos" class="field-error"></span>
                 </div>
             </div>
 
