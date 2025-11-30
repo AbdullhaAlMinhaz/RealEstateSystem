@@ -3,37 +3,205 @@
     Layout = "_AdminLayout";
 }
 
-<section class="card">
+<style>
+    .property-edit-card {
+        max-width: 1250px; /* wider form */
+        margin: 0 auto;
+    }
+
+    .property-edit-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+        .property-edit-header h2 {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 600;
+        }
+
+        .property-edit-header p {
+            margin: 4px 0 0;
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+    .property-edit-form {
+        margin-top: 1.5rem;
+    }
+
+        .property-edit-form .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 columns on large screens */
+            gap: 1.25rem 1.75rem;
+        }
+
+        .property-edit-form .auth-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .property-edit-form label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .property-edit-form input[type="text"],
+        .property-edit-form input[type="number"],
+        .property-edit-form textarea,
+        .property-edit-form select {
+            padding: 0.55rem 0.75rem;
+            border-radius: 0.55rem;
+            border: 1px solid #d1d5db;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+            background-color: #f9fafb;
+        }
+
+        .property-edit-form textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+            .property-edit-form input:focus,
+            .property-edit-form textarea:focus,
+            .property-edit-form select:focus {
+                border-color: #2563eb;
+                box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.15);
+                background-color: #ffffff;
+            }
+
+        .property-edit-form .text-danger {
+            font-size: 0.8rem;
+        }
+
+        .property-edit-form .checkbox-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.4rem;
+            font-size: 0.95rem;
+        }
+
+            .property-edit-form .checkbox-inline input {
+                width: 1rem;
+                height: 1rem;
+            }
+
+        .property-edit-form .form-actions {
+            margin-top: 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .property-edit-form .btn-primary {
+            padding: 0.55rem 1.25rem;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg, #2563eb, #059669);
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+            transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.1s ease;
+        }
+
+            .property-edit-form .btn-primary:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 10px 22px rgba(37, 99, 235, 0.32);
+                opacity: 0.97;
+            }
+
+        .property-edit-form .btn-secondary {
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            border: 1px solid #d1d5db;
+            background-color: #ffffff;
+            color: #374151;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+
+            .property-edit-form .btn-secondary:hover {
+                background-color: #f3f4f6;
+                border-color: #9ca3af;
+            }
+
+        .property-edit-form .validation-summary-errors {
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            font-size: 0.9rem;
+        }
+
+        /* Make some fields full width across all columns */
+        .property-edit-form .field-full {
+            grid-column: 1 / -1;
+        }
+
+    /* Responsive: 2 columns on medium screens */
+    @@media (max-width: 1200px) {
+        .property-edit-form .form-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    /* Responsive: 1 column on small screens */
+    @@media (max-width: 900px) {
+        .property-edit-form .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<section class="card property-edit-card">
     <div class="card-header">
-        <div>
-            <h2>Edit Property</h2>
-            <p class="card-subtitle">Update listing details and status.</p>
+        <div class="property-edit-header">
+            <div>
+                <h2>Edit Property</h2>
+                <p class="card-subtitle">Update listing details and status for this property.</p>
+            </div>
         </div>
     </div>
 
     <div class="card-body">
-        <form asp-action="Edit" method="post">
+        <form asp-action="Edit" asp-route-id="@Model.PropertyId" method="post" class="property-edit-form">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="PropertyId" />
+
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
 
             <div class="form-grid">
                 <div class="auth-field">
                     <label asp-for="Title"></label>
-                    <input asp-for="Title" />
+                    <input asp-for="Title" placeholder="e.g. Modern 3-bedroom apartment in Dhaka" />
                     <span asp-validation-for="Title" class="text-danger"></span>
-                </div>
-
-                <div class="auth-field">
-                    <label asp-for="Description"></label>
-                    <textarea asp-for="Description"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
 
                 <div class="auth-field">
                     <label asp-for="PropertyType"></label>
                     <select asp-for="PropertyType"
-                            asp-items="Html.GetEnumSelectList<RealEstateSystem.Models.PropertyType>()"></select>
+                            asp-items="Html.GetEnumSelectList<RealEstateSystem.Models.PropertyType>()">
+                    </select>
                     <span asp-validation-for="PropertyType" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field field-full">
+                    <label asp-for="Description"></label>
+                    <textarea asp-for="Description"
+                              placeholder="Short marketing description buyers will see..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
 
                 <div class="auth-field">
@@ -43,8 +211,32 @@
                 </div>
 
                 <div class="auth-field">
+                    <label asp-for="AreaSqft"></label>
+                    <input asp-for="AreaSqft" />
+                    <span asp-validation-for="AreaSqft" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="Bedrooms"></label>
+                    <input asp-for="Bedrooms" />
+                    <span asp-validation-for="Bedrooms" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="Bathrooms"></label>
+                    <input asp-for="Bathrooms" />
+                    <span asp-validation-for="Bathrooms" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field">
+                    <label asp-for="YearBuilt"></label>
+                    <input asp-for="YearBuilt" />
+                    <span asp-validation-for="YearBuilt" class="text-danger"></span>
+                </div>
+
+                <div class="auth-field field-full">
                     <label asp-for="Address"></label>
-                    <input asp-for="Address" />
+                    <input asp-for="Address" placeholder="Street address (e.g. Road 10, House 5)" />
                     <span asp-validation-for="Address" class="text-danger"></span>
                 </div>
 
@@ -56,7 +248,7 @@
 
                 <div class="auth-field">
                     <label asp-for="AreaOrLocation"></label>
-                    <input asp-for="AreaOrLocation" />
+                    <input asp-for="AreaOrLocation" placeholder="Area / neighborhood" />
                     <span asp-validation-for="AreaOrLocation" class="text-danger"></span>
                 </div>
 
@@ -73,47 +265,25 @@
                 </div>
 
                 <div class="auth-field">
-                    <label asp-for="Bedrooms"></label>
-                    <input asp-for="Bedrooms" />
-                    <span asp-validation-for="Bedrooms" class="text-danger"></span>
-                </div>
-
-                <div class="auth-field">
-                    <label asp-for="Bathrooms"></label>
-                    <input asp-for="Bathrooms" />
-                    <span asp-validation-for="Bathrooms" class="text-danger"></span>
-                </div>
-
-                <div class="auth-field">
-                    <label asp-for="AreaSqft"></label>
-                    <input asp-for="AreaSqft" />
-                    <span asp-validation-for="AreaSqft" class="text-danger"></span>
-                </div>
-
-                <div class="auth-field">
-                    <label asp-for="YearBuilt"></label>
-                    <input asp-for="YearBuilt" />
-                    <span asp-validation-for="YearBuilt" class="text-danger"></span>
-                </div>
-
-                <div class="auth-field">
                     <label asp-for="Status"></label>
                     <select asp-for="Status"
-                            asp-items="Html.GetEnumSelectList<RealEstateSystem.Models.PropertyStatus>()"></select>
+                            asp-items="Html.GetEnumSelectList<RealEstateSystem.Models.PropertyStatus>()">
+                    </select>
                     <span asp-validation-for="Status" class="text-danger"></span>
                 </div>
 
                 <div class="auth-field">
                     <label asp-for="ApprovalStatus"></label>
                     <select asp-for="ApprovalStatus"
-                            asp-items="Html.GetEnumSelectList<RealEstateSystem.Models.PropertyApprovalStatus>()"></select>
+                            asp-items="Html.GetEnumSelectList<RealEstateSystem.Models.PropertyApprovalStatus>()">
+                    </select>
                     <span asp-validation-for="ApprovalStatus" class="text-danger"></span>
                 </div>
 
-                <div class="auth-field">
-                    <label>
+                <div class="auth-field field-full">
+                    <label class="checkbox-inline">
                         <input asp-for="IsFeatured" />
-                        Featured listing
+                        <span>Featured listing (show higher in search results)</span>
                     </label>
                 </div>
             </div>

@@ -754,3 +754,27 @@ body.theme-dark .pie-hole {
         display: inline-flex;
     }
 }
+
+/* Make sidebar static and scroll only the main content area */
+html, body {
+    height: 100%;
+}
+
+    body.admin-body {
+        overflow: hidden; /* prevent whole page from scrolling */
+    }
+
+.admin-layout {
+    height: 100vh; /* full viewport height grid */
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* main column fills the height */
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto; /* only this area scrolls */
+}

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RealEstateSystem.Common;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace RealEstateSystem.Models
