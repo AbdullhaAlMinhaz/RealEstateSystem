@@ -1,0 +1,421 @@
+﻿@model RealEstateSystem.ViewModels.BuyerProfileViewModel
+@using RealEstateSystem.Models
+
+@{
+    Layout = "~/Views/Shared/_BuyerLayout.cshtml";
+}
+
+<style>
+    .profile-page-wrapper {
+        padding: 2.5rem 2.5rem 3.5rem;
+        font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top left, #e0f2fe 0, #f9fafb 42%, #eef2ff 100%);
+    }
+
+    .profile-card {
+        background: #ffffff;
+        border-radius: 26px;
+        box-shadow: 0 30px 80px rgba(15, 23, 42, 0.18);
+        padding: 3rem 3.5rem 2.2rem;
+        max-width: 1040px;
+        margin: 0 auto 1.8rem;
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 2.2rem;
+    }
+
+    .profile-avatar-wrapper {
+        position: relative;
+        width: 110px;
+        height: 110px;
+        margin: 0 auto 1rem;
+    }
+
+    .profile-avatar {
+        width: 110px;
+        height: 110px;
+        border-radius: 999px;
+        object-fit: cover;
+        border: 4px solid #ffffff;
+        box-shadow: 0 14px 40px rgba(15, 23, 42, 0.35);
+    }
+
+    .avatar-upload-btn {
+        position: absolute;
+        right: -4px;
+        bottom: 0;
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        border: none;
+        background: #0f172a;
+        color: #ffffff;
+        cursor: pointer;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.4);
+    }
+
+        .avatar-upload-btn:hover {
+            background: #020617;
+        }
+
+    .profile-name {
+        font-size: 1.55rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #111827;
+    }
+
+    .profile-email {
+        font-size: 0.95rem;
+        color: #6b7280;
+        margin-bottom: 0.75rem;
+    }
+
+    .role-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.3rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: #1d4ed8;
+        background: #e0ecff;
+    }
+
+    .divider-line {
+        border-top: 1px solid #e5e7eb;
+        margin: 2.2rem 0 1.6rem;
+    }
+
+    .profile-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 2rem;
+        row-gap: 0.8rem;
+    }
+
+    .profile-info-label {
+        font-size: 0.9rem;
+        color: #6b7280;
+    }
+
+    .profile-info-value {
+        font-size: 0.95rem;
+        color: #111827;
+        text-align: right;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        padding: 0.1rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+        .status-pill.active {
+            background: #bbf7d0;
+            color: #15803d;
+        }
+
+    /* lower section: Profile Information card */
+
+    .profile-lower-wrapper {
+        max-width: 1040px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: minmax(0, 2.2fr);
+        gap: 1.8rem;
+    }
+
+    .profile-edit-card {
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15);
+        padding: 1.8rem 2.1rem 1.9rem;
+    }
+
+    .profile-edit-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .profile-edit-subtitle {
+        font-size: 0.9rem;
+        color: #6b7280;
+        margin-bottom: 1.2rem;
+    }
+
+    .profile-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem 1.4rem;
+        margin-bottom: 1.2rem;
+    }
+
+    .profile-form-field label {
+        display: block;
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-bottom: 0.2rem;
+    }
+
+    .settings-input,
+    .settings-select,
+    .settings-textarea {
+        width: 100%;
+        padding: 0.55rem 0.75rem;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        background: #ffffff;
+    }
+
+        .settings-input:focus,
+        .settings-select:focus,
+        .settings-textarea:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.3);
+        }
+
+    .settings-textarea {
+        resize: vertical;
+        min-height: 70px;
+    }
+
+    .profile-form-actions {
+        margin-top: 0.7rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+
+    .btn-save-changes {
+        padding: 0.6rem 1.5rem;
+        border-radius: 999px;
+        border: none;
+        background: #0f172a;
+        color: #ffffff;
+        font-size: 0.84rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        transition: background 0.15s ease, transform 0.05s ease;
+    }
+
+        .btn-save-changes:hover {
+            background: #020617;
+            transform: translateY(-1px);
+        }
+
+    .flash-container {
+        margin: 0 auto 1rem;
+        max-width: 1040px;
+    }
+
+    .flash-message {
+        border-radius: 999px;
+        padding: 0.7rem 1.1rem;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+    }
+
+    .flash-success {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .flash-error {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .field-validation-error {
+        font-size: 0.78rem;
+        color: #b91c1c;
+        display: block;
+        margin-top: 0.15rem;
+    }
+
+    @@media (max-width: 900px) {
+        .profile-card {
+            padding: 2.3rem 1.8rem 2rem;
+        }
+
+        .profile-info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-info-value {
+            text-align: left;
+        }
+
+        .profile-lower-wrapper {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-edit-card {
+            padding: 1.6rem 1.4rem 1.8rem;
+        }
+
+        .profile-form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<section class="profile-page-wrapper">
+
+    @if (TempData["ProfileSuccess"] != null || TempData["ProfileError"] != null)
+    {
+        <div class="flash-container">
+            @if (TempData["ProfileSuccess"] != null)
+            {
+                <div class="flash-message flash-success">@TempData["ProfileSuccess"]</div>
+            }
+            @if (TempData["ProfileError"] != null)
+            {
+                <div class="flash-message flash-error">@TempData["ProfileError"]</div>
+            }
+        </div>
+    }
+
+    <!-- TOP PROFILE CARD -->
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar-wrapper">
+                <img src="@Model.ProfilePhoto"
+                     alt="@Model.FullName"
+                     class="profile-avatar" />
+
+                <form asp-action="UploadPhoto"
+                      asp-controller="BuyerProfile"
+                      method="post"
+                      enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <label class="avatar-upload-btn" title="Change photo">
+                        <span>✎</span>
+                        <input type="file" name="profilePhoto"
+                               accept="image/*"
+                               style="display:none"
+                               onchange="this.form.submit();" />
+                    </label>
+                </form>
+            </div>
+
+            <h1 class="profile-name">@Model.FullName</h1>
+            <p class="profile-email">@Model.Email</p>
+            <span class="role-badge">Buyer</span>
+        </div>
+
+        <div class="divider-line"></div>
+
+        <div class="profile-info-grid">
+            <div class="profile-info-label">Phone</div>
+            <div class="profile-info-value">@Model.PhoneNumber</div>
+
+            <div class="profile-info-label">Gender</div>
+            <div class="profile-info-value">@Model.GenderDisplay</div>
+
+            <div class="profile-info-label">Date of birth</div>
+            <div class="profile-info-value">@Model.DateOfBirthDisplay</div>
+
+            <div class="profile-info-label">Active status</div>
+            <div class="profile-info-value">
+                @if (Model.IsActive)
+                {
+                    <span class="status-pill active">Active</span>
+                }
+                else
+                {
+                    <span class="status-pill">Inactive</span>
+                }
+            </div>
+
+            <div class="profile-info-label">Registered on</div>
+            <div class="profile-info-value">@Model.RegisteredOnDisplay</div>
+        </div>
+    </div>
+
+    <!-- LOWER PART: PROFILE INFORMATION FORM -->
+    <div class="profile-lower-wrapper">
+        <div class="profile-edit-card">
+            <h2 class="profile-edit-title">Profile Information</h2>
+            <p class="profile-edit-subtitle">
+                Update your name and contact details. Changes will be saved to your account.
+            </p>
+
+            <form asp-action="UpdateProfile"
+                  asp-controller="BuyerProfile"
+                  method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="UserId" />
+
+                <div class="profile-form-grid">
+                    <div class="profile-form-field">
+                        <label asp-for="FirstName"></label>
+                        <input asp-for="FirstName" class="settings-input" />
+                        <span asp-validation-for="FirstName" class="field-validation-error"></span>
+                    </div>
+
+                    <div class="profile-form-field">
+                        <label asp-for="LastName"></label>
+                        <input asp-for="LastName" class="settings-input" />
+                        <span asp-validation-for="LastName" class="field-validation-error"></span>
+                    </div>
+
+                    <div class="profile-form-field">
+                        <label asp-for="Email"></label>
+                        <input asp-for="Email" class="settings-input" readonly />
+                        <span class="field-validation-error">
+                            Email changes are disabled here.
+                        </span>
+                    </div>
+
+                    <div class="profile-form-field">
+                        <label asp-for="PhoneNumber"></label>
+                        <input asp-for="PhoneNumber" class="settings-input" />
+                        <span asp-validation-for="PhoneNumber" class="field-validation-error"></span>
+                    </div>
+
+                    <div class="profile-form-field">
+                        <label asp-for="DateOfBirth"></label>
+                        <input asp-for="DateOfBirth" class="settings-input" type="date" />
+                        <span asp-validation-for="DateOfBirth" class="field-validation-error"></span>
+                    </div>
+
+                    <div class="profile-form-field">
+                        <label asp-for="Gender"></label>
+                        <select asp-for="Gender" class="settings-select">
+                            <option value="">Select gender</option>
+                            <option value="@Gender.Male">Male</option>
+                            <option value="@Gender.Female">Female</option>
+                           
+                        </select>
+                        <span asp-validation-for="Gender" class="field-validation-error"></span>
+                    </div>
+                </div>
+
+                <div class="profile-form-actions">
+                    <button type="submit" class="btn-save-changes">
+                        Save changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>

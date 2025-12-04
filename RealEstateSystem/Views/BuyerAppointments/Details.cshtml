@@ -1,0 +1,15 @@
+﻿@{
+    Layout = "~/Views/Shared/_BuyerLayout.cshtml";
+    ViewBag.BuyerName = ViewBag.BuyerName ?? "Buyer";
+    var id = ViewBag.AppointmentId ?? 0;
+}
+
+<section class="card">
+    <div class="card-header">
+        <h2>Appointment Details</h2>
+        <span class="card-tag">Appointment ID: @id</span>
+    </div>
+    <p style="padding:1rem 0;">
+        Here you can show the visit time and allow rescheduling for appointment @id.
+    </p>
+</section>

@@ -1,42 +1,372 @@
-﻿@model IEnumerable<RealEstateSystem.Models.Appointment>
+﻿@using RealEstateSystem.Models
+@model IEnumerable<RealEstateSystem.Models.Appointment>
+
 @{
     Layout = "~/Views/Shared/_SellerLayout.cshtml";
 }
 
-<main class="content">
-    <section class="card">
+@if (TempData["AppointmentSuccess"] != null)
+{
+    <div class="flash-container" style="margin-bottom:1rem;">
+        <div class="flash-message flash-success">
+            @TempData["AppointmentSuccess"]
+        </div>
+    </div>
+}
+
+
+<section class="seller-appointments-page">
+
+    <section class="card seller-appointments-header-card">
         <div class="card-header">
             <h2>Appointments</h2>
+            <span class="card-tag">View scheduled property visits.</span>
+        </div>
+        <p class="card-subtitle">
+            Manage visit requests from buyers, confirm upcoming tours and keep track of completed appointments.
+        </p>
+    </section>
+
+    <section class="card seller-appointments-card">
+        <div class="seller-appointments-card-header">
+            <div>
+                <h3 class="seller-appointments-title">Appointments</h3>
+                <p class="seller-appointments-subtitle">
+                    @Model.Count() visit@(Model.Count() == 1 ? "" : "s") scheduled.
+                </p>
+            </div>
         </div>
 
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Property</th>
-                    <th>Buyer</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var a in Model)
-                {
+        <div class="seller-appointments-table-wrapper">
+            <table class="seller-appointments-table">
+                <thead>
                     <tr>
-                        <td>@a.Property?.Title</td>
-                        <td>@(a.Buyer?.User != null ? a.Buyer.User.FirstName + " " + a.Buyer.User.LastName : "Unknown")</td>
-                        <td>@a.AppointmentDate.ToString("dd MMM yyyy")</td>
-                        <td>@a.AppointmentTime</td>
-                        <td>@a.Status</td>
+                        <th>Property</th>
+                        <th>Buyer</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th style="text-align:right;">Actions</th>
                     </tr>
-                }
-                @if (!Model.Any())
-                {
-                    <tr>
-                        <td colspan="5">No appointments scheduled.</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="no-data">
+                                You don’t have any appointment requests yet.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var a in Model)
+                        {
+                            <tr>
+                                <td class="cell-main">
+                                    <div class="property-name">@a.Property.Title</div>
+                                    <div class="property-meta">
+                                        @a.Property.AreaOrLocation, @a.Property.City
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="buyer-name">
+                                        @a.Buyer.User.FirstName @a.Buyer.User.LastName
+                                    </div>
+                                </td>
+                                <td>@a.AppointmentDate.ToShortDateString()</td>
+                                <td>@a.AppointmentTime</td>
+                                <td>
+                                    <span class="status-badge status-@a.Status.ToString().ToLower()">
+                                        @a.Status
+                                    </span>
+                                </td>
+                                <td class="cell-actions">
+                                    @if (a.Status == AppointmentStatus.Requested || a.Status == AppointmentStatus.Rescheduled)
+                                    {
+                                        <form asp-action="UpdateStatus"
+                                              method="post"
+                                              class="inline-form">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@a.AppointmentId" />
+                                            <input type="hidden" name="status" value="@AppointmentStatus.Confirmed" />
+                                            <button type="submit" class="chip-btn primary">
+                                                Confirm
+                                            </button>
+                                        </form>
+
+                                        <form asp-action="UpdateStatus"
+                                              method="post"
+                                              class="inline-form">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@a.AppointmentId" />
+                                            <input type="hidden" name="status" value="@AppointmentStatus.Cancelled" />
+                                            <button type="submit" class="chip-btn danger ghost">
+                                                Cancel
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (a.Status == AppointmentStatus.Confirmed)
+                                    {
+                                        <form asp-action="UpdateStatus"
+                                              method="post"
+                                              class="inline-form">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@a.AppointmentId" />
+                                            <input type="hidden" name="status" value="@AppointmentStatus.Completed" />
+                                            <button type="submit" class="chip-btn neutral">
+                                                Mark completed
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
     </section>
-</main>
+
+</section>
+
+<style>
+
+    .flash-container {
+        margin-bottom: 1rem;
+    }
+
+    .flash-message {
+        border-radius: 999px;
+        padding: 0.7rem 1.1rem;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+    }
+
+    .flash-success {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+
+    .seller-appointments-page {
+        padding-bottom: 2rem;
+    }
+
+    .seller-appointments-header-card {
+        margin-bottom: 1.5rem;
+    }
+
+    .seller-appointments-card {
+        margin-top: 0.5rem;
+    }
+
+    .seller-appointments-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem 0;
+    }
+
+    .seller-appointments-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.15rem;
+    }
+
+    .seller-appointments-subtitle {
+        font-size: 0.9rem;
+        color: #6b7280;
+        margin-bottom: 0.4rem;
+    }
+
+    .seller-appointments-table-wrapper {
+        margin-top: 0.4rem;
+        overflow-x: auto;
+    }
+
+    .seller-appointments-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+        .seller-appointments-table thead tr {
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .seller-appointments-table th,
+        .seller-appointments-table td {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .seller-appointments-table th {
+            font-weight: 600;
+            color: #6b7280;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .seller-appointments-table tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.12s ease, transform 0.05s ease;
+        }
+
+            .seller-appointments-table tbody tr:hover {
+                background: #f9fafb;
+                transform: translateY(-1px);
+            }
+
+    .cell-main {
+        min-width: 180px;
+    }
+
+    .property-name {
+        font-weight: 500;
+        color: #0f172a;
+    }
+
+    .property-meta {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        margin-top: 0.15rem;
+    }
+
+    .buyer-name {
+        font-weight: 500;
+    }
+
+    .cell-actions {
+        text-align: right;
+        min-width: 210px;
+    }
+
+    .no-data {
+        text-align: center;
+        padding: 1.5rem;
+        color: #6b7280;
+    }
+
+    /* Status badges */
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.18rem 0.65rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .status-requested {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-confirmed {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-rescheduled {
+        background: #e0f2fe;
+        color: #075985;
+    }
+
+    .status-cancelled {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .status-completed {
+        background: #e5e7eb;
+        color: #374151;
+    }
+
+    /* Chip buttons */
+
+    .inline-form {
+        display: inline-block;
+        margin-left: 0.25rem;
+    }
+
+    .chip-btn {
+        border-radius: 999px;
+        padding: 0.3rem 0.9rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+    }
+
+        .chip-btn.primary {
+            background: #0f172a;
+            color: #ffffff;
+            border-color: #0f172a;
+        }
+
+            .chip-btn.primary:hover {
+                background: #020617;
+                border-color: #020617;
+                transform: translateY(-1px);
+            }
+
+        .chip-btn.neutral {
+            background: #e5e7eb;
+            color: #111827;
+            border-color: #e5e7eb;
+        }
+
+            .chip-btn.neutral:hover {
+                background: #d1d5db;
+                border-color: #9ca3af;
+                transform: translateY(-1px);
+            }
+
+        .chip-btn.danger {
+            background: #fee2e2;
+            color: #b91c1c;
+            border-color: #fecaca;
+        }
+
+            .chip-btn.danger:hover {
+                background: #fecaca;
+                border-color: #ef4444;
+                transform: translateY(-1px);
+            }
+
+        .chip-btn.ghost {
+            background: transparent;
+        }
+
+    @@media (max-width: 900px) {
+        .seller-appointments-table th,
+        .seller-appointments-table td {
+            padding-inline: 0.6rem;
+        }
+
+        .cell-actions {
+            min-width: 180px;
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .seller-appointments-table {
+            font-size: 0.85rem;
+        }
+
+            .seller-appointments-table th {
+                font-size: 0.75rem;
+            }
+    }
+</style>

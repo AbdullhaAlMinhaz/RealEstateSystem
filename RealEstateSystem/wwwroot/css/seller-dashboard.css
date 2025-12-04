@@ -29,6 +29,7 @@ body {
     display: grid;
     grid-template-columns: 260px minmax(0, 1fr);
     min-height: 100vh;
+    overflow: hidden; /* prevent page/body scroll */
 }
 
 /* SIDEBAR */
@@ -150,6 +151,8 @@ body {
 .main {
     padding: 1.5rem 1.75rem 2rem;
     background: radial-gradient(circle at top left, #e0f2fe 0, #f9fafb 42%, #eef2ff 100%);
+    height: 100vh; /* same as layout */
+    overflow-y: auto; /* only this area scrolls */
 }
 
 /* TOPBAR */

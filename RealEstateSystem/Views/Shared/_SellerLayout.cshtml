@@ -68,13 +68,6 @@
                     Inquiries
                 </a>
 
-                <a asp-controller="SellerOffers" asp-action="Index"
-                   class="nav-item @(currentController == "SellerOffers" ? "active" : "")"
-                   data-page-title="Offers"
-                   data-page-subtitle="Review and respond to buyer offers.">
-                    Offers
-                </a>
-
                 <a asp-controller="SellerAppointments" asp-action="Index"
                    class="nav-item @(currentController == "SellerAppointments" ? "active" : "")"
                    data-page-title="Appointments"
@@ -89,6 +82,7 @@
                     Analytics
                 </a>
 
+                <!-- ⭐ NEW: Seller profile link -->
                 <a asp-controller="SellerProfile" asp-action="Index"
                    class="nav-item @(currentController == "SellerProfile" ? "active" : "")"
                    data-page-title="My Profile"
@@ -107,8 +101,6 @@
                     <a asp-controller="Account" asp-action="Logout" class="btn-logout">Logout</a>
                 </div>
             </nav>
-
-
         </aside>
 
         <!-- MAIN AREA -->
@@ -180,27 +172,6 @@
                     sidebar.classList.toggle('is-open');
                 });
             }
-
-            /* SIDEBAR NAV: update title/subtitle + active state */
-            // navItems.forEach(item => {
-            //     item.addEventListener('click', function (e) {
-            //         e.preventDefault();
-
-            //         navItems.forEach(i => i.classList.remove('active'));
-            //         item.classList.add('active');
-
-            //         const title = item.getAttribute('data-page-title');
-            //         const subtitle = item.getAttribute('data-page-subtitle');
-
-            //         if (pageTitle && title) pageTitle.textContent = title;
-            //         if (pageSubtitle && subtitle) pageSubtitle.textContent = subtitle;
-
-            //         close sidebar on small screens
-            //         if (window.innerWidth <= 720 && sidebar) {
-            //             sidebar.classList.remove('is-open');
-            //         }
-            //     });
-            // });
 
             /* STAT CARDS: active highlight */
             statCards.forEach(card => {

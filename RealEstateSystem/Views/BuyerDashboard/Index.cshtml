@@ -1,0 +1,240 @@
+﻿@model RealEstateSystem.ViewModels.BuyerDashboardViewModel
+
+@{
+    Layout = "~/Views/Shared/_BuyerLayout.cshtml";
+    ViewBag.BuyerName = Model.BuyerName;
+}
+
+<section class="grid grid-3 overview">
+    <article class="stat-card is-active">
+        <p class="stat-label">Saved Properties</p>
+        <p class="stat-value" data-counter data-target="@Model.SavedPropertiesCount">0</p>
+        <p class="stat-meta">In your wishlist</p>
+    </article>
+
+    <article class="stat-card">
+        <p class="stat-label">Active Offers</p>
+        <p class="stat-value" data-counter data-target="@Model.ActiveOffersCount">0</p>
+        <p class="stat-meta">Awaiting seller response</p>
+    </article>
+
+    <article class="stat-card">
+        <p class="stat-label">Upcoming Visits</p>
+        <p class="stat-value" data-counter data-target="@Model.UpcomingVisitsCount">0</p>
+        <p class="stat-meta">Scheduled appointments</p>
+    </article>
+</section>
+
+<section class="grid grid-2 middle">
+    <article class="card">
+        <div class="card-header">
+            <h2>Quick Property Search</h2>
+            <span class="card-tag">Find your next home</span>
+        </div>
+
+        <form class="search-form" id="quickSearchForm">
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="searchLocation">Location</label>
+                    <input id="searchLocation" type="text" placeholder="e.g. Bashundhara, Dhanmondi" />
+                </div>
+                <div class="form-field">
+                    <label for="searchType">Property Type</label>
+                    <select id="searchType">
+                        <option value="any">Any</option>
+                        <option value="apartment">Apartment</option>
+                        <option value="house">House</option>
+                        <option value="commercial">Commercial</option>
+                        <option value="land">Land</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-field">
+                    <label>Price Range (BDT)</label>
+                    <div class="inline-inputs">
+                        <input id="priceMin" type="number" placeholder="Min" />
+                        <span class="inline-separator">-</span>
+                        <input id="priceMax" type="number" placeholder="Max" />
+                    </div>
+                </div>
+                <div class="form-field">
+                    <label for="searchBeds">Bedrooms</label>
+                    <select id="searchBeds">
+                        <option value="any">Any</option>
+                        <option value="1">1+</option>
+                        <option value="2">2+</option>
+                        <option value="3">3+</option>
+                        <option value="4">4+</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="button" class="btn-primary full-width" id="btnQuickSearch">
+                Search Properties
+            </button>
+
+            <p class="search-feedback" id="searchFeedback"></p>
+        </form>
+    </article>
+
+    <article class="card">
+        <div class="card-header">
+            <h2>Visits & Offers Summary</h2>
+            <span class="card-tag">Today &amp; upcoming</span>
+        </div>
+
+        <div class="summary-block">
+            <h3>Next Visit</h3>
+            @if (Model.NextVisit != null && Model.NextVisit.HasVisit && Model.NextVisit.VisitDateTime.HasValue)
+            {
+                <p class="summary-title">@Model.NextVisit.PropertyTitle, @Model.NextVisit.Location</p>
+                <p class="summary-meta">
+                    @Model.NextVisit.VisitDateTime.Value.ToString("dddd • h:mm tt")
+                    @if (!string.IsNullOrEmpty(Model.NextVisit.SellerName))
+                    {
+                        @: • With @Model.NextVisit.SellerName
+                    }
+                </p>
+                <a asp-controller="BuyerAppointments"
+                   asp-action="Details"
+                   asp-route-id="@Model.NextVisit.AppointmentId"
+                   class="btn-outline">
+                    Reschedule via Email
+                </a>
+            }
+            else
+            {
+                <p class="summary-title">No upcoming visits</p>
+                <p class="summary-meta">You don’t have any scheduled appointments yet.</p>
+            }
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <div class="summary-block">
+            <h3>Latest Offer</h3>
+            @if (Model.LatestOffer != null && Model.LatestOffer.HasOffer)
+            {
+                <p class="summary-title">@Model.LatestOffer.PropertyTitle</p>
+                <p class="summary-meta">
+                    Offer: @Model.LatestOffer.OfferAmount.ToString("N0") BDT • Status:
+                    <span class="pill pill-pending">@Model.LatestOffer.Status</span>
+                </p>
+                <div class="summary-actions">
+                    <a asp-controller="BuyerOffers"
+                       asp-action="Details"
+                       asp-route-id="@Model.LatestOffer.OfferId"
+                       class="btn-text">
+                        View offer details
+                    </a>
+                    @if (Model.LatestOffer.HasReceipt)
+                    {
+                        <a asp-controller="BuyerOffers"
+                           asp-action="Receipt"
+                           asp-route-id="@Model.LatestOffer.OfferId"
+                           class="btn-text">
+                            Download receipt
+                        </a>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="summary-title">No offers yet</p>
+                <p class="summary-meta">You haven’t placed any offers on properties.</p>
+            }
+        </div>
+    </article>
+</section>
+
+<section class="grid grid-2 bottom">
+    <article class="card">
+        <div class="card-header">
+            <h2>All Properties</h2>
+            <span class="card-tag">Shown based on latest listings</span>
+        </div>
+
+        <div class="property-list" id="propertyList">
+            @if (Model.Properties != null && Model.Properties.Any())
+            {
+                foreach (var p in Model.Properties)
+                {
+                    var thumbClass = "thumb-" + p.ThumbIndex;
+                    <div class="property-item @(p.IsInWishlist ? "saved" : "")">
+                        <div class="property-thumb @thumbClass"></div>
+                        <div class="property-info">
+                            <p class="property-title">@p.Title</p>
+                            <p class="property-meta">
+                                @p.Location • @p.Bedrooms Bed • @p.AreaSqft.ToString("N0") sqft
+                            </p>
+                            <p class="property-price">
+                                BDT @p.Price.ToString("N0")
+                            </p>
+                        </div>
+                        <div class="property-actions">
+                            <button type="button"
+                                    class="btn-icon btn-heart @(p.IsInWishlist ? "is-saved" : "")"
+                                    aria-label="@(p.IsInWishlist ? "Remove from wishlist" : "Save to wishlist")">
+                                @(p.IsInWishlist ? "♥" : "♡")
+                            </button>
+
+                            <a asp-controller="BuyerProperties"
+                               asp-action="Details"
+                               asp-route-id="@p.PropertyId"
+                               class="btn-icon btn-view"
+                               aria-label="View details">
+                                ›
+                            </a>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p>No properties available at the moment.</p>
+            }
+        </div>
+    </article>
+
+    <article class="card">
+        <div class="card-header">
+            <h2>Recent Activity</h2>
+            <span class="card-tag">Last 7 days</span>
+        </div>
+
+        <ul class="activity-list">
+            @if (Model.RecentActivities != null && Model.RecentActivities.Any())
+            {
+                foreach (var a in Model.RecentActivities)
+                {
+                    var dotClass = a.Color switch
+                    {
+                        "green" => "dot dot-green",
+                        "yellow" => "dot dot-yellow",
+                        _ => "dot dot-blue"
+                    };
+
+                    <li>
+                        <span class="@dotClass"></span>
+                        <div>
+                            <p class="activity-text">@a.Text</p>
+                            <p class="activity-meta">@a.Meta</p>
+                        </div>
+                    </li>
+                }
+            }
+            else
+            {
+                <li>
+                    <span class="dot dot-blue"></span>
+                    <div>
+                        <p class="activity-text">No recent activity.</p>
+                        <p class="activity-meta">You’ll see updates here as you interact with properties.</p>
+                    </div>
+                </li>
+            }
+        </ul>
+    </article>
+</section>

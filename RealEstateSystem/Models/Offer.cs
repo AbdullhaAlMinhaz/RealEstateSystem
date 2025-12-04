@@ -18,22 +18,22 @@ namespace RealEstateSystem.Models
         public int SellerId { get; set; }
         public Seller Seller { get; set; }
 
-        [Required]
         [Column(TypeName = "decimal(18,2)")]
         public decimal OfferAmount { get; set; }
 
-        public OfferStatus OfferStatus { get; set; } = OfferStatus.Pending;
+        public DateTime OfferDate { get; set; }
 
-        public DateTime OfferDate { get; set; } = DateTime.Now;
+        public OfferStatus OfferStatus { get; set; }
 
         public DateTime? ResponseDate { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal? CounterOfferAmount { get; set; }
 
-        public string BuyerNotes { get; set; }
+        // These are required in the DB – make sure they are never null
+        public string BuyerNotes { get; set; } = string.Empty;
 
-        public string SellerNotes { get; set; }
+        public string SellerNotes { get; set; } = string.Empty;
 
         public DateTime? ExpiryDate { get; set; }
 

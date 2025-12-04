@@ -11,13 +11,13 @@ using RealEstateSystem.ViewModels;
 
 namespace RealEstateSystem.Controllers
 {
-    public class AdminProfileController : Controller
+    public class SellerProfileController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IWebHostEnvironment _env;
 
-        public AdminProfileController(
+        public SellerProfileController(
             ApplicationDbContext context,
             IPasswordHasher<User> passwordHasher,
             IWebHostEnvironment env)
@@ -27,7 +27,7 @@ namespace RealEstateSystem.Controllers
             _env = env;
         }
 
-        // ========== GET: /AdminProfile ==========
+        // ========== GET: /SellerProfile ==========
         [HttpGet]
         public IActionResult Index()
         {
@@ -35,26 +35,43 @@ namespace RealEstateSystem.Controllers
             if (userId == null)
                 return RedirectToAction("Login", "Account");
 
-            var user = _context.Users.FirstOrDefault(u => u.UserId == userId && u.Role == UserRole.Admin);
+            // 👇 Load user from DB and make sure it's actually a Seller
+            var user = _context.Users.FirstOrDefault(u => u.UserId == userId && u.Role == UserRole.Seller);
             if (user == null)
             {
                 HttpContext.Session.Clear();
                 return RedirectToAction("Login", "Account");
             }
 
-            var model = new AdminProfileViewModel
+            var seller = _context.Sellers.FirstOrDefault(s => s.UserId == user.UserId);
+            if (seller == null)
+            {
+                seller = new Seller
+                {
+                    UserId = user.UserId,
+                    JoinedDate = DateTime.Now
+                };
+                _context.Sellers.Add(seller);
+                _context.SaveChanges();
+            }
+
+            var model = new SellerProfileViewModel
             {
                 UserId = user.UserId,
+                SellerId = seller.SellerId,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 Gender = user.Gender,
                 DateOfBirth = user.DateOfBirth,
-                //PresentAddress = user.PresentAddress,
+              //  PresentAddress = user.PresentAddress,
                 IsActive = user.IsActive,
                 RegisteredOn = user.CreatedDate == default ? DateTime.Now : user.CreatedDate,
-                ProfilePhoto = user.ProfilePhoto
+                ProfilePhoto = user.ProfilePhoto,
+                AgencyName = seller.AgencyName,
+              //  SellerType = seller.SellerType,
+              //  IsVerified = seller.IsVerified
             };
 
             return View(model);
@@ -63,23 +80,29 @@ namespace RealEstateSystem.Controllers
         // ========== UPDATE BASIC PROFILE ==========
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdateProfile(AdminProfileViewModel model)
+        public IActionResult UpdateProfile(SellerProfileViewModel model)
         {
-            var user = _context.Users.FirstOrDefault(u => u.UserId == model.UserId && u.Role == UserRole.Admin);
-            if (user == null)
+            var user = _context.Users.FirstOrDefault(u => u.UserId == model.UserId && u.Role == UserRole.Seller);
+            var seller = _context.Sellers.FirstOrDefault(s => s.SellerId == model.SellerId);
+
+            if (user == null || seller == null)
                 return NotFound();
 
-            // bind editable fields
             user.FirstName = model.FirstName;
             user.LastName = model.LastName;
             user.Email = model.Email;
             user.PhoneNumber = model.PhoneNumber;
             user.Gender = model.Gender;
             user.DateOfBirth = model.DateOfBirth;
-            //user.PresentAddress = model.PresentAddress;
+           // user.PresentAddress = model.PresentAddress;
             user.UpdatedDate = DateTime.Now;
 
-            // handle image upload
+            seller.AgencyName = model.AgencyName;
+           // seller.SellerType = model.SellerType;
+         //   seller.IsVerified = model.IsVerified;
+           // seller.UpdatedDate = DateTime.Now;
+
+            // image upload
             if (model.ProfileImageFile != null && model.ProfileImageFile.Length > 0)
             {
                 var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "profiles");
@@ -87,7 +110,7 @@ namespace RealEstateSystem.Controllers
                     Directory.CreateDirectory(uploadsFolder);
 
                 var extension = Path.GetExtension(model.ProfileImageFile.FileName);
-                var fileName = $"admin_{user.UserId}_{Guid.NewGuid()}{extension}";
+                var fileName = $"seller_{user.UserId}_{Guid.NewGuid()}{extension}";
                 var filePath = Path.Combine(uploadsFolder, fileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
@@ -95,11 +118,10 @@ namespace RealEstateSystem.Controllers
                     model.ProfileImageFile.CopyTo(stream);
                 }
 
-                // store relative path in DB
                 user.ProfilePhoto = $"/uploads/profiles/{fileName}";
             }
 
-            _context.SaveChanges();   // 👈 NOW changes go to DB
+            _context.SaveChanges();
 
             HttpContext.Session.SetString("UserName", $"{user.FirstName} {user.LastName}");
 
@@ -110,9 +132,9 @@ namespace RealEstateSystem.Controllers
         // ========== UPDATE PASSWORD ==========
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdatePassword(AdminProfileViewModel model)
+        public IActionResult UpdatePassword(SellerProfileViewModel model)
         {
-            var user = _context.Users.FirstOrDefault(u => u.UserId == model.UserId && u.Role == UserRole.Admin);
+            var user = _context.Users.FirstOrDefault(u => u.UserId == model.UserId && u.Role == UserRole.Seller);
             if (user == null)
                 return NotFound();
 
@@ -146,21 +168,27 @@ namespace RealEstateSystem.Controllers
             return RedirectToAction("Index");
         }
 
-        private AdminProfileViewModel ReloadModel(User user)
+        private SellerProfileViewModel ReloadModel(User user)
         {
-            return new AdminProfileViewModel
+            var seller = _context.Sellers.FirstOrDefault(s => s.UserId == user.UserId);
+
+            return new SellerProfileViewModel
             {
                 UserId = user.UserId,
+                SellerId = seller?.SellerId ?? 0,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 Gender = user.Gender,
                 DateOfBirth = user.DateOfBirth,
-                //PresentAddress = user.PresentAddress,
+               // PresentAddress = user.PresentAddress,
                 IsActive = user.IsActive,
                 RegisteredOn = user.CreatedDate == default ? DateTime.Now : user.CreatedDate,
-                ProfilePhoto = user.ProfilePhoto
+                ProfilePhoto = user.ProfilePhoto,
+                AgencyName = seller?.AgencyName,
+               // SellerType = seller?.SellerType,
+              //  IsVerified = seller?.IsVerified ?? false
             };
         }
     }

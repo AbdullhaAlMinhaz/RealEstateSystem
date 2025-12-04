@@ -1,6 +1,6 @@
-﻿@model RealEstateSystem.ViewModels.AdminProfileViewModel
+﻿@model RealEstateSystem.ViewModels.SellerProfileViewModel
 @{
-    Layout = "_AdminLayout";
+    Layout = "_SellerLayout";  // or "_AdminLayout" if you use same layout
     ViewData["Title"] = "My Profile";
 }
 
@@ -198,7 +198,7 @@
             }
             else
             {
-                @((Model.FirstName ?? "A").Substring(0, 1).ToUpper())
+                @((Model.FirstName ?? "S").Substring(0, 1).ToUpper())
             }
         </div>
 
@@ -209,7 +209,7 @@
             @Model.Email
         </div>
 
-        <div class="badge-role">Admin</div>
+        <div class="badge-role">Seller</div>
 
         <div class="profile-divider"></div>
 
@@ -227,15 +227,15 @@
                 @(Model.DateOfBirth.HasValue? Model.DateOfBirth.Value.ToString("dd MMM yyyy") : "Not set")
             </div>
 
-            @* <div class="profile-details-label">Present address</div>
+            <div class="profile-details-label">Present address</div>
             <div class="profile-details-value">
                 @(!string.IsNullOrWhiteSpace(Model.PresentAddress) ? Model.PresentAddress : "Not set")
-            </div> *@
+            </div>
 
-            <div class="profile-details-label">Active status</div>
+            <div class="profile-details-label">Account status</div>
             <div class="profile-details-value">
-                <span class="badge-status @(Model.IsActive ? "active" : "inactive")">
-                    @(Model.IsActive ? "Active" : "Inactive")
+                <span class="badge-status @(Model.IsVerified ? "active" : "inactive")">
+                    @(Model.IsVerified ? "Verified" : "Pending")
                 </span>
             </div>
 
@@ -252,11 +252,12 @@
         <!-- LEFT: PROFILE INFO -->
         <div class="card-form">
             <h5>Profile Information</h5>
-            <p class="text-muted mb-3">Update your name and contact details.</p>
+            <p class="text-muted mb-3">Update your personal and agency details.</p>
 
             <form asp-action="UpdateProfile" method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="UserId" />
+                <input type="hidden" asp-for="SellerId" />
 
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -301,6 +302,19 @@
                         <label asp-for="PresentAddress" class="form-label"></label>
                         <textarea asp-for="PresentAddress" class="form-control" rows="2"></textarea>
                         <span asp-validation-for="PresentAddress" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="AgencyName" class="form-label"></label>
+                        <input asp-for="AgencyName" class="form-control" />
+                        <span asp-validation-for="AgencyName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="SellerType" class="form-label"></label>
+                        <input asp-for="SellerType" class="form-control" />
+                        @* or use a select if you have enum *@
+                        <span asp-validation-for="SellerType" class="text-danger"></span>
                     </div>
 
                     <div class="col-12">

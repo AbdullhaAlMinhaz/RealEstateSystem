@@ -1,0 +1,578 @@
+﻿@* @model RealEstateSystem.ViewModels.BuyerPropertyBrowseViewModel
+
+@{
+    Layout = "~/Views/Shared/_BuyerLayout.cshtml";
+} *@
+
+@* <style>
+    /* FORCE 3-column grid for properties on this page */
+    .property-grid {
+        margin-top: 1rem;
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 1.5rem;
+    }
+
+    .property-card {
+        background: #ffffff;
+        border-radius: 26px;
+        overflow: hidden;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .property-card-image-wrapper {
+        width: 100%;
+        aspect-ratio: 4 / 3; /* all same ratio */
+        overflow: hidden;
+    }
+
+    .property-card-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* crop but keep same size */
+        display: block;
+    }
+
+    .property-card-divider {
+        height: 6px;
+        background: #020617;
+    }
+
+    .property-card-body {
+        padding: 0.9rem 1.25rem 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 0.9rem;
+    }
+
+    .property-card-price {
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .property-card-footer .btn-outline.small {
+        border-radius: 999px;
+        padding-inline: 1.3rem;
+    }
+
+    /* simple responsive behavior */
+    @@media (max-width: 1200px) {
+        .property-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+    @@media (max-width: 768px) {
+        .property-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+</style> *@
+
+
+@model RealEstateSystem.ViewModels.BuyerPropertyBrowseViewModel
+
+@{
+    Layout = "~/Views/Shared/_BuyerLayout.cshtml";
+}
+
+<style>
+    /* ========= PROPERTY GRID (3 cards per row) ========= */
+
+    .property-grid {
+        margin-top: 1rem;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.5rem;
+    }
+
+    .property-card {
+        background: #ffffff;
+        border-radius: 26px;
+        overflow: hidden;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+        .property-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 22px 50px rgba(15, 23, 42, 0.15);
+        }
+
+    .property-card-image-wrapper {
+        width: 100%;
+        aspect-ratio: 4 / 3; /* all images same ratio */
+        overflow: hidden;
+    }
+
+    .property-card-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .property-card-divider {
+        height: 6px;
+        background: #020617;
+    }
+
+    .property-card-body {
+        padding: 0.9rem 1.25rem 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 0.9rem;
+    }
+
+    .property-card-price {
+        font-weight: 700;
+        font-size: 1rem;
+        color: #020617;
+    }
+
+    .property-card-meta {
+        font-size: 0.9rem;
+        color: #64748b;
+    }
+
+    .property-card-location {
+        font-size: 0.9rem;
+        color: #64748b;
+        margin-top: 0.2rem;
+    }
+
+     /* Wish List CSS................................................................................ */
+    .property-card-footer {
+        margin-top: 0.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+        .property-card-footer .btn-outline.small {
+            border-radius: 999px;
+            padding-inline: 1.3rem;
+        }
+
+    .wishlist-form {
+        margin-left: 0.75rem;
+    }
+
+    .wishlist-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.45rem 0.95rem;
+        border-radius: 999px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        color: #020617;
+        font-size: 0.8rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    }
+
+        .wishlist-btn:hover {
+            transform: translateY(-1px);
+            border-color: #6366f1;
+        }
+
+        .wishlist-btn.active {
+            background: #020617;
+            color: #ffffff;
+            border-color: #020617;
+        }
+
+    .wishlist-icon {
+        font-size: 0.95rem;
+    }
+    /* Wish List CSS     End ................................................................................ */
+
+
+    @@media (max-width: 1200px) {
+        .property-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .property-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    /* ========= ADVANCED SEARCH (top card) ========= */
+
+    .adv-search-card {
+        margin-bottom: 1.75rem;
+        padding: 1.8rem 2rem 1.5rem;
+        border-radius: 26px;
+        background: #ffffff;
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+    }
+
+    .adv-search-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.1rem;
+    }
+
+        .adv-search-header h2 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin: 0;
+            color: #020617;
+        }
+
+    .adv-search-subtitle {
+        display: block;
+        margin-top: 0.2rem;
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+
+    .adv-search-pill {
+        padding: 0.45rem 1.1rem;
+        border-radius: 999px;
+        background: #e0f2fe;
+        color: #0369a1;
+        font-size: 0.8rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .adv-search-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+    }
+
+    /* 2 rows × 2 columns */
+    .adv-search-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem 1.2rem;
+    }
+
+    .adv-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .adv-field-wide {
+        grid-column: 1 / -1; /* full width row for Location */
+    }
+
+    .adv-field label {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #0f172a;
+    }
+
+    /* pill-style inputs */
+    .adv-input {
+        width: 100%;
+        border-radius: 999px;
+        border: none;
+        padding: 0.7rem 1rem;
+        background: #f3f4f6;
+        font-size: 0.9rem;
+        color: #0f172a;
+        outline: none;
+        box-shadow: inset 0 0 0 1px transparent;
+        transition: box-shadow 0.15s ease, background-color 0.15s ease;
+    }
+
+        .adv-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .adv-input:focus {
+            background: #ffffff;
+            box-shadow: inset 0 0 0 2px #2563eb;
+        }
+
+    .adv-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: linear-gradient(45deg, transparent 50%, #6b7280 50%), linear-gradient(135deg, #6b7280 50%, transparent 50%);
+        background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+        background-size: 7px 7px, 7px 7px;
+        background-repeat: no-repeat;
+    }
+
+    /* price range pill with two inputs */
+    .adv-price-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .adv-price-input {
+        flex: 1;
+    }
+
+    .adv-price-separator {
+        font-size: 0.9rem;
+        color: #9ca3af;
+    }
+
+    /* footer (results + buttons) */
+
+    .adv-search-footer {
+        margin-top: 0.2rem;
+        padding-top: 0.9rem;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .adv-search-count {
+        font-size: 0.9rem;
+        color: #6b7280;
+    }
+
+    .adv-search-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .adv-btn-reset {
+        font-size: 0.85rem;
+        color: #64748b;
+        text-decoration: none;
+    }
+
+        .adv-btn-reset:hover {
+            text-decoration: underline;
+        }
+
+    .adv-btn-search {
+        border: none;
+        border-radius: 999px;
+        padding: 0.6rem 1.6rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        background: linear-gradient(90deg, #2563eb, #22c55e); /* your blue/green */
+        color: #ffffff;
+        box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35);
+        transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+    }
+
+        .adv-btn-search:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.03);
+            box-shadow: 0 16px 36px rgba(37, 99, 235, 0.45);
+        }
+
+    @@media (max-width: 900px) {
+        .adv-search-card {
+            padding: 1.4rem 1.25rem;
+        }
+
+        .adv-search-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .adv-field-wide {
+            grid-column: auto;
+        }
+
+        .adv-search-footer {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .adv-search-actions {
+            align-self: flex-end;
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .adv-search-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .adv-search-pill {
+            align-self: flex-start;
+        }
+
+        .adv-btn-search {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="buyer-page-inner">
+
+    <!-- ======= ADVANCED SEARCH CARD ======= -->
+    <section class="card adv-search-card">
+        <div class="adv-search-header">
+            <div>
+                <h2>Advanced Search</h2>
+                <span class="adv-search-subtitle">
+                    Filter by location, type, price and bedrooms.
+                </span>
+            </div>
+            <span class="adv-search-pill">Find your next home</span>
+        </div>
+
+        <form asp-action="Index" method="get" class="adv-search-form">
+            <div class="adv-search-grid">
+                <!-- Row 1: Location (wide) + Type -->
+                <div class="adv-field adv-field-wide">
+                    <label for="location">Location</label>
+                    <input id="location"
+                           name="location"
+                           type="text"
+                           class="adv-input"
+                           placeholder="e.g. Bashundhara, Dhanmondi"
+                           value="@Model.Location" />
+                </div>
+
+                <div class="adv-field">
+                    <label for="propertyType">Property Type</label>
+                    <select id="propertyType"
+                            name="propertyType"
+                            class="adv-input adv-select">
+                        <option value="">Any</option>
+                        <option value="Apartment">Apartment</option>
+                        <option value="House">House</option>
+                        <option value="Commercial">Commercial</option>
+                        <option value="Land">Land</option>
+                    </select>
+                </div>
+
+                <!-- Row 2: Price (Min/Max) + Bedrooms -->
+                <div class="adv-field">
+                    <label>Price Range (BDT)</label>
+                    <div class="adv-price-wrapper">
+                        <input type="number"
+                               name="minPrice"
+                               class="adv-input adv-price-input"
+                               placeholder="Min"
+                               value="@(Model.MinPrice != null ? Model.MinPrice.ToString() : "")" />
+                        <span class="adv-price-separator">–</span>
+                        <input type="number"
+                               name="maxPrice"
+                               class="adv-input adv-price-input"
+                               placeholder="Max"
+                               value="@(Model.MaxPrice != null ? Model.MaxPrice.ToString() : "")" />
+                    </div>
+                </div>
+
+                <div class="adv-field">
+                    <label for="minBedrooms">Bedrooms</label>
+                    <select id="minBedrooms"
+                            name="minBedrooms"
+                            class="adv-input adv-select">
+                        <option value="">Any</option>
+                        <option value="1">1+</option>
+                        <option value="2">2+</option>
+                        <option value="3">3+</option>
+                        <option value="4">4+</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="adv-search-footer">
+                <div class="adv-search-count">
+                    @((Model.Properties?.Count ?? 0)) results
+                </div>
+
+                <div class="adv-search-actions">
+                    <a asp-action="Index" class="adv-btn-reset">Reset</a>
+                    <button type="submit" class="adv-btn-search">Search</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <!-- ======= PROPERTY LIST (simple cards) ======= -->
+    <section class="card">
+        <h2>All available properties</h2>
+        <p class="adv-search-subtitle">
+            Latest approved listings from all sellers.
+        </p>
+
+        @if (Model.Properties != null && Model.Properties.Any())
+        {
+            <div class="property-grid">
+                @foreach (var p in Model.Properties)
+                {
+                    <article class="property-card">
+                        <div class="property-card-image-wrapper">
+                            <img src="@p.PrimaryImageUrl"
+                                 alt="@p.Title"
+                                 class="property-card-image" />
+                        </div>
+
+                        <div class="property-card-divider"></div>
+
+                        <div class="property-card-body">
+                            <p class="property-card-price">
+                                @p.Price.ToString("N0") tk
+                            </p>
+
+                            <p class="property-card-meta">
+                                @p.Bedrooms bed • @p.Bathrooms bath
+                            </p>
+
+                            <p class="property-card-location">
+                                @p.AreaOrLocation, @p.City
+                            </p>
+
+                            <div class="property-card-footer">
+                                <a asp-action="Details"
+                                   asp-route-id="@p.PropertyId"
+                                   class="btn-outline small">
+                                    Details
+                                </a>
+
+                                <form asp-controller="BuyerWishlist"
+                                      asp-action="Toggle"
+                                      method="post"
+                                      class="wishlist-form">
+                                    <input type="hidden" name="propertyId" value="@p.PropertyId" />
+                                    <button type="submit"
+                                            class="wishlist-btn @(p.IsInWishlist ? "active" : "")">
+                                        <span class="wishlist-icon">
+                                            @(p.IsInWishlist ? "♥" : "♡")
+                                        </span>
+                                        <span>
+                                            @(p.IsInWishlist ? "In wishlist" : "Wishlist")
+                                        </span>
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <p>No properties found for this filter.</p>
+        }
+    </section>
+
+</div>

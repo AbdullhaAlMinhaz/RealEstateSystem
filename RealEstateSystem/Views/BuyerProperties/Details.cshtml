@@ -1,0 +1,638 @@
+﻿@model RealEstateSystem.ViewModels.PropertyDetailsViewModel
+
+@{
+    Layout = "~/Views/Shared/_BuyerLayout.cshtml";
+
+    var prop = Model.Property;
+    var images = Model.Images?.ToList() ?? new List<RealEstateSystem.Models.PropertyImage>();
+    var mainImage = images.FirstOrDefault();
+    var mainUrl = mainImage?.ImageUrl ?? "/images/property-placeholder.jpg";
+
+    string fullLocation;
+    if (!string.IsNullOrWhiteSpace(prop.AreaOrLocation))
+    {
+        fullLocation = $"{prop.AreaOrLocation}, {prop.City}";
+    }
+    else if (!string.IsNullOrWhiteSpace(prop.City))
+    {
+        fullLocation = prop.City;
+    }
+    else
+    {
+        fullLocation = prop.Address;
+    }
+
+    var addressDisplay = string.IsNullOrWhiteSpace(prop.Address)
+        ? fullLocation
+        : prop.Address;
+
+    var areaDisplay = prop.AreaSqft > 0 ? $"{prop.AreaSqft:N0} sqft" : "Not specified";
+    var bedroomsDisplay = prop.Bedrooms?.ToString() ?? "Not specified";
+    var bathroomsDisplay = prop.Bathrooms?.ToString() ?? "Not specified";
+    var yearBuiltDisplay = prop.YearBuilt?.ToString() ?? "Not specified";
+    var collectionDisplay = prop.IsFeatured ? "Featured" : "Standard";
+
+    string mapQuery;
+    if (prop.Latitude.HasValue && prop.Longitude.HasValue)
+    {
+        mapQuery =
+            prop.Latitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)
+            + ","
+            + prop.Longitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    }
+    else if (!string.IsNullOrWhiteSpace(addressDisplay))
+    {
+        mapQuery = addressDisplay;
+    }
+    else
+    {
+        mapQuery = fullLocation;
+    }
+
+    var mapSrc = $"https://www.google.com/maps?q={mapQuery}&output=embed";
+}
+
+<style>
+    .property-details-page {
+        padding: 2.5rem 2.5rem 3.5rem;
+        font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top left, #e0f2fe 0, #f9fafb 42%, #eef2ff 100%);
+    }
+
+    .property-details-header {
+        margin-bottom: 2rem;
+    }
+
+        .property-details-header h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text, #111827);
+        }
+
+        .property-details-header p {
+            font-size: 0.95rem;
+            color: var(--text-muted, #6b7280);
+        }
+
+    /* === SECTION 1: IMAGE + AT A GLANCE === */
+
+    .property-main-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+        gap: 2rem;
+        align-items: flex-start;
+        margin-bottom: 3rem;
+    }
+
+    .property-main-image-block {
+        background: #ffffff;
+        border-radius: 18px;
+        box-shadow: var(--shadow-soft, 0 24px 60px rgba(15, 23, 42, 0.16));
+        padding: 0.75rem;
+    }
+
+        .property-main-image-block img {
+            width: 100%;
+            display: block;
+            border-radius: 14px;
+            object-fit: cover;
+            max-height: 540px;
+        }
+
+    .glance-card {
+        background: #ffffff;
+        border-radius: 18px;
+        box-shadow: var(--shadow-soft, 0 24px 60px rgba(15, 23, 42, 0.16));
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+        position: sticky;
+        top: 1.5rem;
+        align-self: flex-start;
+    }
+
+    .glance-header {
+        padding: 1.2rem 1.6rem 0.8rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+        .glance-header h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+        }
+
+    .glance-divider {
+        height: 2px;
+        width: 100%;
+        background: #111827;
+        margin-top: 0.8rem;
+    }
+
+    .glance-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.93rem;
+    }
+
+        .glance-table tbody tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        .glance-table td {
+            padding: 0.65rem 1.6rem;
+            vertical-align: middle;
+        }
+
+    .glance-label {
+        white-space: nowrap;
+        font-weight: 500;
+        color: var(--text, #111827);
+    }
+
+    .glance-value {
+        color: var(--text-muted, #6b7280);
+        text-align: right;
+    }
+
+    .glance-icon {
+        margin-right: 0.45rem;
+        font-size: 1rem;
+    }
+
+    .glance-footer {
+        padding: 1.1rem 1.6rem 1.4rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .glance-status-btn {
+        width: 100%;
+        border-radius: 0;
+        border: none;
+        padding: 0.8rem 1rem;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+        cursor: pointer;
+        background: #111827;
+        color: #ffffff;
+        transition: background 0.18s ease, transform 0.1s ease;
+    }
+
+        .glance-status-btn:hover {
+            background: #000000;
+            transform: translateY(-1px);
+        }
+
+    /* === SECTION 2: FEATURES (IMAGE STRIP) === */
+
+    .features-section {
+        background: radial-gradient(circle at top left, #e0f2fe 0, #f9fafb 42%, #eef2ff 100%);
+        color: #111827;
+        margin: 0 -2.5rem 3rem;
+        padding: 2.5rem 2.5rem 2.8rem;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+        margin-bottom: 1.6rem;
+        text-align: center;
+    }
+
+    .feature-slider {
+        display: flex;
+        gap: 1.4rem;
+        overflow-x: auto;
+        padding-bottom: 0.4rem;
+    }
+
+    .feature-slide {
+        flex: 0 0 auto;
+        min-width: 320px;
+        max-width: 520px;
+    }
+
+        .feature-slide img {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+            border-radius: 16px;
+            display: block;
+        }
+
+    .feature-slider::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .feature-slider::-webkit-scrollbar-thumb {
+        background: #4b5563;
+        border-radius: 999px;
+    }
+
+    /* .............................send error or success message..................... */
+
+    .flash-container {
+        margin-bottom: 1rem;
+    }
+
+    .flash-message {
+        border-radius: 999px;
+        padding: 0.7rem 1.1rem;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+    }
+
+    .flash-success {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .flash-error {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    /* === SECTION 3: MAP === */
+
+    .map-section {
+        background: radial-gradient(circle at top left, #e0f2fe 0, #f9fafb 42%, #eef2ff 100%);
+        color: #111827;
+        margin: 0 -2.5rem 3rem;
+        padding: 2.5rem 2.5rem 3rem;
+    }
+
+    .map-frame-wrapper {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+    }
+
+    .map-frame {
+        width: 100%;
+        height: 380px;
+        border: 0;
+    }
+
+    /* === SECTION 4: BOOK CONSULTATION === */
+
+    .consult-section {
+        background: radial-gradient(circle at top left, #e0f2fe 0, #f9fafb 42%, #eef2ff 100%);
+        color: #111827;
+        margin: 0 -2.5rem 0;
+        padding: 3rem 2.5rem 3.4rem;
+    }
+
+    .consult-inner {
+        max-width: 780px;
+        margin: 0 auto;
+    }
+
+    .consult-heading {
+        text-align: center;
+        margin-bottom: 1.2rem;
+    }
+
+        .consult-heading h2 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+    .consult-contacts {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1.2rem;
+        font-size: 0.95rem;
+        color: #e5e7eb;
+        margin-bottom: 1.6rem;
+        background-color: rgba(15, 23, 42, 0.8);
+    }
+
+        .consult-contacts span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+    .consult-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .consult-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .consult-input,
+    .consult-textarea {
+        width: 100%;
+        border-radius: 4px;
+        border: 1px solid #4b5563;
+        padding: 0.75rem 0.85rem;
+        background: rgba(15, 23, 42, 0.8);
+        color: #f9fafb;
+        font-size: 0.9rem;
+        outline: none;
+    }
+
+        .consult-input::placeholder,
+        .consult-textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .consult-input:focus,
+        .consult-textarea:focus {
+            border-color: var(--primary, #1d4ed8);
+            box-shadow: 0 0 0 1px var(--primary, #1d4ed8);
+        }
+
+    .consult-textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .consult-submit-wrap {
+        text-align: center;
+        margin-top: 0.5rem;
+    }
+
+    .consult-submit {
+        min-width: 220px;
+        padding: 0.75rem 1.8rem;
+        border-radius: 999px;
+        border: none;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: 0.8rem;
+        font-weight: 600;
+        background: var(--primary-dark, #1e3a8a);
+        color: #ffffff;
+        cursor: pointer;
+        transition: background 0.18s ease, transform 0.1s ease, box-shadow 0.18s ease;
+        box-shadow: 0 14px 40px rgba(15, 23, 42, 0.55);
+    }
+
+        .consult-submit:hover {
+            background: var(--primary, #1d4ed8);
+            transform: translateY(-1px);
+        }
+
+    /* === RESPONSIVE === */
+
+    @@media (max-width: 1024px) {
+        .property-main-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .property-details-page {
+            padding: 1.8rem 1.4rem 3rem;
+        }
+
+        .features-section,
+        .map-section,
+        .consult-section {
+            margin: 0 -1.4rem 2.4rem;
+            padding-left: 1.4rem;
+            padding-right: 1.4rem;
+        }
+
+        .consult-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .feature-slide {
+            min-width: 260px;
+        }
+    }
+</style>
+
+<section class="property-details-page">
+
+    @* VISIT REQUEST MESSAGES *@
+    @if (TempData["AppointmentSuccess"] != null || TempData["AppointmentError"] != null)
+    {
+        <div class="flash-container">
+            @if (TempData["AppointmentSuccess"] != null)
+            {
+                <div class="flash-message flash-success">
+                    @TempData["AppointmentSuccess"]
+                </div>
+            }
+            @if (TempData["AppointmentError"] != null)
+            {
+                <div class="flash-message flash-error">
+                    @TempData["AppointmentError"]
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Title + Address -->
+    <header class="property-details-header">
+        <h1>@prop.Title</h1>
+        @if (!string.IsNullOrWhiteSpace(addressDisplay))
+        {
+            <p>@addressDisplay</p>
+        }
+        else if (!string.IsNullOrWhiteSpace(fullLocation))
+        {
+            <p>@fullLocation</p>
+        }
+    </header>
+
+    <!-- SECTION 1: Main Image + AT A GLANCE -->
+    <div class="property-main-grid">
+        <div class="property-main-image-block">
+            <img src="@mainUrl" alt="@prop.Title" />
+        </div>
+
+        <aside class="glance-card">
+            <div class="glance-header">
+                <h2>AT A GLANCE</h2>
+                <div class="glance-divider"></div>
+            </div>
+
+            <table class="glance-table">
+                <tbody>
+                    <tr>
+                        <td class="glance-label">
+                            <span class="glance-icon">📍</span>Address
+                        </td>
+                        <td class="glance-value">@addressDisplay</td>
+                    </tr>
+                    <tr>
+                        <td class="glance-label">
+                            <span class="glance-icon">📐</span>Area Size
+                        </td>
+                        <td class="glance-value">@areaDisplay</td>
+                    </tr>
+                    <tr>
+                        <td class="glance-label">
+                            <span class="glance-icon">🏙</span>City
+                        </td>
+                        <td class="glance-value">@prop.City</td>
+                    </tr>
+                    <tr>
+                        <td class="glance-label">
+                            <span class="glance-icon">🏢</span>Property Type
+                        </td>
+                        <td class="glance-value">@prop.PropertyType</td>
+                    </tr>
+                    <tr>
+                        <td class="glance-label">
+                            <span class="glance-icon">🛏</span>Bedroom
+                        </td>
+                        <td class="glance-value">@bedroomsDisplay</td>
+                    </tr>
+                    <tr>
+                        <td class="glance-label">
+                            <span class="glance-icon">🛁</span>Bathroom
+                        </td>
+                        <td class="glance-value">@bathroomsDisplay</td>
+                    </tr>
+                    <tr>
+                        <td class="glance-label">
+                            <span class="glance-icon">📅</span>Year Built
+                        </td>
+                        <td class="glance-value">@yearBuiltDisplay</td>
+                    </tr>
+                    <tr>
+                        <td class="glance-label">
+                            <span class="glance-icon">⭐</span>Collection
+                        </td>
+                        <td class="glance-value">@collectionDisplay</td>
+                    </tr>
+                    <tr>
+                        <td class="glance-label">
+                            <span class="glance-icon">💰</span>Price
+                        </td>
+                        <td class="glance-value">
+                            @prop.Price.ToString("N0") BDT
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="glance-footer">
+                <button type="button" class="glance-status-btn">
+                    CONSTRUCTION STATUS
+                </button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- SECTION 2: FEATURES IMAGE STRIP -->
+    <section class="features-section">
+        <h2 class="section-title">Images of the Property</h2>
+
+        <div class="feature-slider">
+            @if (images.Any())
+            {
+                foreach (var img in images)
+                {
+                    <div class="feature-slide">
+                        <img src="@img.ImageUrl" alt="@prop.Title feature image" />
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="feature-slide">
+                    <img src="@mainUrl" alt="@prop.Title" />
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- SECTION 3: MAP -->
+    <section class="map-section">
+        <h2 class="section-title">MAP</h2>
+
+        <div class="map-frame-wrapper">
+            <iframe class="map-frame"
+                    src="@mapSrc"
+                    loading="lazy"
+                    allowfullscreen
+                    referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        </div>
+    </section>
+
+    <!-- SECTION 4: BOOK A FREE CONSULTATION / VISIT REQUEST -->
+    <section class="consult-section">
+        <div class="consult-inner">
+            <div class="consult-heading">
+                <h2>Book A Free Consultation</h2>
+            </div>
+
+            <div class="consult-contacts">
+                <span>📞 16604</span>
+                <span>📱 @Model.SellerPhone</span>
+                <span>✉️ @Model.SellerEmail</span>
+            </div>
+
+            <form class="consult-form"
+                  asp-controller="BuyerAppointments"
+                  asp-action="Book"
+                  method="post">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" name="propertyId" value="@prop.PropertyId" />
+
+                <div class="consult-grid">
+                    <input class="consult-input" type="text" name="Name" placeholder="Name" />
+                    <input class="consult-input" type="email" name="Email" placeholder="Email" />
+                </div>
+
+                <div class="consult-grid">
+                    <input class="consult-input"
+                           type="text"
+                           name="Phone"
+                           placeholder="Phone" />
+                    <input class="consult-input"
+                           type="datetime-local"
+                           style="display:none;" />
+
+                    <input class="consult-input"
+                           type="date"
+                           name="date"
+                           placeholder="Preferred Date" />
+
+                    <input class="consult-input"
+                           type="time"
+                           name="time"
+                           placeholder="Preferred Time" />
+                </div>
+
+                <textarea class="consult-textarea"
+                          name="message"
+                          rows="4"
+                          placeholder="Message (optional)"></textarea>
+
+                <div class="consult-submit-wrap">
+                    <button type="submit" class="consult-submit">
+                        REQUEST VISIT
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </section>
+
+</section>

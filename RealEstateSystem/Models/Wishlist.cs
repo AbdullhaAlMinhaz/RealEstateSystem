@@ -16,6 +16,6 @@ namespace RealEstateSystem.Models
 
         public DateTime AddedDate { get; set; } = DateTime.Now;
 
-        public string Notes { get; set; }
+        public string Notes { get; set; } = string.Empty;
     }
 }

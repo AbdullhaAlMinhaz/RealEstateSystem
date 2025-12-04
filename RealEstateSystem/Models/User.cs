@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace RealEstateSystem.Models
 {
@@ -45,6 +46,7 @@ namespace RealEstateSystem.Models
         // Navigation
         public Seller SellerProfile { get; set; }
         public Buyer BuyerProfile { get; set; }
+
 
         public ICollection<SystemActivity> SystemActivities { get; set; }
         public ICollection<Notification> Notifications { get; set; }

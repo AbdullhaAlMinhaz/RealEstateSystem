@@ -1,0 +1,268 @@
+﻿@model RealEstateSystem.ViewModels.BuyerAppointmentListViewModel
+@{
+    Layout = "~/Views/Shared/_BuyerLayout.cshtml";
+    ViewBag.BuyerName = ViewBag.BuyerName ?? "Buyer";
+}
+  @* ...................Buyer Appointment success or error message.................... *@
+
+@if (TempData["AppointmentSuccess"] != null || TempData["AppointmentError"] != null)
+{
+    <div class="flash-container" style="margin-bottom:1rem;">
+        @if (TempData["AppointmentSuccess"] != null)
+        {
+            <div class="flash-message flash-success">
+                @TempData["AppointmentSuccess"]
+            </div>
+        }
+        @if (TempData["AppointmentError"] != null)
+        {
+            <div class="flash-message flash-error">
+                @TempData["AppointmentError"]
+            </div>
+        }
+    </div>
+}
+
+
+<section class="card">
+    <div class="card-header">
+        <h2>Visits &amp; Appointments</h2>
+        <span class="card-tag">Your scheduled property visits</span>
+    </div>
+    <p class="card-subtitle">
+        Track your upcoming property visits and see your visit history.
+    </p>
+</section>
+
+<section class="card" style="margin-top:1.5rem;">
+    <div class="card-header">
+        <h3>Upcoming visits</h3>
+    </div>
+    <div class="card-body">
+        @if (Model.Upcoming == null || !Model.Upcoming.Any())
+        {
+            <p>You don’t have any upcoming visits yet.</p>
+        }
+        else
+        {
+            <div class="appointment-grid">
+                @foreach (var a in Model.Upcoming)
+                {
+                    <article class="appointment-card">
+                        <div class="appointment-image-wrapper">
+                            <img src="@a.PrimaryImageUrl"
+                                 alt="@a.PropertyTitle"
+                                 class="appointment-image" />
+                        </div>
+
+                        <div class="appointment-body">
+                            <h4 class="appointment-title">@a.PropertyTitle</h4>
+                            <p class="appointment-location">
+                                @a.AreaOrLocation, @a.City
+                            </p>
+
+                            <p class="appointment-meta">
+                                @a.AppointmentDate.ToString("dd MMM yyyy")
+                                at
+                                @a.AppointmentTime.ToString(@"hh\:mm")
+                                &nbsp;•&nbsp;
+                                <span class="status @a.Status.ToString().ToLower()">
+                                    @a.Status
+                                </span>
+                            </p>
+
+                            <p class="appointment-seller">
+                                With @a.SellerName
+                            </p>
+
+                            <div class="appointment-footer">
+                                <form asp-action="Cancel"
+                                      method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@a.AppointmentId" />
+                                    <button type="submit" class="btn-outline small danger">
+                                        Cancel visit
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+<section class="card" style="margin-top:1.5rem;">
+    <div class="card-header">
+        <h3>Past visits</h3>
+    </div>
+    <div class="card-body">
+        @if (Model.Past == null || !Model.Past.Any())
+        {
+            <p>You don’t have any past visits yet.</p>
+        }
+        else
+        {
+            <div class="appointment-grid">
+                @foreach (var a in Model.Past)
+                {
+                    <article class="appointment-card">
+                        <div class="appointment-image-wrapper">
+                            <img src="@a.PrimaryImageUrl"
+                                 alt="@a.PropertyTitle"
+                                 class="appointment-image" />
+                        </div>
+
+                        <div class="appointment-body">
+                            <h4 class="appointment-title">@a.PropertyTitle</h4>
+                            <p class="appointment-location">
+                                @a.AreaOrLocation, @a.City
+                            </p>
+
+                            <p class="appointment-meta">
+                                @a.AppointmentDate.ToString("dd MMM yyyy")
+                                at
+                                @a.AppointmentTime.ToString(@"hh\:mm")
+                                &nbsp;•&nbsp;
+                                <span class="status @a.Status.ToString().ToLower()">
+                                    @a.Status
+                                </span>
+                            </p>
+
+                            <p class="appointment-seller">
+                                With @a.SellerName
+                            </p>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+<style>
+    .appointment-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.25rem;
+    }
+
+    .appointment-card {
+        display: grid;
+        grid-template-columns: 160px minmax(0, 1fr);
+        gap: 1rem;
+        background: #ffffff;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(15, 23, 42, 0.12);
+    }
+
+    .appointment-image-wrapper {
+        width: 160px;
+        height: 140px;
+        overflow: hidden;
+    }
+
+    .appointment-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .appointment-body {
+        padding: 0.9rem 1rem 1rem 0.5rem;
+    }
+
+    .appointment-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.15rem;
+    }
+
+    .appointment-location {
+        font-size: 0.9rem;
+        color: #64748b;
+        margin-bottom: 0.4rem;
+    }
+
+    .appointment-meta {
+        font-size: 0.9rem;
+        color: #4b5563;
+        margin-bottom: 0.2rem;
+    }
+
+    .appointment-seller {
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+
+    .appointment-footer {
+        margin-top: 0.6rem;
+    }
+
+    .btn-outline.small.danger {
+        border-radius: 999px;
+        border-color: #ef4444;
+        color: #b91c1c;
+    }
+
+        .btn-outline.small.danger:hover {
+            background: #fee2e2;
+        }
+
+    .status {
+        padding: 0.1rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+        .status.requested {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status.confirmed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status.rescheduled {
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+        .status.cancelled {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .status.completed {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+    @@media (max-width: 992px) {
+        .appointment-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .appointment-card {
+            grid-template-columns: 140px minmax(0, 1fr);
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .appointment-card {
+            grid-template-columns: 1fr;
+        }
+
+        .appointment-image-wrapper {
+            width: 100%;
+            height: 180px;
+        }
+    }
+</style>

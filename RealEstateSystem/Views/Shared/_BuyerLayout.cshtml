@@ -1,0 +1,301 @@
+﻿@{
+    Layout = null;
+    var buyerName = ViewBag.BuyerName as string ?? "Buyer Name";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Buyer – EstateFlow</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/buyer-dashboard.css" />
+    <link rel="icon" type="image/png" href="~/images/Favicon.jpg" />
+</head>
+<body>
+    <div class="buyer-layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">RE</div>
+                <div class="logo-text">
+                    <span class="logo-title">EstateFlow</span>
+                    <span class="logo-subtitle">Buyer Panel</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a asp-controller="BuyerDashboard" asp-action="Index"
+                   class="nav-item"
+                   data-page-title="Buyer Dashboard"
+                   data-page-subtitle="Track your favorites, offers and visits in one place.">
+                    <span class="nav-dot"></span>
+                    Dashboard
+                </a>
+
+                <a asp-controller="BuyerProperties" asp-action="Index"
+                   class="nav-item"
+                   data-page-title="Browse Properties"
+                   data-page-subtitle="Explore all available properties that match your preferences.">
+                    Browse Properties
+                </a>
+
+                <a asp-controller="BuyerWishlist" asp-action="Index"
+                   class="nav-item"
+                   data-page-title="My Wishlist"
+                   data-page-subtitle="View and manage properties you’ve saved.">
+                    My Wishlist
+                </a>
+
+
+                <a asp-controller="BuyerAppointments" asp-action="Index"
+                   class="nav-item"
+                   data-page-title="Visits & Appointments"
+                   data-page-subtitle="See and manage your scheduled visits.">
+                    Visits & Appointments
+                </a>
+
+                <a asp-controller="BuyerMessages" asp-action="Index"
+                   class="nav-item"
+                   data-page-title="Messages"
+                   data-page-subtitle="Conversations with agents and owners.">
+                    Messages
+                </a>
+
+                <a asp-controller="BuyerProfile" asp-action="Index"
+                   class="nav-item"
+                   data-page-title="My Profile"
+                   data-page-subtitle="Update your buyer profile and preferences.">
+                    My Profile
+                </a>
+
+                <a asp-controller="BuyerSettings" asp-action="Index"
+                   class="nav-item"
+                   data-page-title="Settings"
+                   data-page-subtitle="Notification and account settings.">
+                    Settings
+                </a>
+
+                <div class="sidebar-footer">
+                    <a asp-controller="Account" asp-action="Logout" class="btn-logout">Logout</a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- MAIN -->
+        <div class="main">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="btn-menu" id="btnMenu" aria-label="Toggle menu">☰</button>
+                    <div>
+                        <h1 class="page-title">Buyer Dashboard</h1>
+                        <p class="page-subtitle">Track your favorites, offers and visits in one place.</p>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <button class="btn-icon theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+                    <div class="topbar-user">
+                        <div class="avatar">
+                            @buyerName.FirstOrDefault().ToString().ToUpper()
+                        </div>
+                        <div class="topbar-user-info">
+                            <span class="topbar-user-name">@buyerName</span>
+                            <span class="topbar-user-role">Verified Buyer</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('btnMenu');
+            const navItems = document.querySelectorAll('.nav-item');
+            const pageTitle = document.querySelector('.page-title');
+            const pageSubtitle = document.querySelector('.page-subtitle');
+            const themeToggle = document.getElementById('themeToggle');
+            const statCards = document.querySelectorAll('.stat-card');
+            const counters = document.querySelectorAll('[data-counter]');
+            const searchBtn = document.getElementById('btnQuickSearch');
+            const searchLocation = document.getElementById('searchLocation');
+            const searchType = document.getElementById('searchType');
+            const priceMin = document.getElementById('priceMin');
+            const priceMax = document.getElementById('priceMax');
+            const searchBeds = document.getElementById('searchBeds');
+            const searchFeedback = document.getElementById('searchFeedback');
+            const propertyList = document.getElementById('propertyList');
+            const toast = document.getElementById('toast');
+
+            // mobile sidebar
+            if (menuBtn && sidebar) {
+                menuBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('is-open');
+                });
+            }
+
+            // update title/subtitle (navigation will still happen)
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const title = item.dataset.pageTitle;
+                    const subtitle = item.dataset.pageSubtitle;
+
+                    if (pageTitle && title) pageTitle.textContent = title;
+                    if (pageSubtitle && subtitle) pageSubtitle.textContent = subtitle;
+                });
+            });
+
+            // stat cards
+            statCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    statCards.forEach(c => c.classList.remove('is-active'));
+                    card.classList.add('is-active');
+                });
+            });
+
+            // counter animation
+            function animateCounter(el, target) {
+                const duration = 900;
+                const start = 0;
+                const startTime = performance.now();
+
+                function update(now) {
+                    const elapsed = now - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const value = Math.floor(start + (target - start) * progress);
+                    el.textContent = value.toLocaleString();
+                    if (progress < 1) requestAnimationFrame(update);
+                }
+
+                requestAnimationFrame(update);
+            }
+
+            counters.forEach(el => {
+                const target = parseInt(el.dataset.target || '0', 10);
+                if (!isNaN(target)) animateCounter(el, target);
+            });
+
+            // theme toggle
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    document.body.classList.toggle('theme-dark');
+                });
+            }
+
+            // toast
+            function showToast(message) {
+                if (!toast) return;
+                toast.textContent = message;
+                toast.classList.add('is-visible');
+                setTimeout(() => toast.classList.remove('is-visible'), 2000);
+            }
+
+            // helpers for quick search
+            function parseBedsFromMeta(meta) {
+                const match = meta.match(/(\d+)\s*Bed/i);
+                return match ? parseInt(match[1], 10) : null;
+            }
+
+            function parsePrice(text) {
+                const digits = text.replace(/[^\d]/g, '');
+                return digits ? parseInt(digits, 10) : null;
+            }
+
+            function matchesCriteria(item, criteria) {
+                const title = item.querySelector('.property-title')?.textContent || '';
+                const meta = item.querySelector('.property-meta')?.textContent || '';
+                const priceText = item.querySelector('.property-price')?.textContent || '';
+                const combined = (title + ' ' + meta).toLowerCase();
+
+                if (criteria.location && !combined.includes(criteria.location.toLowerCase()))
+                    return false;
+
+                if (criteria.type && criteria.type !== 'any') {
+                    const typeWord = criteria.type.toLowerCase();
+                    if (!combined.includes(typeWord)) return false;
+                }
+
+                const bedsWanted = criteria.beds;
+                if (bedsWanted && bedsWanted !== 'any') {
+                    const wanted = parseInt(bedsWanted, 10);
+                    const listingBeds = parseBedsFromMeta(meta);
+                    if (listingBeds != null && listingBeds < wanted) return false;
+                }
+
+                const price = parsePrice(priceText);
+                if (criteria.min && price != null && price < criteria.min) return false;
+                if (criteria.max && price != null && price > criteria.max) return false;
+
+                return true;
+            }
+
+            if (searchBtn && propertyList) {
+                searchBtn.addEventListener('click', () => {
+                    const criteria = {
+                        location: searchLocation?.value.trim() || '',
+                        type: searchType?.value || 'any',
+                        min: priceMin?.value ? parseInt(priceMin.value, 10) : null,
+                        max: priceMax?.value ? parseInt(priceMax.value, 10) : null,
+                        beds: searchBeds?.value || 'any'
+                    };
+
+                    const items = Array.from(propertyList.querySelectorAll('.property-item'));
+                    let matchCount = 0;
+
+                    items.forEach(item => {
+                        if (matchesCriteria(item, criteria)) {
+                            item.style.display = '';
+                            matchCount++;
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+
+                    if (searchFeedback) {
+                        if (matchCount === 0) {
+                            searchFeedback.textContent = 'No properties matched your current filters.';
+                            searchFeedback.classList.add('is-warning');
+                        } else {
+                            searchFeedback.textContent =
+                                'Showing ' + matchCount + ' matching propert' + (matchCount === 1 ? 'y.' : 'ies.');
+                            searchFeedback.classList.remove('is-warning');
+                        }
+                    }
+                });
+            }
+
+            // wishlist heart + view buttons
+            if (propertyList) {
+                propertyList.addEventListener('click', (e) => {
+                    const heartBtn = e.target.closest('.btn-heart');
+                    const viewBtn = e.target.closest('.btn-view');
+
+                    if (heartBtn) {
+                        e.preventDefault();
+                        const item = heartBtn.closest('.property-item');
+                        const title = item?.querySelector('.property-title')?.textContent || 'Property';
+
+                        const isSaved = heartBtn.classList.toggle('is-saved');
+                        heartBtn.textContent = isSaved ? '♥' : '♡';
+                        heartBtn.setAttribute('aria-label', isSaved ? 'Remove from wishlist' : 'Save to wishlist');
+                        if (item) item.classList.toggle('saved', isSaved);
+
+                        showToast(isSaved ? `Added "${title}" to wishlist.` : `Removed "${title}" from wishlist.`);
+                    }
+
+                    // viewBtn: DO NOT preventDefault -> it navigates to property details
+                });
+            }
+        });
+    </script>
+</body>
+</html>

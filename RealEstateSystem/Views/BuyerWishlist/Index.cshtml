@@ -1,0 +1,194 @@
+﻿@model List<RealEstateSystem.ViewModels.BuyerPropertyBrowseItemViewModel>
+
+@{
+    Layout = "~/Views/Shared/_BuyerLayout.cshtml";
+    ViewBag.BuyerName = ViewBag.BuyerName ?? "Buyer";
+}
+
+<section class="card">
+    <div class="card-header">
+        <h2>My Wishlist</h2>
+        <span class="card-tag">Saved properties</span>
+    </div>
+    <p class="card-subtitle">
+        All properties you’ve added to your wishlist will appear here.
+    </p>
+</section>
+
+<section class="card" style="margin-top:1.5rem;">
+    <div class="card-body">
+        @if (Model == null || !Model.Any())
+        {
+            <p>You don’t have any properties in your wishlist yet.</p>
+        }
+        else
+        {
+            <div class="property-grid">
+                @foreach (var p in Model)
+                {
+                    <article class="property-card">
+                        <div class="property-card-image-wrapper">
+                            <img src="@p.PrimaryImageUrl"
+                                 alt="@p.Title"
+                                 class="property-card-image" />
+                        </div>
+
+                        <div class="property-card-divider"></div>
+
+                        <div class="property-card-body">
+                            <p class="property-card-price">
+                                @p.Price.ToString("N0") tk
+                            </p>
+
+                            <p class="property-card-meta">
+                                @p.Bedrooms bed • @p.Bathrooms bath
+                            </p>
+
+                            <p class="property-card-location">
+                                @p.AreaOrLocation, @p.City
+                            </p>
+
+                            <div class="property-card-footer">
+                                <a asp-controller="BuyerProperties"
+                                   asp-action="Details"
+                                   asp-route-id="@p.PropertyId"
+                                   class="btn-outline small">
+                                    Details
+                                </a>
+
+                                <form asp-controller="BuyerWishlist"
+                                      asp-action="Toggle"
+                                      method="post"
+                                      class="wishlist-form">
+                                    <input type="hidden" name="propertyId" value="@p.PropertyId" />
+                                    <button type="submit"
+                                            class="wishlist-btn active">
+                                        <span class="wishlist-icon">♥</span>
+                                        <span>In wishlist</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+<!-- reuse same card styles as Browse page -->
+<style>
+    .property-grid {
+        margin-top: 1rem;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.5rem;
+    }
+
+    .property-card {
+        background: #ffffff;
+        border-radius: 26px;
+        overflow: hidden;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+        .property-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 22px 50px rgba(15, 23, 42, 0.15);
+        }
+
+    .property-card-image-wrapper {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        overflow: hidden;
+    }
+
+    .property-card-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .property-card-divider {
+        height: 6px;
+        background: #020617;
+    }
+
+    .property-card-body {
+        padding: 1.1rem 1.3rem 1.2rem;
+    }
+
+    .property-card-price {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.35rem;
+        color: #020617;
+    }
+
+    .property-card-meta {
+        font-size: 0.9rem;
+        color: #64748b;
+    }
+
+    .property-card-location {
+        font-size: 0.9rem;
+        color: #64748b;
+        margin-top: 0.2rem;
+    }
+
+    .property-card-footer {
+        margin-top: 0.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+        .property-card-footer .btn-outline.small {
+            border-radius: 999px;
+            padding-inline: 1.3rem;
+        }
+
+    .wishlist-form {
+        margin-left: 0.75rem;
+    }
+
+    .wishlist-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.45rem 0.95rem;
+        border-radius: 999px;
+        border: 1px solid #e2e8f0;
+        background: #020617;
+        color: #ffffff;
+        font-size: 0.8rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    }
+
+        .wishlist-btn:hover {
+            transform: translateY(-1px);
+        }
+
+    .wishlist-icon {
+        font-size: 0.95rem;
+    }
+
+    @@media (max-width: 1200px) {
+        .property-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .property-grid {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+    }
+</style>
