@@ -32,11 +32,24 @@ namespace RealEstateSystem.Data
         public DbSet<Report> Reports { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<SearchHistory> SearchHistories { get; set; }
+        public DbSet<ChatConversation> ChatConversations { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<ChatConversation>()
+            .HasIndex(c => new { c.UserAId, c.UserBId })
+            .IsUnique();
+
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(m => m.Conversation)
+                .WithMany(c => c.Messages)
+                .HasForeignKey(m => m.ConversationId);
+
 
 
             // ✅ Make ProfilePhoto optional in EF

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RealEstateSystem.Data;
 using RealEstateSystem.Models;
+using RealEstateSystem.Hubs;   // ✅ ADD THIS
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Password hasher for our custom User entity
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+
+// ✅ SignalR
+builder.Services.AddSignalR();
 
 // Session (for login state)
 builder.Services.AddDistributedMemoryCache();
@@ -45,15 +49,8 @@ using (var scope = app.Services.CreateScope())
     // 🔐 FIXED ADMIN CREDENTIALS
     var adminEmail = "admin@gmail.com";   // EXACT email for login (no "a" in gmil)
     var adminPassword = "Admin@123";
-    //......................................................................................................................
-    // Check if this admin already exists
-    //var existingAdmin = context.Users.FirstOrDefault(u => u.Email == adminEmail);
-    // Check if an admin already exists (any email)
-    //......................................................................................................................
-
 
     var existingAdmin = context.Users.FirstOrDefault(u => u.Role == UserRole.Admin);
-
 
     if (existingAdmin == null)
     {
@@ -98,11 +95,12 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
+// ✅ SignalR Hub route
+app.MapHub<ChatHub>("/chatHub");
+
 app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}")
     .WithStaticAssets();
 
 app.Run();
-
-
