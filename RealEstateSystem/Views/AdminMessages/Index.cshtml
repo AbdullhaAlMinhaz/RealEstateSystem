@@ -1,0 +1,211 @@
+﻿@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var myUserId = Context.Session.GetInt32("UserId") ?? 0;
+}
+
+<link rel="stylesheet" href="~/css/chat-ui.css" />
+
+<div class="chat-shell">
+    <!-- LEFT -->
+    <div class="chat-left">
+        <div class="chat-left-top">
+            <div class="chat-title">RealEstate Message System</div>
+        </div>
+
+        <div class="chat-left-body">
+            <div class="chat-search">
+                <input id="contactSearch" placeholder="Search or start a new chat" />
+            </div>
+
+            <div class="chat-list" id="contactList"></div>
+        </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="chat-right">
+        <div class="chat-right-top">
+            <div class="chat-avatar" id="activeAvatar">?</div>
+            <div>
+                <div style="font-weight:700" id="activeName">Select a chat</div>
+                <div style="font-size:12px;opacity:.7" id="activeRole">—</div>
+            </div>
+        </div>
+
+        <div class="chat-thread" id="thread"></div>
+
+        <div class="chat-input">
+            <input id="msgBox" placeholder="Type a message..." disabled />
+            <button id="sendBtn" disabled>Send</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.__myUserId = @myUserId;
+</script>
+
+<script src="https://unpkg.com/@@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
+
+<script>
+    let activeUserId = null;
+
+    function initials(name) {
+        const p = (name || '?').trim().split(' ');
+        return (p[0]?.[0] || '?').toUpperCase();
+    }
+
+    function fmtTime(d) {
+        const dt = new Date(d);
+        return dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function setActive(user) {
+        activeUserId = user.userId;
+        document.getElementById('activeName').textContent = user.name;
+        document.getElementById('activeRole').textContent = user.role;
+        document.getElementById('activeAvatar').textContent = initials(user.name);
+
+        document.getElementById('msgBox').disabled = false;
+        document.getElementById('sendBtn').disabled = false;
+
+        loadHistory(activeUserId);
+    }
+
+    function buildUserItem(u, isRecent) {
+        const item = document.createElement('div');
+        item.className = 'chat-item';
+        item.dataset.user = u.userId;
+
+        const subtitle = isRecent ? (u.lastMessage || u.role) : u.role;
+
+        item.innerHTML = `
+            <div class="chat-avatar">${initials(u.name)}</div>
+            <div class="chat-meta">
+                <div class="chat-name">${u.name}</div>
+                <div class="chat-sub">${subtitle}</div>
+            </div>
+        `;
+
+        item.onclick = () => {
+            document.querySelectorAll('.chat-item').forEach(x => x.classList.remove('active'));
+            item.classList.add('active');
+            setActive(u);
+        };
+
+        return item;
+    }
+
+    function renderMergedList(recent, allUsers) {
+        const list = document.getElementById("contactList");
+        list.innerHTML = "";
+
+        const recentIds = new Set(recent.map(x => x.userId));
+
+        recent.forEach(u => list.appendChild(buildUserItem(u, true)));
+
+        allUsers
+            .filter(u => !recentIds.has(u.userId))
+            .forEach(u => list.appendChild(buildUserItem(u, false)));
+    }
+
+    async function loadSidebar(q = '') {
+        const [recentRes, allRes] = await Promise.all([
+            fetch(`/chat/contacts?q=${encodeURIComponent(q)}`),
+            fetch(`/chat/allusers?q=${encodeURIComponent(q)}`)
+        ]);
+
+        const recent = recentRes.ok ? await recentRes.json() : [];
+        const allUsers = allRes.ok ? await allRes.json() : [];
+
+        renderMergedList(recent, allUsers);
+    }
+
+    async function loadHistory(withUserId) {
+        const res = await fetch(`/chat/history?withUserId=${withUserId}`);
+        const msgs = res.ok ? await res.json() : [];
+
+        const thread = document.getElementById('thread');
+        thread.innerHTML = '';
+
+        msgs.forEach(m => {
+            renderMessage(m.fromUserId === window.__myUserId, m.text, m.sentAt);
+        });
+
+        thread.scrollTop = thread.scrollHeight;
+    }
+
+    function renderMessage(isMe, text, sentAt) {
+        const thread = document.getElementById('thread');
+        const wrap = document.createElement('div');
+        wrap.style.display = 'flex';
+        wrap.style.flexDirection = 'column';
+
+        const bubble = document.createElement('div');
+        bubble.className = `bubble ${isMe ? 'me' : 'them'}`;
+        bubble.textContent = text;
+
+        const time = document.createElement('div');
+        time.className = 'bubble-time';
+        time.textContent = fmtTime(sentAt);
+
+        bubble.appendChild(time);
+        wrap.appendChild(bubble);
+        thread.appendChild(wrap);
+    }
+
+    function moveChatToTop(userId, lastMessage) {
+        const list = document.getElementById("contactList");
+        let item = list.querySelector(`.chat-item[data-user='${userId}']`);
+        if (!item) return;
+
+        const sub = item.querySelector(".chat-sub");
+        if (sub) sub.textContent = lastMessage;
+
+        list.prepend(item);
+    }
+
+    (async function init() {
+        await loadSidebar();
+
+        const search = document.getElementById('contactSearch');
+        let t = null;
+        search.addEventListener('input', () => {
+            clearTimeout(t);
+            t = setTimeout(() => loadSidebar(search.value || ''), 250);
+        });
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("ReceiveMessage", (m) => {
+            const isMe = m.fromUserId === window.__myUserId;
+            const otherUserId = isMe ? m.toUserId : m.fromUserId;
+
+            moveChatToTop(otherUserId, m.text);
+
+            if (activeUserId === otherUserId) {
+                renderMessage(isMe, m.text, m.sentAt);
+                const thread = document.getElementById('thread');
+                thread.scrollTop = thread.scrollHeight;
+            }
+        });
+
+        await connection.start();
+
+        async function send() {
+            const box = document.getElementById('msgBox');
+            const text = box.value.trim();
+            if (!text || !activeUserId) return;
+
+            box.value = '';
+            await connection.invoke("SendMessage", activeUserId, text);
+        }
+
+        document.getElementById('sendBtn').onclick = send;
+        document.getElementById('msgBox').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') send();
+        });
+    })();
+</script>

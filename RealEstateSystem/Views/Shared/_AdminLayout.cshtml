@@ -62,6 +62,12 @@
                     Reports
                 </a>
 
+                <a asp-controller="AdminMessages" asp-action="Index" class="nav-item @(currentController == "AdminMessages" ? "is-active" : "")">
+                        Messages
+                </a>
+                
+
+
                 <a asp-controller="AdminProfile" asp-action="Index"
                    class="nav-item @(currentController == "AdminProfile" ? "is-active" : "")">
                     My Profile

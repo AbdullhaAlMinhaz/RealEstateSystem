@@ -1,4 +1,5 @@
-﻿/*.chat-shell {
+﻿
+/*.chat-shell {
     height: calc(100vh - 140px);
     display: flex;
     border-radius: 16px;
@@ -8,7 +9,7 @@
 }*/
 
 /* =========================
-   LEFT SIDE
+   LEFT SIDE (Buyer-style)
 ========================= */
 
 /*.chat-left {
@@ -19,7 +20,7 @@
     border-right: 1px solid #eee;
 }*/
 
-/* NEW: Title at the top */
+/* Title header (same in both buyer & seller) */
 /*.chat-left-top {
     padding: 14px 14px 10px;
     display: flex;
@@ -34,43 +35,40 @@
         font-size: 14px;
         letter-spacing: .2px;
         color: #111827;
-    }*/
+    }
 
-/* Container that holds search + list as one panel */
-/*.chat-left-body {
+.chat-left-body {
     padding: 12px;
     display: flex;
     flex-direction: column;
     height: 100%;
+    gap: 10px;
 }*/
 
-/* Search bar: CONNECTED to list */
+/* Rounded search bar (PILL) like Buyer screenshot */
 /*.chat-search {
     padding: 0;
 }
 
     .chat-search input {
         width: 100%;
-        padding: 10px 12px;
+        padding: 10px 14px;
         border: 1px solid #e5e7eb;
-        border-bottom: 0;*/ /* connect */
-        /*border-radius: 14px 14px 0 0;*/ /* rounded top only */
+        border-radius: 999px;*/ /* ✅ pill shape */
         /*outline: none;
         background: #fff;
     }*/
 
-/* List: CONNECTED to search */
+/* One list, scrollable */
 /*.chat-list {
     flex: 1;
     overflow: auto;
     padding: 6px;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-top: 0;*/ /* connect */
-    /*border-radius: 0 0 14px 14px;*/ /* rounded bottom only */
-/*}
+    background: transparent;
+}*/
 
-.chat-item {
+/* User items */
+/*.chat-item {
     display: flex;
     gap: 10px;
     padding: 10px;
@@ -105,15 +103,18 @@
 }
 
 .chat-name {
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 16px;
+    color: #111827;
 }
 
 .chat-sub {
-    font-size: 12px;
-    opacity: .7;
+    font-size: 13px;
+    opacity: .75;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: #374151;
 }*/
 
 /* =========================
@@ -123,9 +124,8 @@
 /*.chat-right {
     flex: 1;
     display: flex;
-    flex-direction: column;*/
-    /* FIXED: comment removed so CSS doesn't break */
-    /*background: url('/images/chat-bg.png') center/cover no-repeat;
+    flex-direction: column;
+    background: url('/images/chat-bg.png') center/cover no-repeat;
 }
 
 .chat-right-top {
@@ -201,7 +201,6 @@
         color: #fff;
     }*/
 
-
 .chat-shell {
     height: calc(100vh - 140px);
     display: flex;
@@ -211,10 +210,7 @@
     box-shadow: 0 10px 30px rgba(0,0,0,.06);
 }
 
-/* =========================
-   LEFT SIDE (Buyer-style)
-========================= */
-
+/* LEFT */
 .chat-left {
     width: 340px;
     display: flex;
@@ -223,7 +219,6 @@
     border-right: 1px solid #eee;
 }
 
-/* Title header (same in both buyer & seller) */
 .chat-left-top {
     padding: 14px 14px 10px;
     display: flex;
@@ -233,12 +228,12 @@
     border-bottom: 1px solid #e5e7eb;
 }
 
-    .chat-left-top .chat-title {
-        font-weight: 800;
-        font-size: 14px;
-        letter-spacing: .2px;
-        color: #111827;
-    }
+.chat-title {
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: .2px;
+    color: #111827;
+}
 
 .chat-left-body {
     padding: 12px;
@@ -248,21 +243,17 @@
     gap: 10px;
 }
 
-/* Rounded search bar (PILL) like Buyer screenshot */
-.chat-search {
-    padding: 0;
+/* Rounded search (pill) */
+.chat-search input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 999px;
+    outline: none;
+    background: #fff;
 }
 
-    .chat-search input {
-        width: 100%;
-        padding: 10px 14px;
-        border: 1px solid #e5e7eb;
-        border-radius: 999px; /* ✅ pill shape */
-        outline: none;
-        background: #fff;
-    }
-
-/* One list, scrollable */
+/* list */
 .chat-list {
     flex: 1;
     overflow: auto;
@@ -270,7 +261,6 @@
     background: transparent;
 }
 
-/* User items */
 .chat-item {
     display: flex;
     gap: 10px;
@@ -320,10 +310,7 @@
     color: #374151;
 }
 
-/* =========================
-   RIGHT SIDE
-========================= */
-
+/* RIGHT */
 .chat-right {
     flex: 1;
     display: flex;
@@ -352,7 +339,6 @@
     padding: 10px 12px;
     border-radius: 14px;
     margin: 6px 0;
-    position: relative;
     display: inline-block;
 }
 
@@ -375,10 +361,7 @@
     text-align: right;
 }
 
-/* =========================
-   INPUT
-========================= */
-
+/* INPUT */
 .chat-input {
     padding: 12px;
     background: rgba(255,255,255,.9);
@@ -393,6 +376,7 @@
         border-radius: 999px;
         border: 1px solid #e5e7eb;
         outline: none;
+        background: #fff;
     }
 
     .chat-input button {
@@ -403,4 +387,3 @@
         background: #111827;
         color: #fff;
     }
-
