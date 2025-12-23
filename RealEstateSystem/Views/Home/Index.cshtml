@@ -1,4 +1,7 @@
-﻿@{
+﻿@model RealEstateSystem.ViewModels.HomeIndexViewModel
+@using System.Linq
+
+@{
     ViewData["Title"] = "Real Estate Property Listing & Selling System";
 }
 
@@ -100,28 +103,31 @@
             <!-- Search strip -->
             <section class="search-strip">
                 <div class="container search-strip-inner">
-                    <form class="hero-search" id="searchForm">
+                    <form class="hero-search" id="searchForm" method="get" asp-controller="Home" asp-action="Index">
                         <div class="search-field">
                             <span class="search-label">Search</span>
-                            <input type="text" placeholder="City / Area (e.g., Dhanmondi, Gulshan)" />
+                            <input type="text"
+                                   name="location"
+                                   value="@Model?.Location"
+                                   placeholder="City / Area (e.g., Dhanmondi, Gulshan)" />
                         </div>
                         <div class="search-field">
                             <span class="search-label">Property Type</span>
-                            <select>
+                            <select name="propertyType">
                                 <option value="">Any type</option>
-                                <option>Apartment</option>
-                                <option>House</option>
-                                <option>Commercial</option>
-                                <option>Land</option>
+                                @foreach (var pt in System.Enum.GetValues(typeof(RealEstateSystem.Models.PropertyType)).Cast<RealEstateSystem.Models.PropertyType>())
+                                {
+                                    <option value="@pt" selected="@(Model?.PropertyType == pt ? "selected" : null)">@pt</option>
+                                }
                             </select>
                         </div>
                         <div class="search-field">
                             <span class="search-label">Price (Min)</span>
-                            <input type="number" placeholder="$ Min" />
+                            <input type="number" name="minPrice" value="@(Model?.MinPrice)" placeholder="$ Min" />
                         </div>
                         <div class="search-field">
                             <span class="search-label">Price (Max)</span>
-                            <input type="number" placeholder="$ Max" />
+                            <input type="number" name="maxPrice" value="@(Model?.MaxPrice)" placeholder="$ Max" />
                         </div>
                         <button type="submit" class="btn btn-primary search-btn">
                             Search
@@ -133,238 +139,80 @@
                 </div>
             </section>
 
-            <!-- PROPERTY CARDS (static sample for now) -->
+            <!-- PROPERTY CARDS (dynamic) -->
             <div class="properties-grid">
-                @* You can later replace these static cards with a loop over properties from the database *@
+                @if (Model?.Properties == null || !Model.Properties.Any())
+                {
+                    <p style="padding: 20px; color: #666;">No properties found.</p>
+                }
+                else
+                {
+                    foreach (var p in Model.Properties)
+                    {
+                        // Safe image url (supports relative or absolute)
+                        var imgRaw = p.PrimaryImageUrl;
+                        var imgUrl = string.IsNullOrWhiteSpace(imgRaw)
+                        ? Url.Content("~/images/appartment 01.jpg")
+                        : (imgRaw.StartsWith("http", System.StringComparison.OrdinalIgnoreCase)
+                        ? imgRaw
+                        : Url.Content(imgRaw.StartsWith("~") ? imgRaw : ("~/" + imgRaw.TrimStart('/'))));
 
-                <!-- Example card 1 -->
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="~/images/appartment 01.jpg" alt="Spacious kitchen and living room">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,00,00,000 tk</p>
-                        <p class="property-type">3-bed, 2-bath</p>
-                        <p class="property-location">Dallas, TX</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
+                        var bedText = p.Bedrooms.HasValue ? $"{p.Bedrooms}-bed" : null;
+                        var bathText = p.Bathrooms.HasValue ? $"{p.Bathrooms}-bath" : null;
+                        var typeLine = string.Join(", ", new[] { bedText, bathText }.Where(x => !string.IsNullOrWhiteSpace(x)));
 
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="images/appartment 02.jpg" alt="Living room with balcony view">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,40,00,000 tk</p>
-                        <p class="property-type">4 beds, 3 baths</p>
-                        <p class="property-location">Los Angeles, CA</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
+                        var locationLine = !string.IsNullOrWhiteSpace(p.AreaOrLocation)
+                        ? p.AreaOrLocation
+                        : string.Join(", ", new[] { p.City, p.State }.Where(x => !string.IsNullOrWhiteSpace(x)));
 
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="images/appartment 03.jpg" alt="Luxury apartment with dining and kitchen">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,60,00,000 tk</p>
-                        <p class="property-type">3-bed, 2-bath</p>
-                        <p class="property-location">Denver, CO</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
+                        <article class="property-card">
+                            <div class="property-image">
+                                <img src="@imgUrl" alt="Property image">
+                            </div>
+                            <div class="property-body">
+                                <!-- ✅ Price comes directly from DB (no helper file) -->
+                                <p class="property-price">@(p.Price.ToString("N0")) tk</p>
 
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="images/appartment 01.jpg" alt="Bright apartment with balcony">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,00,00,000 tk</p>
-                        <p class="property-type">2-beds, 1 bath</p>
-                        <p class="property-location">Orlando, FL</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
+                                <p class="property-type">@typeLine</p>
+                                <p class="property-location">@locationLine</p>
 
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="images/appartment 03.jpg" alt="Modern high-rise apartment">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,50,00,000 tk</p>
-                        <p class="property-type">3-bed, 2-bath</p>
-                        <p class="property-location">Chicago, IL</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
-
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="images/appartment 02.jpg" alt="Apartment with city view">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,00,00,000 tk</p>
-                        <p class="property-type">2-bed, 2-bath</p>
-                        <p class="property-location">Houston, TX</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
-
-                <!-- PAGE 2 -->
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="images/appartment 01.jpg" alt="Large family kitchen and living">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,00,00,000 tk</p>
-                        <p class="property-type">4-bed, 3-bath</p>
-                        <p class="property-location">San Francisco, CA</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
-
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="images/appartment 02.jpg" alt="Cozy apartment with balcony">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,00,00,000 tk</p>
-                        <p class="property-type">2-bed, 1-bath</p>
-                        <p class="property-location">Seattle, WA</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
-
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="images/appartment 03.jpg" alt="Modern city apartment">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,00,00,000 tk</p>
-                        <p class="property-type">2-bed, 2-bath</p>
-                        <p class="property-location">Boston, MA</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
-
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="images/appartment 01.jpg" alt="Spacious apartment interior">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,00,00,000 tk</p>
-                        <p class="property-type">3-bed, 3-bath</p>
-                        <p class="property-location">New York, NY</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
-
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="images/appartment 02.jpg" alt="Apartment with open balcony">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,00,00,000 tk</p>
-                        <p class="property-type">2-bed, 2-bath</p>
-                        <p class="property-location">Phoenix, AZ</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
-
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="images/appartment 03.jpg" alt="Bright apartment with glass windows">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,00,00,000 tk</p>
-                        <p class="property-type">3-bed, 2-bath</p>
-                        <p class="property-location">Miami, FL</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
-
-                <!-- PAGE 3 -->
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="images/appartment 01.jpg" alt="Luxury apartment with island kitchen">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,00,00,000 tk</p>
-                        <p class="property-type">4-bed, 3-bath</p>
-                        <p class="property-location">San Diego, CA</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
-
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="images/appartment 02.jpg" alt="Elegant living room with balcony">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,00,00,000 tk</p>
-                        <p class="property-type">3-bed, 2-bath</p>
-                        <p class="property-location">Atlanta, GA</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
-
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="images/appartment 03.jpg" alt="Apartment facing river view">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,00,00,000 tk</p>
-                        <p class="property-type">3-bed, 3-bath</p>
-                        <p class="property-location">Portland, OR</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
-
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="images/appartment 01.jpg" alt="Open-plan family apartment">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,00,00,000 tk</p>
-                        <p class="property-type">3-bed, 2-bath</p>
-                        <p class="property-location">Austin, TX</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
-
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="images/appartment 02.jpg" alt="Cozy modern apartment">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,00,00,000 tk</p>
-                        <p class="property-type">2-bed, 1-bath</p>
-                        <p class="property-location">Charlotte, NC</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
-
-                <article class="property-card">
-                    <div class="property-image">
-                        <img src="images/appartment 03.jpg" alt="City-view apartment with balcony">
-                    </div>
-                    <div class="property-body">
-                        <p class="property-price">1,00,00,000 tk</p>
-                        <p class="property-type">3-bed, 3-bath</p>
-                        <p class="property-location">Toronto, CA</p>
-                        <button class="btn btn-details">Details</button>
-                    </div>
-                </article>
+                                <!-- Keep same UI button, but link to details -->
+                                <a class="btn btn-details"
+                                   asp-controller="BuyerProperties"
+                                   asp-action="Details"
+                                   asp-route-id="@p.PropertyId">Details</a>
+                            </div>
+                        </article>
+                    }
+                }
             </div>
 
-            </div>
-
-            <!-- PAGINATION -->
+            <!-- PAGINATION (dynamic) -->
             <div class="pagination">
-                <button class="pagination-btn active" data-page="1">1</button>
-                <button class="pagination-btn" data-page="2">2</button>
-                <button class="pagination-btn" data-page="3">3</button>
+                @if (Model != null && Model.TotalPages > 1)
+                {
+                    for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        var active = i == Model.Page ? "active" : "";
+                        <a class="pagination-btn @active"
+                           asp-controller="Home"
+                           asp-action="Index"
+                           asp-route-location="@Model.Location"
+                           asp-route-propertyType="@(Model.PropertyType)"
+                           asp-route-minPrice="@(Model.MinPrice)"
+                           asp-route-maxPrice="@(Model.MaxPrice)"
+                           asp-route-page="@i"
+                           asp-fragment="properties">@i</a>
+
+                    }
+                }
+                else
+                {
+                    // Keeps your pagination area clean even if only one page
+                    <button class="pagination-btn active" type="button">1</button>
+                }
             </div>
+
         </div>
     </section>
 </main>
@@ -452,7 +300,6 @@
         </div>
     </div>
 
-    
     @await Html.PartialAsync("~/Views/Account/Login.cshtml", new RealEstateSystem.ViewModels.LoginViewModel())
     @await Html.PartialAsync("~/Views/Account/Register.cshtml", new RealEstateSystem.ViewModels.RegisterViewModel())
 
@@ -470,8 +317,3 @@
         </script>
     }
 </section>
-
-
-
-
-

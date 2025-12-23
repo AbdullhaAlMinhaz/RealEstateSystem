@@ -48,12 +48,21 @@ document.querySelectorAll(".btn-details").forEach(btn => {
 // ======================
 // CLIENT-SIDE PAGINATION FOR PROPERTY CARDS
 // ======================
+// IMPORTANT:
+// If pagination buttons are generated as <a> links (server-side pagination),
+// then do NOT run this client-side pagination logic.
 document.addEventListener("DOMContentLoaded", () => {
-    const cards = Array.from(document.querySelectorAll(".property-card"));
     const paginationContainer = document.querySelector(".pagination");
-    const pageSize = 6; // show 6 properties per page
+    if (!paginationContainer) return;
 
-    if (!cards.length || !paginationContainer) return;
+    // ? If server pagination exists (anchors), skip client pagination
+    const hasServerLinks = paginationContainer.querySelector("a.pagination-btn");
+    if (hasServerLinks) return;
+
+    const cards = Array.from(document.querySelectorAll(".property-card"));
+    const pageSize = 6;
+
+    if (!cards.length) return;
 
     const totalPages = Math.ceil(cards.length / pageSize);
     let currentPage = 1;
@@ -68,24 +77,13 @@ document.addEventListener("DOMContentLoaded", () => {
             card.style.display = pageIndex === page ? "block" : "none";
         });
 
-        // Update active button style
         paginationContainer.querySelectorAll(".pagination-btn").forEach(btn => {
             const btnPage = parseInt(btn.dataset.page, 10);
             btn.classList.toggle("active", btnPage === currentPage);
         });
-
-        // Optional: scroll back to top of properties section.................................................................
-
-
-        //const propertiesSection = document.getElementById("properties");
-        //if (propertiesSection) {
-        //    propertiesSection.scrollIntoView({ behavior: "smooth", block: "start" });
-        //}
-        //.....................................................................................................................
     }
 
     function buildPagination() {
-        // Clear any buttons you may have hard-coded in HTML
         paginationContainer.innerHTML = "";
 
         for (let i = 1; i <= totalPages; i++) {
@@ -95,10 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.dataset.page = i;
             btn.textContent = i;
 
-            btn.addEventListener("click", () => {
-                showPage(i);
-            });
-
+            btn.addEventListener("click", () => showPage(i));
             paginationContainer.appendChild(btn);
         }
     }
@@ -106,6 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
     buildPagination();
     showPage(1);
 });
+
 
 
 // =============== MODAL HANDLING (Login & Register) ===============

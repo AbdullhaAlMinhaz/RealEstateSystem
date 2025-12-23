@@ -53,9 +53,11 @@
                     Properties
                 </a>
 
-                <a href="#" class="nav-item">
+                <a asp-controller="AdminApprovals" asp-action="Pending"
+                   class="nav-item @(currentController == "AdminApprovals" ? "is-active" : "")">
                     Approvals
                 </a>
+
 
                 <a asp-controller="AdminReports" asp-action="Index"
                    class="nav-item @(currentController == "AdminReports" ? "is-active" : "")">
@@ -127,5 +129,21 @@
     </script>
 
     @RenderSection("Scripts", required: false)
+
+    <div id="adminToast" class="admin-toast"></div>
+
+    <script>
+        window.AdminToast = {
+            show: function (message, type) {
+                const t = document.getElementById("adminToast");
+                if (!t) return;
+                t.textContent = message;
+                t.className = "admin-toast show " + (type || "success");
+                setTimeout(() => t.classList.remove("show"), 2300);
+            }
+        };
+    </script>
+
+
 </body>
 </html>

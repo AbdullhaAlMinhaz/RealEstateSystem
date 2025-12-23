@@ -23,15 +23,23 @@ namespace RealEstateSystem.Controllers
         public IActionResult Approve(int id)
         {
             var property = _context.Properties.FirstOrDefault(p => p.PropertyId == id);
-            if (property == null) return NotFound();
+            if (property == null)
+            {
+                return Json(new { success = false, message = "Property not found." });
+            }
 
             property.ApprovalStatus = PropertyApprovalStatus.Approved;
             property.Status = PropertyStatus.Available;
             property.ApprovalDate = DateTime.Now;
+            property.UpdatedDate = DateTime.Now;
 
             _context.SaveChanges();
 
-            TempData["SuccessMessage"] = "Property approved successfully.";
+            // ✅ AJAX request -> JSON (toast + no page reload)
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return Json(new { success = true, message = "Property approved successfully." });
+
+            // Normal request -> redirect back safely
             return RedirectToAction("Pending", "AdminApprovals");
         }
 
@@ -41,16 +49,22 @@ namespace RealEstateSystem.Controllers
         public IActionResult Reject(int id)
         {
             var property = _context.Properties.FirstOrDefault(p => p.PropertyId == id);
-            if (property == null) return NotFound();
+            if (property == null)
+            {
+                return Json(new { success = false, message = "Property not found." });
+            }
 
             property.ApprovalStatus = PropertyApprovalStatus.Rejected;
-            property.Status = PropertyStatus.Available;
+            property.UpdatedDate = DateTime.Now;
 
             _context.SaveChanges();
 
-            TempData["SuccessMessage"] = "Property rejected.";
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return Json(new { success = true, message = "Property rejected." });
+
             return RedirectToAction("Pending", "AdminApprovals");
         }
+
 
         // ---------- EDIT (GET) ----------
         [HttpGet]

@@ -97,7 +97,7 @@ header {
     display: flex;
     align-items: center;
     gap: 1.4rem;
-    padding: 0.55rem 1.3rem;     /* increased padding */
+    padding: 0.55rem 1.3rem; /* increased padding */
     border-radius: 50px;
     background: #ffffff;
     box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
@@ -108,56 +108,56 @@ header {
 .nav-links {
     list-style: none;
     display: flex;
-    gap: 2.2rem;           /* more spacing */
+    gap: 2.2rem; /* more spacing */
 }
 
 
 .nav-link {
-    font-size: 1.05rem;     /* bigger text */
-    font-weight: 500;       /* more visible */
-    color: #374151;         /* slightly darker gray for readability */
+    font-size: 1.05rem; /* bigger text */
+    font-weight: 500; /* more visible */
+    color: #374151; /* slightly darker gray for readability */
     position: relative;
     padding: 0.4rem 0;
     transition: color 0.2s ease;
 }
 
 
-.nav-link::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -6px;
-    width: 0;
-    height: 3px;         /* thicker underline */
-    background: var(--primary);
-    border-radius: 999px;
-    transition: width 0.25s ease;
-}
+    .nav-link::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -6px;
+        width: 0;
+        height: 3px; /* thicker underline */
+        background: var(--primary);
+        border-radius: 999px;
+        transition: width 0.25s ease;
+    }
 
 
-.nav-link:hover {
-    color: var(--text);
-}
+    .nav-link:hover {
+        color: var(--text);
+    }
 
-.nav-link:hover::after {
-    width: 100%;
-}
+        .nav-link:hover::after {
+            width: 100%;
+        }
 
-/* active page */
+    /* active page */
 
-.nav-link.active {
-    color: var(--primary-dark);
-    font-weight: 700;        /* bolder for visibility */
-}
+    .nav-link.active {
+        color: var(--primary-dark);
+        font-weight: 700; /* bolder for visibility */
+    }
 
-.nav-link.active::after {
-    width: 100%;
-}
+        .nav-link.active::after {
+            width: 100%;
+        }
 
 
-.nav-link.active::after {
-    width: 100%;
-}
+        .nav-link.active::after {
+            width: 100%;
+        }
 
 /* auth buttons */
 
@@ -182,7 +182,7 @@ header {
 
 .btn-sm {
     padding: 0.45rem 1.2rem;
-    font-size: 0.9rem;            /* bigger button text */
+    font-size: 0.9rem; /* bigger button text */
 }
 
 
@@ -194,9 +194,9 @@ header {
     color: var(--text);
 }
 
-.btn-ghost:hover {
-    background: rgba(243, 244, 246, 0.95);
-}
+    .btn-ghost:hover {
+        background: rgba(243, 244, 246, 0.95);
+    }
 
 /* green pill for Registration (reuse your primary style) */
 
@@ -206,10 +206,10 @@ header {
     box-shadow: 0 12px 30px rgba(22, 163, 74, 0.35);
 }
 
-.btn-primary:hover {
-    background: #15803d;
-    transform: translateY(-1px);
-}
+    .btn-primary:hover {
+        background: #15803d;
+        transform: translateY(-1px);
+    }
 
 /* hamburger (mobile) */
 
@@ -223,12 +223,12 @@ header {
     cursor: pointer;
 }
 
-.hamburger span {
-    width: 20px;
-    height: 2px;
-    border-radius: 999px;
-    background: #111827;
-}
+    .hamburger span {
+        width: 20px;
+        height: 2px;
+        border-radius: 999px;
+        background: #111827;
+    }
 
 /* === NAVBAR RESPONSIVE === */
 
@@ -285,12 +285,12 @@ header {
     cursor: pointer;
 }
 
-.hamburger span {
-    width: 20px;
-    height: 2px;
-    border-radius: 999px;
-    background: #111827;
-}
+    .hamburger span {
+        width: 20px;
+        height: 2px;
+        border-radius: 999px;
+        background: #111827;
+    }
 
 /* === SEARCH STRIP (under navbar) === */
 
@@ -343,10 +343,10 @@ header {
     outline: none;
 }
 
-.search-field input:focus,
-.search-field select:focus {
-    border-color: var(--primary);
-}
+    .search-field input:focus,
+    .search-field select:focus {
+        border-color: var(--primary);
+    }
 
 .search-btn {
     min-width: 110px;
@@ -385,9 +385,9 @@ header {
     color: #020617;
 }
 
-.hero-title span {
-    color: var(--primary);
-}
+    .hero-title span {
+        color: var(--primary);
+    }
 
 .hero-subtitle {
     font-size: 0.98rem;
@@ -412,10 +412,10 @@ header {
 }
 
 .hero-image {
-    height: 320px;           /* bigger image */
+    height: 320px; /* bigger image */
     border-radius: 20px;
     overflow: hidden;
-    background: #000;        /* fallback */
+    background: #000; /* fallback */
 }
 
 @media (max-width: 1024px) {
@@ -430,8 +430,6 @@ header {
     }
 }
 
-
-/* Make photos fit nicely */
 
 /* Property body layout tweak so button sits nicely */
 .property-body {
@@ -454,9 +452,9 @@ header {
     box-shadow: none;
 }
 
-.btn-details:hover {
-    background: #f3f4f6;
-}
+    .btn-details:hover {
+        background: #f3f4f6;
+    }
 
 /* Pagination under property grid */
 .pagination {
@@ -477,47 +475,18 @@ header {
     transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
 }
 
-.pagination-btn:hover {
-    background: #f3f4f6;
-}
+    .pagination-btn:hover {
+        background: #f3f4f6;
+    }
 
-.pagination-btn.active {
-    background: #16a34a;
-    color: #ffffff;
-    border-color: #16a34a;
-    box-shadow: 0 10px 24px rgba(22, 163, 74, 0.35);
-}
+    .pagination-btn.active {
+        background: #16a34a;
+        color: #ffffff;
+        border-color: #16a34a;
+        box-shadow: 0 10px 24px rgba(22, 163, 74, 0.35);
+    }
 
 
-/* .hero-image img,
-.property-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: inherit;
-    display: block;
-}
-
-.hero-image-info {
-    margin-top: 0.7rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 0.85rem;
-}
-
-.hero-image-title {
-    font-weight: 600;
-}
-
-.hero-image-location {
-    color: var(--text-muted);
-    font-size: 0.78rem;
-}
-
-.hero-image-price {
-    font-weight: 600;
-} */
 
 /* === SECTIONS BELOW HERO === */
 
@@ -554,15 +523,15 @@ header {
     font-size: 0.85rem;
 }
 
-.how-card h3 {
-    font-size: 1rem;
-    margin-bottom: 0.35rem;
-}
+    .how-card h3 {
+        font-size: 1rem;
+        margin-bottom: 0.35rem;
+    }
 
-.how-card p {
-    color: var(--text-muted);
-    font-size: 0.82rem;
-}
+    .how-card p {
+        color: var(--text-muted);
+        font-size: 0.82rem;
+    }
 
 .how-icon {
     width: 32px;
@@ -642,47 +611,47 @@ footer {
 /* === ABOUT US SECTION (VERTICAL) === */
 
 #about-us .container {
-    max-width: 950px;           /* a bit narrower for nicer reading */
+    max-width: 950px; /* a bit narrower for nicer reading */
 }
 
 .about-grid {
     margin-top: 2rem;
-    display: block;             /* force vertical stacking */
+    display: block; /* force vertical stacking */
 }
 
 .about-left {
     max-width: 850px;
-    margin-bottom: 2rem;        /* space between text and cards */
+    margin-bottom: 2rem; /* space between text and cards */
 }
 
-.about-left h3 {
-    margin-top: 0.5rem;
-    margin-bottom: 0.35rem;
-    font-size: 1.05rem;
-    font-weight: 600;
-}
+    .about-left h3 {
+        margin-top: 0.5rem;
+        margin-bottom: 0.35rem;
+        font-size: 1.05rem;
+        font-weight: 600;
+    }
 
-.about-left p {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    margin-bottom: 0.6rem;
-}
+    .about-left p {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 0.6rem;
+    }
 
-.about-left ul {
-    padding-left: 1.1rem;
-    font-size: 0.88rem;
-    color: var(--text-muted);
-}
+    .about-left ul {
+        padding-left: 1.1rem;
+        font-size: 0.88rem;
+        color: var(--text-muted);
+    }
 
-.about-left li {
-    margin-bottom: 0.35rem;
-}
+    .about-left li {
+        margin-bottom: 0.35rem;
+    }
 
 /* cards under the text */
 
 .about-right {
     display: flex;
-    flex-direction: column;     /* vertical cards */
+    flex-direction: column; /* vertical cards */
     gap: 1rem;
     max-width: 850px;
 }
@@ -695,16 +664,16 @@ footer {
     font-size: 0.87rem;
 }
 
-.about-card h4 {
-    margin-bottom: 0.3rem;
-    font-size: 0.95rem;
-    font-weight: 600;
-}
+    .about-card h4 {
+        margin-bottom: 0.3rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
 
-.about-card p {
-    color: var(--text-muted);
-    line-height: 1.5;
-}
+    .about-card p {
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
 
 /* mobile – nothing special needed, but keep spacing */
 @media (max-width: 768px) {
@@ -834,11 +803,11 @@ footer {
     font-size: 0.9rem;
 }
 
-.contact-card h3 {
-    margin-top: 1rem;
-    margin-bottom: 0.3rem;
-    font-weight: 600;
-}
+    .contact-card h3 {
+        margin-top: 1rem;
+        margin-bottom: 0.3rem;
+        font-weight: 600;
+    }
 
 .contact-map {
     border-radius: 16px;
@@ -860,6 +829,32 @@ footer {
     background: radial-gradient(circle at top left, #e0f2fe 0, #f9fafb 45%, #eef2ff 100%);
 }
 
+.modal,
+.auth-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 9999;
+    padding: 16px; /* 🔥 prevents edge cut */
+}
+
+.modal-content,
+.auth-modal-content {
+    background: #ffffff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh; /* 🔥 KEY FIX */
+    overflow-y: auto; /* 🔥 KEY FIX */
+
+    padding: 24px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+}
+
+
 .auth-main {
     min-height: calc(100vh - 80px);
     display: flex;
@@ -874,7 +869,7 @@ footer {
     background: #ffffff;
     border-radius: 24px;
     box-shadow: 0 24px 80px rgba(15, 23, 42, 0.16);
-    padding: 2rem 2.2rem 2.3rem;
+    padding: 2rem 2.2rem 3.3rem;
 }
 
 .auth-title {
@@ -905,7 +900,7 @@ footer {
 .auth-field-inline {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem;
+    gap: 1.25rem;
 }
 
 .auth-field label {
@@ -921,10 +916,10 @@ footer {
     outline: none;
 }
 
-.auth-field input:focus,
-.auth-field select:focus {
-    border-color: var(--primary);
-}
+    .auth-field input:focus,
+    .auth-field select:focus {
+        border-color: var(--primary);
+    }
 
 .auth-footer-row {
     display: flex;
@@ -942,10 +937,10 @@ footer {
     gap: 0.35rem;
 }
 
-.auth-checkbox input {
-    width: 14px;
-    height: 14px;
-}
+    .auth-checkbox input {
+        width: 14px;
+        height: 14px;
+    }
 
 .auth-note {
     font-size: 0.78rem;
@@ -963,18 +958,20 @@ footer {
     text-align: center;
 }
 
-.auth-switch a {
-    color: var(--primary);
-    font-weight: 500;
-}
+    .auth-switch a {
+        color: var(--primary);
+        font-weight: 500;
+    }
 
 .auth-link-muted {
     font-size: 0.75rem;
     color: var(--text-muted);
 }
-.Name{
+
+.Name {
     display: flex;
 }
+
 .forgot-link {
     font-size: 0.85rem;
     color: var(--primary);
@@ -982,9 +979,9 @@ footer {
     text-decoration: none;
 }
 
-.forgot-link:hover {
-    text-decoration: underline;
-}
+    .forgot-link:hover {
+        text-decoration: underline;
+    }
 
 @media (max-width: 600px) {
     .auth-card {
@@ -1039,4 +1036,139 @@ footer {
 /* Prevent background scroll when modal open */
 body.no-scroll {
     overflow: hidden;
+}
+
+/* ===========================
+   PAGINATION (Landing Page)
+   =========================== */
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 24px;
+    padding-bottom: 8px;
+}
+
+    .pagination .pagination-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 1.5px solid #cfd6df;
+        background: #ffffff;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        color: #2d2d2d;
+        transition: all 0.2s ease;
+    }
+
+        .pagination .pagination-btn:hover {
+            border-color: #20c15a;
+            box-shadow: 0 8px 18px rgba(32, 193, 90, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .pagination .pagination-btn.active {
+            background: #20c15a;
+            border-color: #20c15a;
+            color: #ffffff;
+            box-shadow: 0 10px 20px rgba(32, 193, 90, 0.25);
+        }
+
+/* =========================================================
+   REGISTER MODAL (PROFESSIONAL + NO SCROLL)
+   - Keep normal width
+   - Use 2-column layout inside form (CSS only)
+   - No scrollbar
+   - Only affects #registerModal
+   ========================================================= */
+
+#registerModal.modal-overlay {
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 16px;
+}
+
+/* Normal professional width */
+#registerModal .modal-dialog {
+    width: 100%;
+    max-width: 620px; /* ✅ not too wide */
+    padding: 0;
+}
+
+/* Card fits viewport, no scroll */
+#registerModal .auth-card {
+    width: 100%;
+    max-width: 620px;
+    max-height: calc(100vh - 32px);
+    overflow: hidden; /* ✅ no scrollbars */
+    padding: 22px 24px 18px;
+}
+
+/* Slightly tighter spacing */
+#registerModal .auth-form {
+    gap: 10px;
+}
+
+#registerModal .auth-subtitle {
+    margin-bottom: 10px;
+}
+
+#registerModal .auth-note {
+    font-size: 0.76rem;
+}
+
+#registerModal .auth-switch {
+    margin-top: 8px;
+}
+
+/* ---------- 2-column form layout (CSS only) ---------- */
+/* Make the form a grid */
+#registerModal .auth-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 14px;
+    row-gap: 10px;
+}
+
+    /* Full-width rows */
+    #registerModal .auth-form > :nth-child(1), /* Register as */
+    #registerModal .auth-form > :nth-child(4), /* Gender */
+    #registerModal .auth-form > :nth-child(5), /* DOB */
+    #registerModal .auth-form > :nth-child(6), /* Email */
+    #registerModal .auth-form > :nth-child(7), /* Phone */
+    #registerModal .auth-form > :nth-child(10), /* Note */
+    #registerModal .auth-form > :nth-child(11), /* Button */
+    #registerModal .auth-form > :nth-child(12) /* Switch */ {
+        grid-column: 1 / -1;
+    }
+
+/* Make inputs slightly shorter */
+#registerModal .auth-field input,
+#registerModal .auth-field select {
+    padding: 0.38rem 0.85rem;
+    font-size: 0.84rem;
+}
+
+/* Make password inline row work nicely inside grid */
+#registerModal .auth-field-inline {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+/* If screen height is small, switch to single column to avoid cut */
+@media (max-height: 740px) {
+    #registerModal .modal-dialog,
+    #registerModal .auth-card {
+        max-width: 520px;
+    }
+
+    #registerModal .auth-form {
+        grid-template-columns: 1fr;
+    }
 }

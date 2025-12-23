@@ -103,6 +103,18 @@
         font-weight: 500;
         color: #111827;
     }
+
+    .card-tag-select {
+        border: none;
+        background: #eef2ff;
+        color: #475569;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        outline: none;
+        cursor: pointer;
+    }
+
 </style>
 
 
@@ -153,12 +165,25 @@
     </article>
 </section>
 
+
+
 <!-- MIDDLE ROW -->
 <section class="grid grid-2 middle">
+    <!-- Chart 1 -->
     <article class="card">
         <div class="card-header">
             <h2>Listing &amp; Sales Overview</h2>
-            <span class="card-tag">Last 6 months</span>
+            @* <span class="card-tag">Last 6 months</span> *@
+            <form method="get" asp-controller="AdminDashboard" asp-action="Index">
+                <select class="card-tag-select" name="months" onchange="this.form.submit()">
+                    <option value="1" selected="@(Model.SelectedMonths == 1)">Last 1 month</option>
+                    <option value="2" selected="@(Model.SelectedMonths == 2)">Last 2 months</option>
+                    <option value="4" selected="@(Model.SelectedMonths == 4)">Last 4 months</option>
+                    <option value="6" selected="@(Model.SelectedMonths == 6)">Last 6 months</option>
+                    <option value="12" selected="@(Model.SelectedMonths == 12)">Last 1 year</option>
+                </select>
+            </form>
+
         </div>
 
         <div class="chart-sample">
@@ -168,52 +193,28 @@
             </div>
 
             <div class="chart-bars">
-                <div class="chart-col">
-                    <div class="bar-group">
-                        <div class="bar bar-listings" style="height: 90px;"></div>
-                        <div class="bar bar-sold" style="height: 60px;"></div>
-                    </div>
-                    <span class="chart-label">Jan</span>
-                </div>
-                <div class="chart-col">
-                    <div class="bar-group">
-                        <div class="bar bar-listings" style="height: 110px;"></div>
-                        <div class="bar bar-sold" style="height: 80px;"></div>
-                    </div>
-                    <span class="chart-label">Feb</span>
-                </div>
-                <div class="chart-col">
-                    <div class="bar-group">
-                        <div class="bar bar-listings" style="height: 75px;"></div>
-                        <div class="bar bar-sold" style="height: 50px;"></div>
-                    </div>
-                    <span class="chart-label">Mar</span>
-                </div>
-                <div class="chart-col">
-                    <div class="bar-group">
-                        <div class="bar bar-listings" style="height: 120px;"></div>
-                        <div class="bar bar-sold" style="height: 90px;"></div>
-                    </div>
-                    <span class="chart-label">Apr</span>
-                </div>
-                <div class="chart-col">
-                    <div class="bar-group">
-                        <div class="bar bar-listings" style="height: 95px;"></div>
-                        <div class="bar bar-sold" style="height: 70px;"></div>
-                    </div>
-                    <span class="chart-label">May</span>
-                </div>
-                <div class="chart-col">
-                    <div class="bar-group">
-                        <div class="bar bar-listings" style="height: 85px;"></div>
-                        <div class="bar bar-sold" style="height: 65px;"></div>
-                    </div>
-                    <span class="chart-label">Jun</span>
-                </div>
+                @if (Model.ListingSalesLast6Months != null && Model.ListingSalesLast6Months.Any())
+                {
+                    foreach (var m in Model.ListingSalesLast6Months)
+                    {
+                        <div class="chart-col">
+                            <div class="bar-group">
+                                <div class="bar bar-listings" style="height:@(m.NewHeightPx)px;" title="New: @m.NewListings"></div>
+                                <div class="bar bar-sold" style="height:@(m.SoldHeightPx)px;" title="Sold: @m.SoldListings"></div>
+                            </div>
+                            <span class="chart-label">@m.MonthLabel</span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div style="color:#6b7280;font-size:0.85rem;">No data available.</div>
+                }
             </div>
         </div>
     </article>
 
+    <!-- Chart 2 -->
     <article class="card">
         <div class="card-header">
             <h2>Property Category Distribution</h2>
@@ -221,35 +222,31 @@
         </div>
 
         <div class="pie-wrapper">
-            <div class="pie-chart">
+            <div class="pie-chart" style="background:@Model.CategoryPieGradientCss;">
                 <div class="pie-hole"></div>
             </div>
 
             <div class="pie-legend">
-                <div class="legend-row">
-                    <span class="legend-color legend-apartments"></span>
-                    <span class="legend-label">Apartments</span>
-                    <span class="legend-value">45%</span>
-                </div>
-                <div class="legend-row">
-                    <span class="legend-color legend-houses"></span>
-                    <span class="legend-label">Houses</span>
-                    <span class="legend-value">30%</span>
-                </div>
-                <div class="legend-row">
-                    <span class="legend-color legend-commercial"></span>
-                    <span class="legend-label">Commercial</span>
-                    <span class="legend-value">15%</span>
-                </div>
-                <div class="legend-row">
-                    <span class="legend-color legend-land"></span>
-                    <span class="legend-label">Land</span>
-                    <span class="legend-value">10%</span>
-                </div>
+                @if (Model.CategoryDistribution != null && Model.CategoryDistribution.Any())
+                {
+                    foreach (var s in Model.CategoryDistribution)
+                    {
+                        <div class="legend-row">
+                            <span class="legend-color @s.CssClass"></span>
+                            <span class="legend-label">@s.Label</span>
+                            <span class="legend-value">@s.Percent%</span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div style="color:#6b7280;font-size:0.85rem;">No active listings.</div>
+                }
             </div>
         </div>
     </article>
 </section>
+
 
 <!-- BOTTOM -->
 <section class="bottom">
@@ -259,7 +256,7 @@
                 <h2>Pending Property Approvals</h2>
                 <p class="card-subtitle">Review recent property submissions from sellers.</p>
             </div>
-            <button class="card-link">View all</button>
+            <a asp-controller="AdminApprovals" asp-action="Pending" class="card-link">View all</a>
         </div>
 
         <div class="table-wrapper">

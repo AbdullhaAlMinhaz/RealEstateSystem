@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RealEstateSystem.Data;
 using RealEstateSystem.Models;
 using RealEstateSystem.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace RealEstateSystem.Controllers
 {
@@ -276,30 +276,52 @@ namespace RealEstateSystem.Controllers
             if (RedirectToLoginIfNotSeller(out var seller) is IActionResult redirect)
                 return redirect;
 
+            // ✅ Only delete seller's own property
             var property = _context.Properties
                 .Include(p => p.Images)
-                .FirstOrDefault(p => p.PropertyId == id &&
-                                     p.SellerId == seller.SellerId);
+                .FirstOrDefault(p => p.PropertyId == id && p.SellerId == seller.SellerId);
 
             if (property == null)
                 return NotFound();
 
-            if (property.Images != null && property.Images.Any())
+            try
             {
+                // ✅ 1) Remove Wishlist references FIRST (Fix FK_Wishlists_Properties_PropertyId)
+                // NOTE: Your DbSet name must be Wishlists in ApplicationDbContext
+                var wishItems = _context.Wishlists.Where(w => w.PropertyId == id).ToList();
+                if (wishItems.Any())
+                    _context.Wishlists.RemoveRange(wishItems);
+
+                // ✅ 2) Delete images in DB
+                if (property.Images != null && property.Images.Any())
+                {
+                    _context.PropertyImages.RemoveRange(property.Images);
+                }
+
+                // ✅ 3) Delete images folder from wwwroot/uploads/properties/{id}
                 var folder = Path.Combine(_environment.WebRootPath, "uploads", "properties", property.PropertyId.ToString());
                 if (Directory.Exists(folder))
                 {
                     Directory.Delete(folder, recursive: true);
                 }
 
-                _context.PropertyImages.RemoveRange(property.Images);
+                // ✅ 4) Delete property
+                _context.Properties.Remove(property);
+
+                // ✅ 5) Save once (all deletes in one transaction)
+                _context.SaveChanges();
+
+                TempData["Success"] = "Property deleted successfully.";
+                return RedirectToAction(nameof(Index));
             }
-
-            _context.Properties.Remove(property);
-            _context.SaveChanges();
-
-            return RedirectToAction(nameof(Index));
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Delete failed: " + (ex.InnerException?.Message ?? ex.Message);
+                return RedirectToAction(nameof(Index));
+            }
         }
+
+
 
         // ========== HELPER: SAVE UPLOADED IMAGES ==========
         private void SaveUploadedImages(Property property, List<IFormFile> photos)

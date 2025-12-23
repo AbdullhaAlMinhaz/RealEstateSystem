@@ -1,0 +1,117 @@
+﻿@model List<RealEstateSystem.ViewModels.PendingPropertyApprovalViewModel>
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<section class="bottom">
+    <article class="card">
+        <div class="card-header">
+            <div>
+                <h2>Pending Property Approvals</h2>
+                <p class="card-subtitle">Approve or reject submitted properties.</p>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Seller</th>
+                        <th>Submitted</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="pendingApprovalsBody">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var p in Model)
+                        {
+                            var submittedText = p.SubmittedAt.ToString("dd MMM yyyy, HH:mm");
+
+                            <tr data-row-id="@p.PropertyId">
+                                <td>@p.Title</td>
+                                <td>@p.SellerName</td>
+                                <td>@submittedText</td>
+                                <td><span class="badge badge-pending">Waiting</span></td>
+                                <td class="pending-actions">
+                                    <form asp-controller="AdminProperties" asp-action="Approve" asp-route-id="@p.PropertyId"
+                                          method="post" class="inline-form js-approve-form">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn-table btn-small">Approve</button>
+                                    </form>
+
+                                    <form asp-controller="AdminProperties" asp-action="Reject" asp-route-id="@p.PropertyId"
+                                          method="post" class="inline-form js-reject-form">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn-table btn-danger btn-small">Reject</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="5">No pending properties 🎉</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+
+@section Scripts {
+    <script>
+        async function postFormAjax(form) {
+            const token = form.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const res = await fetch(form.action, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "RequestVerificationToken": token
+                },
+                body: new FormData(form)
+            });
+            return await res.json();
+        }
+
+        function removeRow(form) {
+            const row = form.closest("tr");
+            if (row) row.remove();
+        }
+
+        function showToast(msg, type = "success") {
+            if (window.AdminToast && typeof window.AdminToast.show === "function") {
+                window.AdminToast.show(msg, type);
+            } else {
+                alert(msg); // fallback
+            }
+        }
+
+        document.addEventListener("submit", async function (e) {
+            const form = e.target;
+            if (!form.classList.contains("js-approve-form") && !form.classList.contains("js-reject-form")) return;
+
+            e.preventDefault();
+
+            const confirmText = form.classList.contains("js-approve-form")
+                ? "Approve this property?"
+                : "Reject this property?";
+            if (!confirm(confirmText)) return;
+
+            try {
+                const result = await postFormAjax(form);
+                if (result && result.success) {
+                    removeRow(form);
+                    showToast(result.message || "Done", "success");
+                } else {
+                    showToast(result.message || "Something went wrong.", "error");
+                }
+            } catch {
+                showToast("Network error. Try again.", "error");
+            }
+        });
+    </script>
+}
