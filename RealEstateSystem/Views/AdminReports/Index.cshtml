@@ -202,7 +202,16 @@
 
     <!-- TOP SUMMARY CARDS (CLICKABLE) -->
     <section class="report-overview">
-        <a class="stat-card report-stat" asp-action="Index" asp-controller="AdminReports" asp-route-report="revenue" asp-route-range="@Model.Range">
+        @* <a class="stat-card report-stat" asp-action="Index" asp-controller="AdminReports" asp-route-report="revenue" asp-route-range="@Model.Range"> *@
+            
+        <a class="stat-card report-stat"
+           asp-action="RevenueDetails"
+           asp-controller="AdminReports"
+           asp-route-range="@Model.Range"
+           asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")"
+           asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")">
+
+
             <p class="stat-label">Total Revenue</p>
             <p class="stat-value">৳ @Model.TotalRevenue.ToString("N0")</p>
             <p class="stat-meta">Commission earned from confirmed sales</p>

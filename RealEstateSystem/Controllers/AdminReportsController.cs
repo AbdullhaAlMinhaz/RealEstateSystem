@@ -224,5 +224,66 @@ namespace RealEstateSystem.Controllers
 
             return View(model);
         }
+
+        // GET: /AdminReports/RevenueDetails
+        public async Task<IActionResult> RevenueDetails(string range = "30", DateTime? startDate = null, DateTime? endDate = null)
+        {
+            // 1) Resolve date range (same logic style as Index)
+            DateTime end = (endDate ?? DateTime.Today).Date.AddDays(1).AddTicks(-1);
+            DateTime start;
+
+            if (range == "custom" && startDate.HasValue && endDate.HasValue)
+            {
+                start = startDate.Value.Date;
+                end = endDate.Value.Date.AddDays(1).AddTicks(-1);
+            }
+            else
+            {
+                int days = 30;
+                if (int.TryParse(range, out var parsedDays)) days = parsedDays;
+                start = DateTime.Today.AddDays(-days + 1).Date;
+            }
+
+            // 2) Load paid commission invoices with property + seller user
+            var invoices = await _context.CommissionInvoices
+                .Include(i => i.Property)
+                .Include(i => i.Seller)
+                    .ThenInclude(s => s.User)
+                .Where(i => i.Status == CommissionInvoiceStatus.Paid && i.VerifiedDate != null)
+                .Where(i => i.VerifiedDate >= start && i.VerifiedDate <= end)
+                .OrderByDescending(i => i.VerifiedDate)
+                .Select(i => new RevenueInvoiceRow
+                {
+                    CommissionInvoiceId = i.CommissionInvoiceId,
+                    PropertyId = i.PropertyId,
+                    PropertyTitle = i.Property != null ? i.Property.Title : "",
+                    PropertyCity = i.Property != null ? i.Property.City : "",
+                    PropertyAddress = i.Property != null ? i.Property.Address : "",
+                    ListingPrice = i.ListingPrice,
+                    CommissionRatePercent = i.CommissionRatePercent,
+                    CommissionAmount = i.CommissionAmount,
+                    VerifiedDate = i.VerifiedDate,
+                    SellerName = (i.Seller != null && i.Seller.User != null)
+                        ? (i.Seller.User.FirstName + " " + i.Seller.User.LastName)
+                        : ""
+                })
+                .ToListAsync();
+
+            decimal total = invoices.Sum(x => x.CommissionAmount);
+
+            var vm = new AdminRevenueDetailsViewModel
+            {
+                Range = range,
+                StartDate = start,
+                EndDate = end.Date,
+                TotalRevenue = total,
+                Invoices = invoices
+            };
+
+            ViewData["PageTitle"] = "Revenue Details";
+            ViewData["PageSubtitle"] = "Commission earned from confirmed sales (paid invoices).";
+
+            return View(vm);
+        }
     }
 }
