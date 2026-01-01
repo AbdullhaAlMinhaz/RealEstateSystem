@@ -1,0 +1,43 @@
+﻿@model List<RealEstateSystem.Models.CommissionInvoice>
+@using RealEstateSystem.Models
+
+<h2>Commission Management</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Property</th>
+            <th>Seller</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Submitted</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var i in Model)
+        {
+            <tr>
+                <td>@i.Property.Title</td>
+                <td>@i.Seller.User.FirstName @i.Seller.User.LastName</td>
+                <td>BDT @i.CommissionAmount</td>
+                <td>@i.Status</td>
+                <td>@i.SubmittedDate?.ToString("dd MMM yyyy")</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@i.CommissionInvoiceId" class="btn btn-sm btn-info">
+                        View
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

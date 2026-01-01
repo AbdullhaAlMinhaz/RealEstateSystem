@@ -82,5 +82,7 @@ namespace RealEstateSystem.Models
         public ICollection<Appointment> Appointments { get; set; }
         public ICollection<Offer> Offers { get; set; }
         public ICollection<PropertyAnalytics> AnalyticsRecords { get; set; }
+        public CommissionInvoice CommissionInvoice { get; set; }
+
     }
 }

@@ -34,6 +34,8 @@ namespace RealEstateSystem.Data
         public DbSet<SearchHistory> SearchHistories { get; set; }
         public DbSet<ChatConversation> ChatConversations { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
+        public DbSet<CommissionInvoice> CommissionInvoices { get; set; }
+
 
 
 
@@ -50,6 +52,24 @@ namespace RealEstateSystem.Data
                 .WithMany(c => c.Messages)
                 .HasForeignKey(m => m.ConversationId);
 
+
+
+            // ================================================================
+            // COMMISSION INVOICE (One per Property)
+            // ================================================================
+            modelBuilder.Entity<CommissionInvoice>()
+                .HasIndex(ci => ci.PropertyId)
+                .IsUnique();
+
+            modelBuilder.Entity<CommissionInvoice>()
+                .HasOne(ci => ci.Property)
+                .WithOne(p => p.CommissionInvoice)
+                .HasForeignKey<CommissionInvoice>(ci => ci.PropertyId);
+
+            modelBuilder.Entity<CommissionInvoice>()
+                .HasOne(ci => ci.Seller)
+                .WithMany()
+                .HasForeignKey(ci => ci.SellerId);
 
 
             // ✅ Make ProfilePhoto optional in EF

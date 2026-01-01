@@ -1,0 +1,37 @@
+﻿@model RealEstateSystem.Models.CommissionInvoice
+@using RealEstateSystem.Models
+
+<h2>Commission Details</h2>
+
+<table class="table">
+    <tr><th>Property</th><td>@Model.Property.Title</td></tr>
+    <tr><th>Seller</th><td>@Model.Seller.User.FirstName @Model.Seller.User.LastName</td></tr>
+    <tr><th>Listing Price</th><td>BDT @Model.ListingPrice</td></tr>
+    <tr><th>Commission</th><td>@Model.CommissionRatePercent% (BDT @Model.CommissionAmount)</td></tr>
+    <tr><th>Payment Method</th><td>@Model.PaymentMethod</td></tr>
+    <tr><th>Transaction ID</th><td>@Model.TransactionId</td></tr>
+    <tr>
+        <th>Proof</th>
+        <td>
+            <a href="@Model.ProofImageUrl" target="_blank">View Proof</a>
+        </td>
+    </tr>
+    <tr><th>Status</th><td>@Model.Status</td></tr>
+</table>
+
+@if (Model.Status == CommissionInvoiceStatus.PendingVerification)
+{
+    <form asp-action="Approve" method="post" style="display:inline;">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.CommissionInvoiceId" />
+        <input type="text" name="adminNote" placeholder="Admin note (optional)" class="form-control mb-2" />
+        <button type="submit" class="btn btn-success">Approve</button>
+    </form>
+
+    <form asp-action="Reject" method="post" style="display:inline;">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.CommissionInvoiceId" />
+        <input type="text" name="adminNote" placeholder="Admin note (optional)" class="form-control mb-2" />
+        <button type="submit" class="btn btn-danger">Reject</button>
+    </form>
+}

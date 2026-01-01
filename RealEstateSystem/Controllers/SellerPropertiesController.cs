@@ -28,10 +28,17 @@ namespace RealEstateSystem.Controllers
             if (RedirectToLoginIfNotSeller(out var seller) is IActionResult redirect)
                 return redirect;
 
+            //var properties = _context.Properties
+            //    .Where(p => p.SellerId == seller.SellerId)
+            //    .OrderByDescending(p => p.CreatedDate)
+            //    .ToList();
+
             var properties = _context.Properties
+                .Include(p => p.CommissionInvoice)
                 .Where(p => p.SellerId == seller.SellerId)
                 .OrderByDescending(p => p.CreatedDate)
                 .ToList();
+
 
             var model = new SellerPropertyListViewModel
             {
@@ -47,17 +54,91 @@ namespace RealEstateSystem.Controllers
             return View(model);
         }
 
+        // ========== MARK PROPERTY AS SOLD + AUTO CREATE COMMISSION INVOICE ==========
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult MarkAsSold(int id)
+        {
+            if (RedirectToLoginIfNotSeller(out var seller) is IActionResult redirect)
+                return redirect;
+
+            var property = _context.Properties
+                .FirstOrDefault(p => p.PropertyId == id && p.SellerId == seller.SellerId);
+
+            if (property == null)
+                return NotFound();
+
+            // Only allow Available -> Sold
+            if (property.Status != PropertyStatus.Available)
+            {
+                TempData["Error"] = "Only Available properties can be marked as Sold.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // ✅ Use transaction so Sold + Invoice happen together safely
+            using var tx = _context.Database.BeginTransaction();
+
+            try
+            {
+                // 1) Mark Sold
+                property.Status = PropertyStatus.Sold;
+                property.UpdatedDate = DateTime.Now;
+
+                // 2) Create invoice only if not exists (prevent duplicates)
+                bool invoiceExists = _context.CommissionInvoices.Any(ci => ci.PropertyId == property.PropertyId);
+                if (!invoiceExists)
+                {
+                    int ratePercent = 2; // Default 2% (dropdown later in Step 3)
+
+                    var invoice = new CommissionInvoice
+                    {
+                        PropertyId = property.PropertyId,
+                        SellerId = seller.SellerId,
+                        ListingPrice = property.Price,
+                        CommissionRatePercent = ratePercent,
+                        CommissionAmount = Math.Round(property.Price * (ratePercent / 100m), 2),
+                        Status = CommissionInvoiceStatus.Unpaid,
+                        CreatedDate = DateTime.Now,
+
+                        AdminNote = "",
+                        TransactionId = "",
+                        ProofImageUrl = ""
+                    };
+
+
+                    _context.CommissionInvoices.Add(invoice);
+                }
+
+                _context.SaveChanges();
+                tx.Commit();
+
+                TempData["Success"] = $"'{property.Title}' marked as Sold and commission invoice created.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                tx.Rollback();
+                TempData["Error"] = "Failed to mark sold: " + (ex.InnerException?.Message ?? ex.Message);
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+
         // ========== PENDING PROPERTIES (OPTIONAL TAB) ==========
         public IActionResult Pending()
         {
             if (RedirectToLoginIfNotSeller(out var seller) is IActionResult redirect)
                 return redirect;
 
+
+
             var properties = _context.Properties
+                .Include(p => p.CommissionInvoice)
                 .Where(p => p.SellerId == seller.SellerId &&
                             p.ApprovalStatus == PropertyApprovalStatus.Pending)
                 .OrderByDescending(p => p.CreatedDate)
                 .ToList();
+
 
             var model = new SellerPropertyListViewModel
             {
@@ -157,6 +238,13 @@ namespace RealEstateSystem.Controllers
             if (property == null)
                 return NotFound();
 
+            // ✅ LOCK AFTER SOLD
+            if (property.Status == PropertyStatus.Sold)
+            {
+                TempData["Error"] = "This property is Sold, so it can no longer be edited.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var model = new SellerPropertyEditViewModel
             {
                 PropertyId = property.PropertyId,
@@ -204,6 +292,13 @@ namespace RealEstateSystem.Controllers
 
                 if (property == null)
                     return NotFound();
+
+                // ✅ LOCK AFTER SOLD
+                if (property.Status == PropertyStatus.Sold)
+                {
+                    TempData["Error"] = "This property is Sold, so it can no longer be edited.";
+                    return RedirectToAction(nameof(Index));
+                }
 
                 property.Title = model.Title;
                 property.PropertyType = model.PropertyType;
@@ -320,8 +415,6 @@ namespace RealEstateSystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
-
-
 
         // ========== HELPER: SAVE UPLOADED IMAGES ==========
         private void SaveUploadedImages(Property property, List<IFormFile> photos)

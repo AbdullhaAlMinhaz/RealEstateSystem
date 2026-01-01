@@ -1,7 +1,11 @@
-﻿@{
+﻿@model RealEstateSystem.ViewModels.AdminReportsViewModel
+
+@{
     Layout = "_AdminLayout";
     ViewData["PageTitle"] = "Reports";
     ViewData["PageSubtitle"] = "Generate insights and activity reports.";
+
+    string currentReport = (Model.ActiveReport ?? "sales").ToLower();
 }
 
 <style>
@@ -13,7 +17,7 @@
 
     .report-overview {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(3,minmax(0,1fr));
         gap: 1.25rem;
     }
 
@@ -26,6 +30,9 @@
     .stat-card.report-stat {
         position: relative;
         overflow: hidden;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
     }
 
         .stat-card.report-stat .stat-label {
@@ -53,12 +60,12 @@
     }
 
     .trend-up {
-        background: rgba(46, 213, 115, 0.12);
+        background: rgba(46,213,115,0.12);
         color: #1f9254;
     }
 
     .trend-down {
-        background: rgba(230, 73, 128, 0.12);
+        background: rgba(230,73,128,0.12);
         color: #c0395e;
     }
 
@@ -81,8 +88,7 @@
         align-items: center;
     }
 
-    .filter-select,
-    .filter-input {
+    .filter-select, .filter-input {
         border-radius: 999px;
         border: 1px solid #e0e4f2;
         padding: 0.4rem 0.9rem;
@@ -91,8 +97,7 @@
         outline: none;
     }
 
-        .filter-select:focus,
-        .filter-input:focus {
+        .filter-select:focus, .filter-input:focus {
             border-color: #4f8bff;
             box-shadow: 0 0 0 3px rgba(79,139,255,0.18);
             background-color: #ffffff;
@@ -114,24 +119,26 @@
         border-radius: 999px;
         cursor: pointer;
         color: #5b668c;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
     }
 
         .report-tab.is-active {
             background: #ffffff;
-            box-shadow: 0 4px 12px rgba(82, 101, 255, 0.18);
+            box-shadow: 0 4px 12px rgba(82,101,255,0.18);
             color: #2741ff;
             font-weight: 500;
         }
 
     .report-main-grid {
         display: grid;
-        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+        grid-template-columns: minmax(0,1.5fr) minmax(0,1fr);
         gap: 1.75rem;
         margin-top: 0.25rem;
     }
 
-    .table-compact .table th,
-    .table-compact .table td {
+    .table-compact .table th, .table-compact .table td {
         padding-top: 0.55rem;
         padding-bottom: 0.55rem;
         font-size: 0.85rem;
@@ -170,48 +177,6 @@
         margin-top: 0.15rem;
     }
 
-    .export-grid {
-        display: grid;
-        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-        gap: 1.5rem;
-    }
-
-    .export-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.6rem;
-    }
-
-    .btn-export {
-        border-radius: 999px;
-        border: none;
-        padding: 0.45rem 1.1rem;
-        font-size: 0.85rem;
-        font-weight: 500;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        background: #eef2ff;
-        color: #313d6b;
-    }
-
-    .btn-export-primary {
-        background: linear-gradient(135deg, #4f8bff, #2651ff);
-        color: #ffffff;
-        box-shadow: 0 8px 20px rgba(79,139,255,0.35);
-    }
-
-    .btn-export span.icon {
-        font-size: 0.9rem;
-    }
-
-    .export-note {
-        font-size: 0.8rem;
-        color: #8b94b6;
-        margin-top: 0.4rem;
-    }
-
     .legend-dot-small {
         width: 8px;
         height: 8px;
@@ -231,77 +196,116 @@
     .legend-cancelled {
         background: #e74c3c;
     }
-
-    @* keep it simple: no @media / @keyframes here to avoid Razor conflicts *@
 </style>
 
 <section class="report-page">
 
-    <!-- TOP SUMMARY CARDS -->
+    <!-- TOP SUMMARY CARDS (CLICKABLE) -->
     <section class="report-overview">
-        <article class="stat-card report-stat">
+        <a class="stat-card report-stat" asp-action="Index" asp-controller="AdminReports" asp-route-report="revenue" asp-route-range="@Model.Range">
             <p class="stat-label">Total Revenue</p>
-            <p class="stat-value">৳ 4,85,000</p>
+            <p class="stat-value">৳ @Model.TotalRevenue.ToString("N0")</p>
             <p class="stat-meta">Commission earned from confirmed sales</p>
-            <div class="trend-pill trend-up">
-                <span class="trend-arrow">▲</span>
-                <span>+18% vs last month</span>
-            </div>
-        </article>
 
-        <article class="stat-card report-stat">
+            @{
+                var revUp = Model.RevenueChangePercent >= 0;
+                var revClass = revUp ? "trend-up" : "trend-down";
+                var revArrow = revUp ? "▲" : "▼";
+            }
+            <div class="trend-pill @revClass">
+                <span class="trend-arrow">@revArrow</span>
+                <span>@Model.RevenueChangePercent.ToString("0.##")% vs prev</span>
+            </div>
+        </a>
+
+        <a class="stat-card report-stat" asp-action="Index" asp-controller="AdminReports" asp-route-report="sales" asp-route-range="@Model.Range">
             <p class="stat-label">Completed Sales</p>
-            <p class="stat-value">42</p>
+            <p class="stat-value">@Model.CompletedSales</p>
             <p class="stat-meta">Properties marked as sold in this period</p>
-            <div class="trend-pill trend-up">
-                <span class="trend-arrow">▲</span>
-                <span>+9 deals</span>
-            </div>
-        </article>
 
-        <article class="stat-card report-stat">
-            <p class="stat-label">New Listings</p>
-            <p class="stat-value">124</p>
-            <p class="stat-meta">Fresh properties published by sellers</p>
-            <div class="trend-pill trend-down">
-                <span class="trend-arrow">▼</span>
-                <span>-6% vs last month</span>
+            @{
+                var salesUp = Model.SalesChangeValue >= 0;
+                var salesClass = salesUp ? "trend-up" : "trend-down";
+                var salesArrow = salesUp ? "▲" : "▼";
+            }
+            <div class="trend-pill @salesClass">
+                <span class="trend-arrow">@salesArrow</span>
+                <span>@(salesUp ? "+" : "")@Model.SalesChangeValue deals</span>
             </div>
-        </article>
+        </a>
+
+        <a class="stat-card report-stat" asp-action="Index" asp-controller="AdminReports" asp-route-report="listings" asp-route-range="@Model.Range">
+            <p class="stat-label">New Listings</p>
+            <p class="stat-value">@Model.NewListings</p>
+            <p class="stat-meta">Fresh properties published by sellers</p>
+
+            @{
+                var listUp = Model.ListingsChangePercent >= 0;
+                var listClass = listUp ? "trend-up" : "trend-down";
+                var listArrow = listUp ? "▲" : "▼";
+            }
+            <div class="trend-pill @listClass">
+                <span class="trend-arrow">@listArrow</span>
+                <span>@Model.ListingsChangePercent.ToString("0.##")% vs prev</span>
+            </div>
+        </a>
     </section>
 
-    <!-- FILTER BAR -->
+    <!-- FILTER BAR (GET FORM) -->
     <section class="card">
         <div class="card-header">
             <div class="report-card-main">
                 <div>
                     <h2>Listing &amp; Sales Reports</h2>
                     <p class="card-subtitle">
-                        Filter system activity by time range and report type, then export for presentations.
+                        Filter system activity by time range and report type.
                     </p>
                 </div>
 
-                <div class="report-filters-bar">
+                <form class="report-filters-bar" method="get" asp-action="Index" asp-controller="AdminReports">
                     <div class="report-filters-left">
-                        <select class="filter-select" id="rangeFilter">
-                            <option>Last 7 days</option>
-                            <option selected>Last 30 days</option>
-                            <option>Last 3 months</option>
-                            <option>Last 12 months</option>
-                            <option>Custom range</option>
+                        <select class="filter-select" id="rangeFilter" name="range">
+                            <option value="7" selected="@(Model.Range == "7")">Last 7 days</option>
+                            <option value="30" selected="@(Model.Range == "30")">Last 30 days</option>
+                            <option value="90" selected="@(Model.Range == "90")">Last 3 months</option>
+                            <option value="365" selected="@(Model.Range == "365")">Last 12 months</option>
+                            <option value="custom" selected="@(Model.Range == "custom")">Custom range</option>
                         </select>
 
-                        <input type="date" class="filter-input" id="fromDate" />
+                        <input type="date" class="filter-input" id="fromDate" name="startDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" />
                         <span style="font-size:0.8rem;color:#7b84a4;">to</span>
-                        <input type="date" class="filter-input" id="toDate" />
+                        <input type="date" class="filter-input" id="toDate" name="endDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" />
+
+                        <input type="hidden" name="report" value="@currentReport" />
+                        <button type="submit" class="filter-select" style="cursor:pointer;">Apply</button>
                     </div>
 
                     <div class="report-type-tabs">
-                        <button type="button" class="report-tab is-active" data-report="listings">Listings</button>
-                        <button type="button" class="report-tab" data-report="sales">Sales</button>
-                        <button type="button" class="report-tab" data-report="users">Users</button>
+                        <a class="report-tab @(currentReport == "listings" ? "is-active" : "")"
+                           asp-action="Index" asp-controller="AdminReports"
+                           asp-route-report="listings" asp-route-range="@Model.Range"
+                           asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")"
+                           asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")">
+                            Listings
+                        </a>
+
+                        <a class="report-tab @(currentReport == "sales" ? "is-active" : "")"
+                           asp-action="Index" asp-controller="AdminReports"
+                           asp-route-report="sales" asp-route-range="@Model.Range"
+                           asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")"
+                           asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")">
+                            Sales
+                        </a>
+
+                        <a class="report-tab @(currentReport == "revenue" ? "is-active" : "")"
+                           asp-action="Index" asp-controller="AdminReports"
+                           asp-route-report="revenue" asp-route-range="@Model.Range"
+                           asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")"
+                           asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")">
+                            Revenue
+                        </a>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
 
@@ -320,34 +324,25 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Week 1</td>
-                            <td>32</td>
-                            <td>9</td>
-                            <td>3</td>
-                            <td>28%</td>
-                        </tr>
-                        <tr>
-                            <td>Week 2</td>
-                            <td>27</td>
-                            <td>11</td>
-                            <td>2</td>
-                            <td>33%</td>
-                        </tr>
-                        <tr>
-                            <td>Week 3</td>
-                            <td>29</td>
-                            <td>8</td>
-                            <td>4</td>
-                            <td>27%</td>
-                        </tr>
-                        <tr>
-                            <td>Week 4</td>
-                            <td>36</td>
-                            <td>14</td>
-                            <td>1</td>
-                            <td>39%</td>
-                        </tr>
+                        @if (Model.Rows != null && Model.Rows.Any())
+                        {
+                            foreach (var row in Model.Rows)
+                            {
+                                <tr>
+                                    <td>@row.PeriodLabel</td>
+                                    <td>@row.NewListings</td>
+                                    <td>@row.Sold</td>
+                                    <td>@row.Cancelled</td>
+                                    <td>@row.ConversionPercent%</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5">No report data found for this range.</td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
@@ -358,167 +353,67 @@
                 <ul class="quick-stat-list">
                     <li class="quick-stat-item">
                         <div>
-                            <div class="quick-stat-label">
-                                Highest performing week
-                            </div>
-                            <div class="quick-stat-note">
-                                Based on conversion of listings to sales
-                            </div>
+                            <div class="quick-stat-label">Highest performing period</div>
+                            <div class="quick-stat-note">Based on conversion of listings to sales</div>
                         </div>
-                        <div class="quick-stat-value">Week 4 · 39%</div>
+                        <div class="quick-stat-value">@Model.BestPeriodLabel · @Model.BestPeriodConversion%</div>
                     </li>
 
                     <li class="quick-stat-item">
                         <div>
-                            <div class="quick-stat-label">
-                                Average time to sell
-                            </div>
-                            <div class="quick-stat-note">
-                                From listing approval to marked as sold
-                            </div>
+                            <div class="quick-stat-label">Average time to sell</div>
+                            <div class="quick-stat-note">From listing creation to marked as sold</div>
                         </div>
-                        <div class="quick-stat-value">18 days</div>
+                        <div class="quick-stat-value">@Model.AvgTimeToSellDays days</div>
                     </li>
 
                     <li class="quick-stat-item">
                         <div>
-                            <div class="quick-stat-label">
-                                Top category this period
-                            </div>
-                            <div class="quick-stat-note">
-                                By number of sold properties
-                            </div>
+                            <div class="quick-stat-label">Top category this period</div>
+                            <div class="quick-stat-note">By number of sold properties</div>
                         </div>
-                        <div class="quick-stat-value">Apartments</div>
+                        <div class="quick-stat-value">@Model.TopCategory</div>
                     </li>
 
                     <li class="quick-stat-item">
                         <div>
-                            <div class="quick-stat-label">
-                                Activity breakdown
-                            </div>
-                            <div class="quick-stat-note">
-                                New vs sold vs cancelled listings
-                            </div>
+                            <div class="quick-stat-label">Activity breakdown</div>
+                            <div class="quick-stat-note">New vs sold vs cancelled</div>
                         </div>
                         <div>
                             <span class="legend-dot-small legend-new"></span>
-                            <span style="font-size:0.8rem;margin-right:0.4rem;">New</span>
+                            <span style="font-size:0.8rem;margin-right:0.4rem;">New (@Model.ActivityNew)</span>
                             <span class="legend-dot-small legend-sold"></span>
-                            <span style="font-size:0.8rem;margin-right:0.4rem;">Sold</span>
+                            <span style="font-size:0.8rem;margin-right:0.4rem;">Sold (@Model.ActivitySold)</span>
                             <span class="legend-dot-small legend-cancelled"></span>
-                            <span style="font-size:0.8rem;">Cancelled</span>
+                            <span style="font-size:0.8rem;">Cancelled (@Model.ActivityCancelled)</span>
                         </div>
                     </li>
                 </ul>
             </aside>
         </div>
     </section>
-
-    <!-- EXPORT CENTER -->
-    <section class="card">
-        <div class="card-header">
-            <div>
-                <h2>Export &amp; share</h2>
-                <p class="card-subtitle">
-                    Download ready-made reports to share with management, investors or clients.
-                </p>
-            </div>
-        </div>
-        <div class="card-body export-grid">
-            <div>
-                <h3 style="font-size:0.95rem;font-weight:600;margin-bottom:0.7rem;">
-                    Choose export format
-                </h3>
-                <div class="export-actions">
-                    <button type="button" class="btn-export btn-export-primary">
-                        <span class="icon">⬇</span>
-                        Export as PDF
-                    </button>
-                    <button type="button" class="btn-export">
-                        <span class="icon">📊</span>
-                        Export as Excel
-                    </button>
-                    <button type="button" class="btn-export">
-                        <span class="icon">🧾</span>
-                        Export as CSV
-                    </button>
-                </div>
-                <p class="export-note">
-                    Exports include listing details, seller info, buyer offers and status history for the selected period.
-                </p>
-            </div>
-
-            <div>
-                <h3 style="font-size:0.95rem;font-weight:600;margin-bottom:0.7rem;">
-                    Scheduled reports
-                </h3>
-                <div class="table-wrapper table-compact">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Report</th>
-                                <th>Frequency</th>
-                                <th>Next run</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Monthly admin summary</td>
-                                <td>1st of every month</td>
-                                <td>01 Jul, 09:00 AM</td>
-                            </tr>
-                            <tr>
-                                <td>Weekly new listings</td>
-                                <td>Every Monday</td>
-                                <td>Next Monday</td>
-                            </tr>
-                            <tr>
-                                <td>Top sellers performance</td>
-                                <td>Monthly</td>
-                                <td>01 Jul, 10:00 AM</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </section>
 </section>
 
 @section Scripts {
     <script>
-        // very small interactive behaviour for tabs (just visual in this demo)
-        document.querySelectorAll(".report-tab").forEach(tab => {
-            tab.addEventListener("click", function () {
-                document.querySelectorAll(".report-tab").forEach(t => t.classList.remove("is-active"));
-                this.classList.add("is-active");
-                // In a real app you would load different data here (AJAX / reload).
-            });
-        });
-
-        // If range is "Custom range", enable date inputs; otherwise clear them.
         const rangeFilter = document.getElementById("rangeFilter");
         const fromDate = document.getElementById("fromDate");
         const toDate = document.getElementById("toDate");
 
-        if (rangeFilter) {
-            rangeFilter.addEventListener("change", function () {
-                const isCustom = this.value === "Custom range";
-                fromDate.disabled = !isCustom;
-                toDate.disabled = !isCustom;
+        function applyCustomToggle() {
+            const isCustom = rangeFilter.value === "custom";
+            fromDate.disabled = !isCustom;
+            toDate.disabled = !isCustom;
 
-                if (!isCustom) {
-                    fromDate.value = "";
-                    toDate.value = "";
-                }
-            });
-
-            // initial state
-            if (rangeFilter.value !== "Custom range") {
-                fromDate.disabled = true;
-                toDate.disabled = true;
+            if (!isCustom) {
+                // keep values but disable inputs
             }
+        }
+
+        if (rangeFilter) {
+            rangeFilter.addEventListener("change", applyCustomToggle);
+            applyCustomToggle();
         }
     </script>
 }

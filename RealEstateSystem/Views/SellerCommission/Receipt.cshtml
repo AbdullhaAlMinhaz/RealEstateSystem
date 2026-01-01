@@ -1,0 +1,98 @@
+﻿@model RealEstateSystem.Models.CommissionInvoice
+
+@{
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+<style>
+    .receipt-box {
+        max-width: 750px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        background: #fff;
+    }
+
+    .receipt-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .receipt-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+    }
+
+    .muted {
+        color: #6b7280;
+    }
+
+    .btn-print {
+        margin-top: 16px;
+    }
+</style>
+
+<div class="receipt-box">
+    <div class="receipt-title">Commission Receipt</div>
+    <div class="muted">Receipt generated after admin approval.</div>
+
+    <hr />
+
+    <div class="receipt-row">
+        <div><b>Invoice ID</b></div>
+        <div>@Model.CommissionInvoiceId</div>
+    </div>
+
+    <div class="receipt-row">
+        <div><b>Property</b></div>
+        <div>@Model.Property?.Title</div>
+    </div>
+
+    <div class="receipt-row">
+        <div><b>Seller</b></div>
+        <div>@Model.Seller?.User?.FirstName @Model.Seller?.User?.LastName</div>
+    </div>
+
+    <div class="receipt-row">
+        <div><b>Listing Price</b></div>
+        <div>BDT @Model.ListingPrice.ToString("N2")</div>
+    </div>
+
+    <div class="receipt-row">
+        <div><b>Commission Rate</b></div>
+        <div>@Model.CommissionRatePercent%</div>
+    </div>
+
+    <div class="receipt-row">
+        <div><b>Commission Paid</b></div>
+        <div><b>BDT @Model.CommissionAmount.ToString("N2")</b></div>
+    </div>
+
+    <div class="receipt-row">
+        <div><b>Payment Method</b></div>
+        <div>@Model.PaymentMethod</div>
+    </div>
+
+    <div class="receipt-row">
+        <div><b>Transaction ID</b></div>
+        <div>@Model.TransactionId</div>
+    </div>
+
+    <div class="receipt-row">
+        <div><b>Approved Date</b></div>
+        <div>@Model.VerifiedDate?.ToString("dd MMM yyyy, hh:mm tt")</div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.AdminNote))
+    {
+        <div class="receipt-row">
+            <div><b>Admin Note</b></div>
+            <div>@Model.AdminNote</div>
+        </div>
+    }
+
+    <button class="btn btn-primary btn-print" onclick="window.print()">Print / Save as PDF</button>
+</div>

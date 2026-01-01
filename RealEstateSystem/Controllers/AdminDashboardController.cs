@@ -22,6 +22,18 @@ namespace RealEstateSystem.Controllers
         // ✅ Added: months query param for dropdown range (1,2,4,6,12)
         public IActionResult Index(int months = 6)
         {
+
+            ViewData["CommissionPendingCount"] =
+                _context.CommissionInvoices.Count(i => i.Status == CommissionInvoiceStatus.PendingVerification);
+
+            ViewData["CommissionPaidCount"] =
+                _context.CommissionInvoices.Count(i => i.Status == CommissionInvoiceStatus.Paid);
+
+            ViewData["CommissionTotalPaid"] =
+                _context.CommissionInvoices
+                    .Where(i => i.Status == CommissionInvoiceStatus.Paid)
+                    .Sum(i => (decimal?)i.CommissionAmount) ?? 0m;
+
             // Only allow these values (prevents invalid query values)
             var allowed = new[] { 1, 2, 4, 6, 12 };
             if (!allowed.Contains(months)) months = 6;
