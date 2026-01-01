@@ -5,13 +5,6 @@
     ViewData["PageSubtitle"] = "Overview of users, listings and system activity.";
 }
 
-<p>Pending Commission Verifications: @ViewData["CommissionPendingCount"]</p>
-<p>Paid Commissions: @ViewData["CommissionPaidCount"]</p>
-<p>
-    Total Commission Collected:
-    BDT @((decimal)ViewData["CommissionTotalPaid"]).ToString("N2")
-</p>
-
 
 <style>
     .pending-actions {

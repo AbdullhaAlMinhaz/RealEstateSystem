@@ -1,0 +1,207 @@
+﻿@model RealEstateSystem.ViewModels.AdminListingsDetailsViewModel
+@{
+    Layout = "_AdminLayout";
+}
+
+<style>
+    .wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 18px 20px;
+        box-shadow: 0 12px 30px rgba(0,0,0,.06);
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+        .card h3 {
+            margin: 0;
+            font-size: 14px;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            opacity: .7;
+        }
+
+    .big {
+        font-size: 30px;
+        font-weight: 800;
+        margin-top: 6px;
+    }
+
+    .muted {
+        opacity: .7;
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
+    .filter {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        background: #fff;
+        border-radius: 18px;
+        padding: 14px 16px;
+        box-shadow: 0 12px 30px rgba(0,0,0,.06);
+    }
+
+        .filter select, .filter input {
+            border: 1px solid rgba(0,0,0,.12);
+            border-radius: 999px;
+            padding: 8px 12px;
+            outline: none;
+            background: #fff;
+        }
+
+        .filter button {
+            border: none;
+            border-radius: 999px;
+            padding: 9px 16px;
+            font-weight: 700;
+            background: #2563eb;
+            color: #fff;
+        }
+
+    .table-card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 16px;
+        box-shadow: 0 12px 30px rgba(0,0,0,.06);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        text-align: left;
+        font-size: 12px;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        opacity: .65;
+        padding: 12px 10px;
+    }
+
+    td {
+        padding: 12px 10px;
+        border-top: 1px solid rgba(0,0,0,.06);
+        vertical-align: top;
+    }
+
+    .btn-view {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: #111827;
+        color: #fff;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(0,0,0,.06);
+        font-weight: 700;
+        font-size: 12px;
+    }
+
+    .sum {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 14px;
+        font-size: 16px;
+        font-weight: 800;
+    }
+</style>
+
+<div class="wrap">
+
+    <div class="card">
+        <div>
+            <h3>New Listings</h3>
+            <div class="big">@Model.TotalListings</div>
+            <div class="muted">Total properties created in selected period</div>
+        </div>
+        <div class="muted">
+            Period: @Model.StartDate.ToString("dd MMM yyyy") - @Model.EndDate.ToString("dd MMM yyyy")
+        </div>
+    </div>
+
+    <form class="filter" method="get" asp-action="ListingsDetails" asp-controller="AdminReports">
+        <select name="range">
+            <option value="7" selected="@(Model.Range == "7")">Last 7 days</option>
+            <option value="30" selected="@(Model.Range == "30")">Last 30 days</option>
+            <option value="90" selected="@(Model.Range == "90")">Last 90 days</option>
+            <option value="365" selected="@(Model.Range == "365")">Last 1 year</option>
+            <option value="custom" selected="@(Model.Range == "custom")">Custom</option>
+        </select>
+
+        <input type="date" name="startDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+        <span class="muted">to</span>
+        <input type="date" name="endDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" />
+
+        <button type="submit">Apply</button>
+    </form>
+
+    <div class="table-card">
+        <h3 style="margin:0 0 10px 0;">Listings Breakdown</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Seller</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Listings == null || Model.Listings.Count == 0)
+                {
+                    <tr><td colspan="6" class="muted">No listings found for this period.</td></tr>
+                }
+                else
+                {
+                    foreach (var p in Model.Listings)
+                    {
+                        <tr>
+                            <td>
+                                <div><strong>@p.Title</strong></div>
+                                <div class="muted">@p.City</div>
+                                <div class="muted">@p.Address</div>
+                            </td>
+                            <td>@p.SellerName</td>
+                            <td><strong>৳ @p.Price.ToString("N0")</strong></td>
+                            <td><span class="badge">@p.ApprovalStatus</span></td>
+                            <td>@p.CreatedDate.ToString("dd MMM yyyy")</td>
+                            <td>
+                                <a class="btn-view"
+                                   asp-controller="AdminProperties"
+                                   asp-action="Details"
+                                   asp-route-id="@p.PropertyId">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        <div class="sum">Total Listings: @Model.TotalListings</div>
+    </div>
+
+</div>

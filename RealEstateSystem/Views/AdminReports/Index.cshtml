@@ -202,7 +202,6 @@
 
     <!-- TOP SUMMARY CARDS (CLICKABLE) -->
     <section class="report-overview">
-        @* <a class="stat-card report-stat" asp-action="Index" asp-controller="AdminReports" asp-route-report="revenue" asp-route-range="@Model.Range"> *@
             
         <a class="stat-card report-stat"
            asp-action="RevenueDetails"
@@ -227,7 +226,16 @@
             </div>
         </a>
 
-        <a class="stat-card report-stat" asp-action="Index" asp-controller="AdminReports" asp-route-report="sales" asp-route-range="@Model.Range">
+        @* <a class="stat-card report-stat" asp-action="Index" asp-controller="AdminReports" asp-route-report="sales" asp-route-range="@Model.Range"> *@
+            
+        <a class="stat-card report-stat"
+           asp-action="SalesDetails"
+           asp-controller="AdminReports"
+           asp-route-range="@Model.Range"
+           asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")"
+           asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")">
+
+            
             <p class="stat-label">Completed Sales</p>
             <p class="stat-value">@Model.CompletedSales</p>
             <p class="stat-meta">Properties marked as sold in this period</p>
@@ -243,7 +251,15 @@
             </div>
         </a>
 
-        <a class="stat-card report-stat" asp-action="Index" asp-controller="AdminReports" asp-route-report="listings" asp-route-range="@Model.Range">
+
+        <a class="stat-card report-stat"
+           asp-action="ListingsDetails"
+           asp-controller="AdminReports"
+           asp-route-range="@Model.Range"
+           asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")"
+           asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")">
+
+            
             <p class="stat-label">New Listings</p>
             <p class="stat-value">@Model.NewListings</p>
             <p class="stat-meta">Fresh properties published by sellers</p>

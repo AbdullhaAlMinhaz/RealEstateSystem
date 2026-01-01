@@ -285,5 +285,115 @@ namespace RealEstateSystem.Controllers
 
             return View(vm);
         }
+
+        // GET: /AdminReports/SalesDetails
+        public async Task<IActionResult> SalesDetails(string range = "30", DateTime? startDate = null, DateTime? endDate = null)
+        {
+            DateTime end = (endDate ?? DateTime.Today).Date.AddDays(1).AddTicks(-1);
+            DateTime start;
+
+            if (range == "custom" && startDate.HasValue && endDate.HasValue)
+            {
+                start = startDate.Value.Date;
+                end = endDate.Value.Date.AddDays(1).AddTicks(-1);
+            }
+            else
+            {
+                int days = 30;
+                if (int.TryParse(range, out var parsedDays)) days = parsedDays;
+                start = DateTime.Today.AddDays(-days + 1).Date;
+            }
+
+            // Sold properties in range (same logic you already use in reports)
+            var soldList = await _context.Properties
+                .Include(p => p.Seller).ThenInclude(s => s.User)
+                .Where(p => p.Status == PropertyStatus.Sold)
+                .Where(p =>
+                    (p.UpdatedDate != null && p.UpdatedDate >= start && p.UpdatedDate <= end) ||
+                    (p.UpdatedDate == null && p.CreatedDate >= start && p.CreatedDate <= end)
+                )
+                .OrderByDescending(p => (p.UpdatedDate ?? p.CreatedDate))
+                .Select(p => new SalesPropertyRow
+                {
+                    PropertyId = p.PropertyId,
+                    Title = p.Title,
+                    City = p.City,
+                    Address = p.Address,
+                    Price = p.Price,
+                    SoldDate = (p.UpdatedDate ?? p.CreatedDate),
+                    SellerName = (p.Seller != null && p.Seller.User != null)
+                        ? (p.Seller.User.FirstName + " " + p.Seller.User.LastName)
+                        : ""
+                })
+                .ToListAsync();
+
+            var vm = new AdminSalesDetailsViewModel
+            {
+                Range = range,
+                StartDate = start,
+                EndDate = end.Date,
+                TotalSoldCount = soldList.Count,
+                TotalSoldValue = soldList.Sum(x => x.Price),
+                SoldProperties = soldList
+            };
+
+            ViewData["PageTitle"] = "Sales Details";
+            ViewData["PageSubtitle"] = "Properties marked as SOLD in the selected period.";
+
+            return View(vm);
+        }
+
+        // GET: /AdminReports/ListingsDetails
+        public async Task<IActionResult> ListingsDetails(string range = "30", DateTime? startDate = null, DateTime? endDate = null)
+        {
+            DateTime end = (endDate ?? DateTime.Today).Date.AddDays(1).AddTicks(-1);
+            DateTime start;
+
+            if (range == "custom" && startDate.HasValue && endDate.HasValue)
+            {
+                start = startDate.Value.Date;
+                end = endDate.Value.Date.AddDays(1).AddTicks(-1);
+            }
+            else
+            {
+                int days = 30;
+                if (int.TryParse(range, out var parsedDays)) days = parsedDays;
+                start = DateTime.Today.AddDays(-days + 1).Date;
+            }
+
+            var list = await _context.Properties
+                .Include(p => p.Seller).ThenInclude(s => s.User)
+                .Where(p => p.CreatedDate >= start && p.CreatedDate <= end)
+                .OrderByDescending(p => p.CreatedDate)
+                .Select(p => new ListingRow
+                {
+                    PropertyId = p.PropertyId,
+                    Title = p.Title,
+                    City = p.City,
+                    Address = p.Address,
+                    Price = p.Price,
+                    CreatedDate = p.CreatedDate,
+                    ApprovalStatus = p.ApprovalStatus.ToString(),
+                    SellerName = (p.Seller != null && p.Seller.User != null)
+                        ? (p.Seller.User.FirstName + " " + p.Seller.User.LastName)
+                        : ""
+                })
+                .ToListAsync();
+
+            var vm = new AdminListingsDetailsViewModel
+            {
+                Range = range,
+                StartDate = start,
+                EndDate = end.Date,
+                TotalListings = list.Count,
+                Listings = list
+            };
+
+            ViewData["PageTitle"] = "Listings Details";
+            ViewData["PageSubtitle"] = "New property listings created in the selected period.";
+
+            return View(vm);
+        }
+
     }
 }
