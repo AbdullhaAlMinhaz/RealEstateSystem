@@ -348,15 +348,13 @@
                                         <button type="submit" class="btn-table btn-danger btn-small">Reject</button>
                                     </form>
 
-                                    <button type="button"
-                                            class="btn-table btn-secondary btn-small js-view-property"
-                                            data-property-id="@p.PropertyId"
-                                            data-property-title="@p.Title"
-                                            data-property-seller="@p.SellerName"
-                                            data-property-submitted="@submittedText"
-                                            data-property-status="@statusText">
+                                    <a asp-controller="BuyerProperties"
+                                       asp-action="Details"
+                                       asp-route-id="@p.PropertyId">
                                         View
-                                    </button>
+                                    </a>
+
+
                                 </td>
                             </tr>
                         }

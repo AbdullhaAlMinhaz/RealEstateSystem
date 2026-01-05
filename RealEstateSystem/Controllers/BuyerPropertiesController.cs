@@ -158,23 +158,79 @@ namespace RealEstateSystem.Controllers
         }
 
 
+        //// ========= PROPERTY DETAILS =========
+        //public IActionResult Details(int id)
+        //{
+        //    if (!TrySetBuyerName())
+        //        return RedirectToAction("Login", "Account");
+
+        //    var property = _context.Properties
+        //        .Include(p => p.Seller)
+        //            .ThenInclude(s => s.User)
+        //        .Include(p => p.Images)
+        //        .FirstOrDefault(p => p.PropertyId == id &&
+        //                             p.ApprovalStatus == PropertyApprovalStatus.Approved);
+
+        //    if (property == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    var detailsModel = new PropertyDetailsViewModel
+        //    {
+        //        Property = property,
+        //        Images = property.Images?
+        //            .OrderBy(i => i.DisplayOrder)
+        //            .ThenByDescending(i => i.IsPrimary),
+        //        SellerName = $"{property.Seller?.User?.FirstName} {property.Seller?.User?.LastName}".Trim(),
+        //        SellerEmail = property.Seller?.User?.Email,
+        //        SellerPhone = property.Seller?.User?.PhoneNumber
+        //    };
+
+        //    return View(detailsModel);
+        //}
+
         // ========= PROPERTY DETAILS =========
         public IActionResult Details(int id)
         {
-            if (!TrySetBuyerName())
+            // ---- SESSION AUTH (your project uses this) ----
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
                 return RedirectToAction("Login", "Account");
 
-            var property = _context.Properties
+            var roleStr = HttpContext.Session.GetString("UserRole");
+            bool isAdmin = roleStr == ((int)UserRole.Admin).ToString();
+
+            // Buyer must exist in Buyers table, but Admin should be allowed
+            if (!isAdmin)
+            {
+                if (!TrySetBuyerName())
+                    return RedirectToAction("Login", "Account");
+            }
+            else
+            {
+                // optional: avoids null name issues if any UI expects it
+                ViewBag.BuyerName = "Admin";
+            }
+
+            // ---- PROPERTY QUERY ----
+            var query = _context.Properties
                 .Include(p => p.Seller)
                     .ThenInclude(s => s.User)
                 .Include(p => p.Images)
-                .FirstOrDefault(p => p.PropertyId == id &&
-                                     p.ApprovalStatus == PropertyApprovalStatus.Approved);
+                .Where(p => p.PropertyId == id);
+
+            // Buyer can ONLY view Approved properties
+            // Admin can view Pending/Waiting too
+            if (!isAdmin)
+            {
+                query = query.Where(p => p.ApprovalStatus == PropertyApprovalStatus.Approved);
+            }
+
+            var property = query.FirstOrDefault();
 
             if (property == null)
-            {
                 return NotFound();
-            }
 
             var detailsModel = new PropertyDetailsViewModel
             {
@@ -189,5 +245,8 @@ namespace RealEstateSystem.Controllers
 
             return View(detailsModel);
         }
+
+
+
     }
 }

@@ -1,4 +1,18 @@
 ﻿@model RealEstateSystem.ViewModels.PropertyDetailsViewModel
+@using RealEstateSystem.Models
+@using Microsoft.AspNetCore.Http
+
+@{
+    var roleStr = Context.Session.GetString("UserRole");
+    bool isAdminView = roleStr == ((int)UserRole.Admin).ToString();
+
+    // Optional but looks nicer: admin sees admin layout, buyer sees buyer layout
+    Layout = isAdminView
+        ? "~/Views/Shared/_AdminLayout.cshtml"
+        : "~/Views/Shared/_BuyerLayout.cshtml";
+}
+
+
 
 @{
     Layout = "~/Views/Shared/_BuyerLayout.cshtml";
@@ -575,64 +589,68 @@
     </section>
 
     <!-- SECTION 4: BOOK A FREE CONSULTATION / VISIT REQUEST -->
-    <section class="consult-section">
-        <div class="consult-inner">
-            <div class="consult-heading">
-                <h2>Book A Free Consultation</h2>
-            </div>
-
-            <div class="consult-contacts">
-                <span>📞 16604</span>
-                <span>📱 @Model.SellerPhone</span>
-                <span>✉️ @Model.SellerEmail</span>
-            </div>
-
-            <form class="consult-form"
-                  asp-controller="BuyerAppointments"
-                  asp-action="Book"
-                  method="post">
-                @Html.AntiForgeryToken()
-
-                <input type="hidden" name="propertyId" value="@prop.PropertyId" />
-
-                <div class="consult-grid">
-                    <input class="consult-input" type="text" name="Name" placeholder="Name" />
-                    <input class="consult-input" type="email" name="Email" placeholder="Email" />
+    @if (!isAdminView)
+    {
+        <section class="consult-section">
+            <div class="consult-inner">
+                <div class="consult-heading">
+                    <h2>Book A Free Consultation</h2>
                 </div>
 
-                <div class="consult-grid">
-                    <input class="consult-input"
-                           type="text"
-                           name="Phone"
-                           placeholder="Phone" />
-                    <input class="consult-input"
-                           type="datetime-local"
-                           style="display:none;" />
-
-                    <input class="consult-input"
-                           type="date"
-                           name="date"
-                           placeholder="Preferred Date" />
-
-                    <input class="consult-input"
-                           type="time"
-                           name="time"
-                           placeholder="Preferred Time" />
+                <div class="consult-contacts">
+                    <span>📞 16604</span>
+                    <span>📱 @Model.SellerPhone</span>
+                    <span>✉️ @Model.SellerEmail</span>
                 </div>
 
-                <textarea class="consult-textarea"
+                <form class="consult-form"
+                      asp-controller="BuyerAppointments"
+                      asp-action="Book"
+                      method="post">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="propertyId" value="@prop.PropertyId" />
+
+                    <div class="consult-grid">
+                        <input class="consult-input" type="text" name="Name" placeholder="Name" />
+                        <input class="consult-input" type="email" name="Email" placeholder="Email" />
+                    </div>
+
+                    <div class="consult-grid">
+                        <input class="consult-input"
+                               type="text"
+                               name="Phone"
+                               placeholder="Phone" />
+                        <input class="consult-input"
+                               type="datetime-local"
+                               style="display:none;" />
+
+                        <input class="consult-input"
+                               type="date"
+                               name="date"
+                               placeholder="Preferred Date" />
+
+                        <input class="consult-input"
+                               type="time"
+                               name="time"
+                               placeholder="Preferred Time" />
+                    </div>
+
+                    <textarea class="consult-textarea"
                           name="message"
                           rows="4"
                           placeholder="Message (optional)"></textarea>
 
-                <div class="consult-submit-wrap">
-                    <button type="submit" class="consult-submit">
-                        REQUEST VISIT
-                    </button>
-                </div>
-            </form>
+                    <div class="consult-submit-wrap">
+                        <button type="submit" class="consult-submit">
+                            REQUEST VISIT
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    }
 
-        </div>
-    </section>
+
 
 </section>
