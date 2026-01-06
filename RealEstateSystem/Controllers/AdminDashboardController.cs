@@ -53,23 +53,53 @@ namespace RealEstateSystem.Controllers
             // =========================
             // Pending approvals table
             // =========================
+
+
             var pending = _context.Properties
-                .Include(p => p.Seller)
-                    .ThenInclude(s => s.User)
-                .Where(p => p.ApprovalStatus == PropertyApprovalStatus.Pending)
-                .OrderByDescending(p => p.CreatedDate)
-                .Take(4)
-                .Select(p => new PendingPropertyApprovalViewModel
-                {
-                    PropertyId = p.PropertyId,
-                    Title = p.Title,
-                    SellerName = p.Seller != null && p.Seller.User != null
-                        ? p.Seller.User.FirstName + " " + p.Seller.User.LastName
-                        : "Unknown seller",
-                    SubmittedAt = p.CreatedDate,
-                    ApprovalStatus = p.ApprovalStatus
-                })
-                .ToList();
+            .Include(p => p.Seller).ThenInclude(s => s.User)
+            .Where(p => p.ApprovalStatus == PropertyApprovalStatus.Pending)
+            .OrderByDescending(p => p.SubmittedDate)
+            .Select(p => new PendingPropertyApprovalViewModel
+            {
+                PropertyId = p.PropertyId,
+                Title = p.Title,
+                SellerName = p.Seller.User.FirstName + " " + p.Seller.User.LastName,
+                SubmittedAt = p.SubmittedDate,
+                ApprovalStatus = p.ApprovalStatus,
+
+            // ✅ Modal fields
+            Address = p.Address,
+            City = p.City,
+            PropertyType = p.PropertyType.ToString(),
+            CommissionRatePercent = p.CommissionRatePercent
+            })
+            .ToList(); 
+            
+
+            //    var pending = _context.Properties
+            //        .Include(p => p.Seller)
+            //            .ThenInclude(s => s.User)
+            //        .Where(p => p.ApprovalStatus == PropertyApprovalStatus.Pending)
+            //        .OrderByDescending(p => p.CreatedDate)
+            //        .Take(4)
+
+            //        .Select(p => new PendingPropertyApprovalViewModel
+            //        {
+            //            PropertyId = p.PropertyId,
+            //            Title = p.Title,
+            //            SellerName = p.Seller != null && p.Seller.User != null
+            //? p.Seller.User.FirstName + " " + p.Seller.User.LastName
+            //: "Unknown seller",
+            //            SubmittedAt = p.CreatedDate,
+            //            ApprovalStatus = p.ApprovalStatus,
+
+            //            // ✅ for modal
+            //            Address = p.Address,
+            //            City = p.City,
+            //            PropertyType = p.PropertyType.ToString(),
+            //            CommissionRatePercent = p.CommissionRatePercent
+            //        });
+
 
             // =========================
             // Chart #1: Listing & Sales Overview (Dynamic months range)

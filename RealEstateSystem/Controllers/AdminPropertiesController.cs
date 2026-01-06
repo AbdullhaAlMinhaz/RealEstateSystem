@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using RealEstateSystem.Data;
 using RealEstateSystem.Models;
 using RealEstateSystem.ViewModels;
+using Microsoft.AspNetCore.Http;
+
 
 namespace RealEstateSystem.Controllers
 {
@@ -17,10 +19,36 @@ namespace RealEstateSystem.Controllers
             _context = context;
         }
 
+        //// ---------- APPROVE ----------
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public IActionResult Approve(int id)
+        //{
+        //    var property = _context.Properties.FirstOrDefault(p => p.PropertyId == id);
+        //    if (property == null)
+        //    {
+        //        return Json(new { success = false, message = "Property not found." });
+        //    }
+
+        //    property.ApprovalStatus = PropertyApprovalStatus.Approved;
+        //    property.Status = PropertyStatus.Available;
+        //    property.ApprovalDate = DateTime.Now;
+        //    property.UpdatedDate = DateTime.Now;
+
+        //    _context.SaveChanges();
+
+        //    // ✅ AJAX request -> JSON (toast + no page reload)
+        //    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        //        return Json(new { success = true, message = "Property approved successfully." });
+
+        //    // Normal request -> redirect back safely
+        //    return RedirectToAction("Pending", "AdminApprovals");
+        //}
+
         // ---------- APPROVE ----------
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Approve(int id)
+        public IActionResult Approve(int id, int commissionRatePercent)
         {
             var property = _context.Properties.FirstOrDefault(p => p.PropertyId == id);
             if (property == null)
@@ -28,20 +56,36 @@ namespace RealEstateSystem.Controllers
                 return Json(new { success = false, message = "Property not found." });
             }
 
+            // ✅ Validation (2% - 5%)
+            if (commissionRatePercent < 2 || commissionRatePercent > 5)
+            {
+                return Json(new { success = false, message = "Commission rate must be between 2% and 5%." });
+            }
+
+            // ✅ Save commission rate in Property (used later during Sold/Invoice)
+            property.CommissionRatePercent = commissionRatePercent;
+
+            // Approve property
             property.ApprovalStatus = PropertyApprovalStatus.Approved;
             property.Status = PropertyStatus.Available;
             property.ApprovalDate = DateTime.Now;
             property.UpdatedDate = DateTime.Now;
 
+            // Optional: set ApprovedBy (if you want)
+            var adminUserId = HttpContext.Session.GetInt32("UserId");
+            if (adminUserId != null)
+                property.ApprovedBy = adminUserId.Value;
+
             _context.SaveChanges();
 
-            // ✅ AJAX request -> JSON (toast + no page reload)
+            // ✅ AJAX request -> JSON
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 return Json(new { success = true, message = "Property approved successfully." });
 
             // Normal request -> redirect back safely
             return RedirectToAction("Pending", "AdminApprovals");
         }
+
 
         // ---------- REJECT ----------
         [HttpPost]

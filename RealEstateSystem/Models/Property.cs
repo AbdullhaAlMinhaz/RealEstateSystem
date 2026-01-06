@@ -73,6 +73,9 @@ namespace RealEstateSystem.Models
         public DateTime? UpdatedDate { get; set; }
 
         public DateTime SubmittedDate { get; set; } = DateTime.Now;
+        // Commission rate selected by Admin at approval time (2% to 5%)
+        public int CommissionRatePercent { get; set; } = 2;
+
 
         // Navigation collections
         public ICollection<PropertyImage> Images { get; set; }
@@ -86,3 +89,6 @@ namespace RealEstateSystem.Models
 
     }
 }
+
+
+

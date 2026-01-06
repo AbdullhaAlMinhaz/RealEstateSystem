@@ -88,7 +88,14 @@ namespace RealEstateSystem.Controllers
                 bool invoiceExists = _context.CommissionInvoices.Any(ci => ci.PropertyId == property.PropertyId);
                 if (!invoiceExists)
                 {
-                    int ratePercent = 2; // Default 2% (dropdown later in Step 3)
+                    //int ratePercent = 2; // Default 2% (dropdown later in Step 3)
+
+                    int ratePercent = property.CommissionRatePercent;
+                    if (ratePercent < 2 || ratePercent > 5)
+                    {
+                        ratePercent = 2; // fallback safety
+                    }
+
 
                     var invoice = new CommissionInvoice
                     {
