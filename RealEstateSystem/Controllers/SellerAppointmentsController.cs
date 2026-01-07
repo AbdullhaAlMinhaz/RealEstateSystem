@@ -2,15 +2,21 @@
 using Microsoft.EntityFrameworkCore;
 using RealEstateSystem.Data;
 using RealEstateSystem.Models;
+using RealEstateSystem.Services.Email;
+using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace RealEstateSystem.Controllers
 {
     public class SellerAppointmentsController : BaseSellerController
     {
-        public SellerAppointmentsController(ApplicationDbContext context)
+        private readonly IEmailService _emailService;
+
+        public SellerAppointmentsController(ApplicationDbContext context, IEmailService emailService)
             : base(context)
         {
+            _emailService = emailService;
         }
 
         public IActionResult Index()
@@ -34,13 +40,15 @@ namespace RealEstateSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdateStatus(int id, AppointmentStatus status)
+        public async Task<IActionResult> UpdateStatus(int id, AppointmentStatus status)
         {
             if (RedirectToLoginIfNotSeller(out var seller) is IActionResult redirect)
                 return redirect;
 
-            var appointment = _context.Appointments
-                .FirstOrDefault(a => a.AppointmentId == id && a.SellerId == seller.SellerId);
+            var appointment = await _context.Appointments
+                .Include(a => a.Buyer).ThenInclude(b => b.User)
+                .Include(a => a.Property)
+                .FirstOrDefaultAsync(a => a.AppointmentId == id && a.SellerId == seller.SellerId);
 
             if (appointment == null)
                 return NotFound();
@@ -48,33 +56,71 @@ namespace RealEstateSystem.Controllers
             appointment.Status = status;
             appointment.UpdatedDate = DateTime.Now;
 
+            await _context.SaveChangesAsync();
 
-            //........ Message for the seller in pop up to show the notification..................
-
-
-            string message;
+            // ✅ POPUP message for seller
+            string sellerPopup;
             switch (status)
             {
                 case AppointmentStatus.Confirmed:
-                    message = "You have confirmed this appointment.";
+                    sellerPopup = "You have confirmed this appointment.";
                     break;
+
+                case AppointmentStatus.Rescheduled:
+                    sellerPopup = "You marked this appointment as rescheduled.";
+                    break;
+
                 case AppointmentStatus.Cancelled:
-                    message = "You have cancelled this appointment.";
+                    // In your project, there is NO 'Rejected' status.
+                    // So we use Cancelled as "Rejected/Cancelled" by seller.
+                    sellerPopup = "You have cancelled this appointment.";
                     break;
+
                 case AppointmentStatus.Completed:
-                    message = "You marked this appointment as completed.";
+                    sellerPopup = "You marked this appointment as completed.";
                     break;
+
+                case AppointmentStatus.Requested:
+                    sellerPopup = "Appointment status set to requested.";
+                    break;
+
                 default:
-                    message = "Appointment updated.";
+                    sellerPopup = "Appointment updated.";
                     break;
             }
 
-            appointment.UpdatedDate = DateTime.Now;
-            _context.SaveChanges();
+            TempData["AppointmentSuccess"] = sellerPopup;
 
-            TempData["AppointmentSuccess"] = message;
+            // ✅ EMAIL TO BUYER
+            try
+            {
+                var buyerEmail = appointment.Buyer?.User?.Email;
+                var buyerName = $"{appointment.Buyer?.User?.FirstName} {appointment.Buyer?.User?.LastName}".Trim();
+                if (string.IsNullOrWhiteSpace(buyerName)) buyerName = "Buyer";
 
-            _context.SaveChanges();
+                var subject = $"Appointment Status Updated: {appointment.Property?.Title}";
+
+                var body =
+$@"Hello {buyerName},
+
+Your appointment request has been updated by the seller.
+
+Property: {appointment.Property?.Title}
+Date: {appointment.AppointmentDate:yyyy-MM-dd}
+Time: {appointment.AppointmentTime}
+New Status: {appointment.Status}
+
+Thanks,
+Real Estate Property Management System
+Developed By Abdullah Al Minhaz";
+
+                if (!string.IsNullOrWhiteSpace(buyerEmail))
+                    await _emailService.SendEmailAsync(buyerEmail, subject, body);
+            }
+            catch
+            {
+                // Don't break status update if email fails
+            }
 
             var referer = Request.Headers["Referer"].ToString();
             if (!string.IsNullOrEmpty(referer))
@@ -82,7 +128,5 @@ namespace RealEstateSystem.Controllers
 
             return RedirectToAction("Index");
         }
-
-
     }
 }

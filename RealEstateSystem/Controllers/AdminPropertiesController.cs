@@ -1,93 +1,94 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RealEstateSystem.Data;
 using RealEstateSystem.Models;
 using RealEstateSystem.ViewModels;
 using Microsoft.AspNetCore.Http;
-
+using RealEstateSystem.Services.Email;
 
 namespace RealEstateSystem.Controllers
 {
     public class AdminPropertiesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
 
-        public AdminPropertiesController(ApplicationDbContext context)
+        public AdminPropertiesController(ApplicationDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
-        //// ---------- APPROVE ----------
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public IActionResult Approve(int id)
-        //{
-        //    var property = _context.Properties.FirstOrDefault(p => p.PropertyId == id);
-        //    if (property == null)
-        //    {
-        //        return Json(new { success = false, message = "Property not found." });
-        //    }
-
-        //    property.ApprovalStatus = PropertyApprovalStatus.Approved;
-        //    property.Status = PropertyStatus.Available;
-        //    property.ApprovalDate = DateTime.Now;
-        //    property.UpdatedDate = DateTime.Now;
-
-        //    _context.SaveChanges();
-
-        //    // ✅ AJAX request -> JSON (toast + no page reload)
-        //    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-        //        return Json(new { success = true, message = "Property approved successfully." });
-
-        //    // Normal request -> redirect back safely
-        //    return RedirectToAction("Pending", "AdminApprovals");
-        //}
-
-        // ---------- APPROVE ----------
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Approve(int id, int commissionRatePercent)
+        public async Task<IActionResult> Approve(int id, int commissionRatePercent)
         {
-            var property = _context.Properties.FirstOrDefault(p => p.PropertyId == id);
+            var property = await _context.Properties
+                .Include(p => p.Seller)
+                    .ThenInclude(s => s.User)
+                .FirstOrDefaultAsync(p => p.PropertyId == id);
+
             if (property == null)
             {
                 return Json(new { success = false, message = "Property not found." });
             }
 
-            // ✅ Validation (2% - 5%)
             if (commissionRatePercent < 2 || commissionRatePercent > 5)
             {
                 return Json(new { success = false, message = "Commission rate must be between 2% and 5%." });
             }
 
-            // ✅ Save commission rate in Property (used later during Sold/Invoice)
             property.CommissionRatePercent = commissionRatePercent;
 
-            // Approve property
             property.ApprovalStatus = PropertyApprovalStatus.Approved;
             property.Status = PropertyStatus.Available;
             property.ApprovalDate = DateTime.Now;
             property.UpdatedDate = DateTime.Now;
 
-            // Optional: set ApprovedBy (if you want)
             var adminUserId = HttpContext.Session.GetInt32("UserId");
             if (adminUserId != null)
                 property.ApprovedBy = adminUserId.Value;
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            // ✅ AJAX request -> JSON
+            // ✅ EMAIL TO SELLER
+            try
+            {
+                var sellerEmail = property.Seller?.User?.Email;
+                var sellerName = $"{property.Seller?.User?.FirstName} {property.Seller?.User?.LastName}".Trim();
+                if (string.IsNullOrWhiteSpace(sellerName)) sellerName = "Seller";
+
+                var subject = $"Your Property is Approved: {property.Title}";
+                var body =
+$@"Hello {sellerName},
+
+Good news! Your property has been approved in the system and is now available for buyers.
+
+Property: {property.Title}
+Location: {property.City}, {property.AreaOrLocation}
+Commission Rate: {property.CommissionRatePercent}%
+
+Thanks,
+Real Estate Property Management System
+Developed By Abdullah Al Minhaz";
+
+                if (!string.IsNullOrWhiteSpace(sellerEmail))
+                    await _emailService.SendEmailAsync(sellerEmail, subject, body);
+            }
+            catch
+            {
+                // Don't break approval if email fails
+            }
+
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 return Json(new { success = true, message = "Property approved successfully." });
 
-            // Normal request -> redirect back safely
             return RedirectToAction("Pending", "AdminApprovals");
         }
 
-
-        // ---------- REJECT ----------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Reject(int id)
@@ -109,8 +110,6 @@ namespace RealEstateSystem.Controllers
             return RedirectToAction("Pending", "AdminApprovals");
         }
 
-
-        // ---------- EDIT (GET) ----------
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -142,7 +141,6 @@ namespace RealEstateSystem.Controllers
             return View(model);
         }
 
-        // ---------- EDIT (POST) ----------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, AdminPropertyEditViewModel model)
@@ -181,7 +179,6 @@ namespace RealEstateSystem.Controllers
             return RedirectToAction("ActiveListings");
         }
 
-        // ---------- DETAILS (ADMIN VIEW) ----------
         [HttpGet]
         public IActionResult Details(int id)
         {
@@ -208,7 +205,6 @@ namespace RealEstateSystem.Controllers
             return View(model);
         }
 
-        // ---------- ACTIVE LISTINGS ----------
         public IActionResult ActiveListings()
         {
             var properties = _context.Properties

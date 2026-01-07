@@ -1,21 +1,25 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using RealEstateSystem.Data;
 using RealEstateSystem.Models;
 using RealEstateSystem.ViewModels;
+using RealEstateSystem.Services.Email;
 
 namespace RealEstateSystem.Controllers
 {
     public class BuyerAppointmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
 
-        public BuyerAppointmentsController(ApplicationDbContext context)
+        public BuyerAppointmentsController(ApplicationDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         // --------------------------------------------------------------------
@@ -48,7 +52,6 @@ namespace RealEstateSystem.Controllers
 
         // --------------------------------------------------------------------
         // GET: /BuyerAppointments
-        // Shows upcoming & past visits
         // --------------------------------------------------------------------
         public IActionResult Index()
         {
@@ -121,18 +124,19 @@ namespace RealEstateSystem.Controllers
 
         // --------------------------------------------------------------------
         // POST: /BuyerAppointments/Book
-        // Called from property details page
+        // Buyer books -> Email Seller
         // --------------------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Book(int propertyId, DateTime date, string time, string message)
+        public async Task<IActionResult> Book(int propertyId, DateTime date, string time, string message)
         {
             if (!TrySetBuyerName(out var buyer))
                 return RedirectToAction("Login", "Account");
 
-            var property = _context.Properties
+            var property = await _context.Properties
                 .Include(p => p.Seller)
-                .FirstOrDefault(p => p.PropertyId == propertyId);
+                    .ThenInclude(s => s.User)
+                .FirstOrDefaultAsync(p => p.PropertyId == propertyId);
 
             if (property == null)
                 return NotFound();
@@ -152,8 +156,7 @@ namespace RealEstateSystem.Controllers
                 return RedirectToAction("Details", "BuyerProperties", new { id = propertyId });
             }
 
-            // Optional: avoid duplicate active bookings for same property & time
-            var hasExisting = _context.Appointments.Any(a =>
+            var hasExisting = await _context.Appointments.AnyAsync(a =>
                 a.PropertyId == propertyId &&
                 a.BuyerId == buyer.BuyerId &&
                 (a.Status == AppointmentStatus.Requested ||
@@ -182,7 +185,47 @@ namespace RealEstateSystem.Controllers
             };
 
             _context.Appointments.Add(appointment);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+
+            // ✅ EMAIL TO SELLER
+            try
+            {
+                var sellerEmail = property.Seller?.User?.Email;
+                var sellerName = $"{property.Seller?.User?.FirstName} {property.Seller?.User?.LastName}".Trim();
+                if (string.IsNullOrWhiteSpace(sellerName)) sellerName = "Seller";
+
+                var buyerName = $"{buyer.User?.FirstName} {buyer.User?.LastName}".Trim();
+                if (string.IsNullOrWhiteSpace(buyerName)) buyerName = "Buyer";
+
+                var subject = $"New Appointment Request: {property.Title}";
+                var body =
+$@"Hello {sellerName},
+
+A buyer has requested an appointment to visit your property.
+
+Property: {property.Title}
+Location: {property.City}, {property.AreaOrLocation}
+Date: {dateOnly:yyyy-MM-dd}
+Time: {timeSpan}
+
+Buyer: {buyerName}
+Buyer Email: {buyer.User?.Email}
+Buyer Phone: {buyer.User?.PhoneNumber}
+
+Message:
+{(string.IsNullOrWhiteSpace(message) ? "N/A" : message)}
+
+Thanks,
+Real Estate Property Management System
+Developed By Abdullah Al Minhaz";
+
+                if (!string.IsNullOrWhiteSpace(sellerEmail))
+                    await _emailService.SendEmailAsync(sellerEmail, subject, body);
+            }
+            catch
+            {
+                // Don't break booking if email fails
+            }
 
             TempData["AppointmentSuccess"] =
                 "Your visit request has been sent to the seller.";
@@ -192,7 +235,6 @@ namespace RealEstateSystem.Controllers
 
         // --------------------------------------------------------------------
         // POST: /BuyerAppointments/Cancel/5
-        // Allows buyer to cancel their own appointment
         // --------------------------------------------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -227,7 +269,6 @@ namespace RealEstateSystem.Controllers
             return RedirectToAction("Index");
         }
 
-        // You can keep Details simple for now or expand later
         public IActionResult Details(int id)
         {
             if (!TrySetBuyerName(out var buyer))
