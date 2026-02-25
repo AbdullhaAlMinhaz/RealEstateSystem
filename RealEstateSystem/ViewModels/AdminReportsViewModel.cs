@@ -10,7 +10,7 @@ namespace RealEstateSystem.ViewModels
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 
-        // ✅ NEW (tab)
+        //  NEW (tab)
         public string ActiveReport { get; set; } = "sales";
 
         // Top cards
@@ -18,7 +18,7 @@ namespace RealEstateSystem.ViewModels
         public int CompletedSales { get; set; }
         public int NewListings { get; set; }
 
-        // ✅ NEW (trends)
+        //  NEW (trends)
         public decimal RevenueChangePercent { get; set; } = 0;
         public int SalesChangeValue { get; set; } = 0;
         public decimal ListingsChangePercent { get; set; } = 0;

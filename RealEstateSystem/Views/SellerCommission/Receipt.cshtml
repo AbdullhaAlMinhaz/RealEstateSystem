@@ -33,6 +33,42 @@
     .btn-print {
         margin-top: 16px;
     }
+
+    @@media print {
+    /* hide everything */
+    body * {
+        visibility: hidden !important;
+    }
+
+    /* show only receipt box */
+    .receipt-box, .receipt-box * {
+        visibility: visible !important;
+    }
+
+    /* place receipt at top left for clean PDF */
+    .receipt-box {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        max-width: 750px;
+        margin: 0;
+        border: none;
+        box-shadow: none;
+    }
+
+    /* hide print button */
+    .btn-print {
+        display: none !important;
+    }
+
+    /* A4 printing */
+    @@page {
+        size: A4;
+        margin: 12mm;
+    }
+}
+
 </style>
 
 <div class="receipt-box">
@@ -73,12 +109,26 @@
 
     <div class="receipt-row">
         <div><b>Payment Method</b></div>
-        <div>@Model.PaymentMethod</div>
+        <div>
+            @{
+                string paymentText =
+                (Model.PaymentMethod == null && !string.IsNullOrWhiteSpace(Model.GatewayTranId))
+                ? "SSLCommerz"
+                : (Model.PaymentMethod == RealEstateSystem.Models.CommissionPaymentMethod.Other && !string.IsNullOrWhiteSpace(Model.GatewayTranId))
+                ? "SSLCommerz"
+                : Model.PaymentMethod?.ToString() ?? "N/A";
+            }
+            @paymentText
+        </div>
     </div>
 
     <div class="receipt-row">
         <div><b>Transaction ID</b></div>
-        <div>@Model.TransactionId</div>
+        <div>
+            @(string.IsNullOrWhiteSpace(Model.TransactionId)
+                        ? Model.GatewayTranId
+                        : Model.TransactionId)
+        </div>
     </div>
 
     <div class="receipt-row">

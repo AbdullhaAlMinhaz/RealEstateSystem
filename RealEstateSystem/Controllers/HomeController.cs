@@ -26,8 +26,7 @@ namespace RealEstateSystem.Controllers
         {
             const int pageSize = 6;
 
-            // ? Show all properties except Removed/Rejected
-            // (Because many properties in your DB may be Pending/InReview and were getting filtered out)
+            
             var query = _context.Properties
                 .AsNoTracking()
                 .Include(p => p.Images)

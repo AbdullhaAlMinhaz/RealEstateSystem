@@ -22,9 +22,8 @@ namespace RealEstateSystem.Controllers
             _emailService = emailService;
         }
 
-        // --------------------------------------------------------------------
         // Helpers
-        // --------------------------------------------------------------------
+       
         private bool TrySetBuyerName(out Buyer buyer)
         {
             buyer = null;
@@ -50,9 +49,9 @@ namespace RealEstateSystem.Controllers
             return TrySetBuyerName(out _);
         }
 
-        // --------------------------------------------------------------------
+        
         // GET: /BuyerAppointments
-        // --------------------------------------------------------------------
+       
         public IActionResult Index()
         {
             if (!TrySetBuyerName(out var buyer))
@@ -122,10 +121,10 @@ namespace RealEstateSystem.Controllers
             return View(model);
         }
 
-        // --------------------------------------------------------------------
+        
         // POST: /BuyerAppointments/Book
-        // Buyer books -> Email Seller
-        // --------------------------------------------------------------------
+        // Buyer Email to Seller
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Book(int propertyId, DateTime date, string time, string message)
@@ -187,7 +186,7 @@ namespace RealEstateSystem.Controllers
             _context.Appointments.Add(appointment);
             await _context.SaveChangesAsync();
 
-            // ✅ EMAIL TO SELLER
+            // EMAIL TO SELLER
             try
             {
                 var sellerEmail = property.Seller?.User?.Email;
@@ -217,14 +216,14 @@ Message:
 
 Thanks,
 Real Estate Property Management System
-Developed By Abdullah Al Minhaz";
+Developed By Abdullha Al Minhaz";
 
                 if (!string.IsNullOrWhiteSpace(sellerEmail))
                     await _emailService.SendEmailAsync(sellerEmail, subject, body);
             }
             catch
             {
-                // Don't break booking if email fails
+                
             }
 
             TempData["AppointmentSuccess"] =
@@ -233,9 +232,7 @@ Developed By Abdullah Al Minhaz";
             return RedirectToAction("Details", "BuyerProperties", new { id = propertyId });
         }
 
-        // --------------------------------------------------------------------
-        // POST: /BuyerAppointments/Cancel/5
-        // --------------------------------------------------------------------
+        // POST: /BuyerAppointments/Cancel
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Cancel(int id)

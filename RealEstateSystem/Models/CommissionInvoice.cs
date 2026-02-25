@@ -18,7 +18,7 @@ namespace RealEstateSystem.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal ListingPrice { get; set; }
 
-        // Only 2% to 5% (we’ll use dropdown later)
+        
         public int CommissionRatePercent { get; set; } = 2;
 
         [Column(TypeName = "decimal(18,2)")]
@@ -28,14 +28,14 @@ namespace RealEstateSystem.Models
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
-        // (Step 3 will use these fields)
+        
         public CommissionPaymentMethod? PaymentMethod { get; set; }
         public string TransactionId { get; set; } = "";
         public string ProofImageUrl { get; set; } = "";
 
         public DateTime? SubmittedDate { get; set; }
 
-        // (Step 4 will use these fields)
+       
         public string AdminNote { get; set; } = "";
         public DateTime? VerifiedDate { get; set; }
 

@@ -6,12 +6,10 @@
     var roleStr = Context.Session.GetString("UserRole");
     bool isAdminView = roleStr == ((int)UserRole.Admin).ToString();
 
-    // Optional but looks nicer: admin sees admin layout, buyer sees buyer layout
     Layout = isAdminView
         ? "~/Views/Shared/_AdminLayout.cshtml"
         : "~/Views/Shared/_BuyerLayout.cshtml";
 }
-
 
 
 @{
@@ -202,7 +200,6 @@
             transform: translateY(-1px);
         }
 
-    /* === SECTION 2: FEATURES (IMAGE STRIP) === */
 
     .features-section {
         background: radial-gradient(circle at top left, #e0f2fe 0, #f9fafb 42%, #eef2ff 100%);
@@ -276,7 +273,7 @@
         color: #b91c1c;
     }
 
-    /* === SECTION 3: MAP === */
+    /*  MAP */
 
     .map-section {
         background: radial-gradient(circle at top left, #e0f2fe 0, #f9fafb 42%, #eef2ff 100%);
@@ -297,7 +294,7 @@
         border: 0;
     }
 
-    /* === SECTION 4: BOOK CONSULTATION === */
+    /*  BOOK CONSULTATION  */
 
     .consult-section {
         background: radial-gradient(circle at top left, #e0f2fe 0, #f9fafb 42%, #eef2ff 100%);
@@ -405,7 +402,7 @@
             transform: translateY(-1px);
         }
 
-    /* === RESPONSIVE === */
+    /*  RESPONSIVE */
 
     @@media (max-width: 1024px) {
         .property-main-grid {
@@ -574,7 +571,7 @@
         </div>
     </section>
 
-    <!-- SECTION 3: MAP -->
+    <!-- MAP -->
     <section class="map-section">
         <h2 class="section-title">MAP</h2>
 
@@ -588,13 +585,13 @@
         </div>
     </section>
 
-    <!-- SECTION 4: BOOK A FREE CONSULTATION / VISIT REQUEST -->
+    <!--  BOOK A FREE CONSULTATION / VISIT REQUEST -->
     @if (!isAdminView)
     {
         <section class="consult-section">
             <div class="consult-inner">
                 <div class="consult-heading">
-                    <h2>Book A Free Consultation</h2>
+                    <h2>Book A Free Appointment</h2>
                 </div>
 
                 <div class="consult-contacts">

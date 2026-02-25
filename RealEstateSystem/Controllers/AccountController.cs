@@ -26,7 +26,7 @@ namespace RealEstateSystem.Controllers
             return View();
         }
 
-        // ========== REGISTER (POST) ==========
+        //  REGISTER (POST) 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Register(RegisterViewModel model)
@@ -78,7 +78,7 @@ namespace RealEstateSystem.Controllers
                 var seller = new Seller
                 {
                     UserId = user.UserId,
-                    SellerType = SellerType.Owner,          // adjust default if you want
+                    SellerType = SellerType.Owner,          
                     RegistrationStatus = RegistrationStatus.Pending,
                     JoinedDate = DateTime.Now
                 };
@@ -97,14 +97,14 @@ namespace RealEstateSystem.Controllers
 
         }
 
-        // ========== LOGIN (GET) ==========
+        // LOGIN (GET) 
         [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
-        // ========== LOGIN (POST) ==========
+        // LOGIN (POST) 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Login(LoginViewModel model)
@@ -145,7 +145,7 @@ namespace RealEstateSystem.Controllers
             }
         }
 
-        // ========== LOGOUT ==========
+        // LOGOUT
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();

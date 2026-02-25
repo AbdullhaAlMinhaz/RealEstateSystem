@@ -91,7 +91,7 @@ namespace RealEstateSystem.Controllers
             return View(cards);
         }
 
-        // -------- POST: /BuyerWishlist/Toggle --------
+        // -------- POST: /BuyerWishlist/ --------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Toggle(int propertyId)
@@ -122,7 +122,7 @@ namespace RealEstateSystem.Controllers
 
             _context.SaveChanges();
 
-            // send back to the page the user came from (browse, details, etc.)
+            
             var referer = Request.Headers["Referer"].ToString();
             if (!string.IsNullOrEmpty(referer))
                 return Redirect(referer);

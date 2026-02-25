@@ -22,6 +22,7 @@ namespace RealEstateSystem.Services.Email
             if (string.IsNullOrWhiteSpace(toEmail))
                 throw new ArgumentException("Recipient email is required.", nameof(toEmail));
 
+            // Mailkit
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(_settings.FromName, _settings.FromEmail));
             message.To.Add(MailboxAddress.Parse(toEmail));

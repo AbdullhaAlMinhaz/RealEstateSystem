@@ -17,10 +17,7 @@ namespace RealEstateSystem.Controllers
         {
             _context = context;
         }
-
-        // =========================
-        // LIST: ALL USERS
-        // =========================
+        // All User
         public IActionResult Index()
         {
             var model = new AdminUserListViewModel
@@ -38,9 +35,7 @@ namespace RealEstateSystem.Controllers
             return View("UserList", model);
         }
 
-        // =========================
-        // LIST: BUYERS ONLY
-        // =========================
+        // Buyers
         public IActionResult Buyers()
         {
             var model = new AdminUserListViewModel
@@ -59,9 +54,7 @@ namespace RealEstateSystem.Controllers
             return View("UserList", model);
         }
 
-        // =========================
-        // LIST: SELLERS ONLY
-        // =========================
+        // Sellers
         public IActionResult Sellers()
         {
             var model = new AdminUserListViewModel
@@ -80,9 +73,8 @@ namespace RealEstateSystem.Controllers
             return View("UserList", model);
         }
 
-        // =========================
-        // EDIT USER (GET)
-        // =========================
+        //Edit Users
+
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -108,9 +100,8 @@ namespace RealEstateSystem.Controllers
             return View(vm);
         }
 
-        // =========================
-        // EDIT USER (POST)
-        // =========================
+        // User Edit post
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, AdminUserEditViewModel model)
@@ -137,13 +128,11 @@ namespace RealEstateSystem.Controllers
             _context.SaveChanges();
             TempData["SuccessMessage"] = "User updated successfully.";
 
-            // after editing, go back to All Users
             return RedirectToAction(nameof(Index));
         }
 
-        // =========================
-        // DELETE USER (POST)
-        // =========================
+        // Delete
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)

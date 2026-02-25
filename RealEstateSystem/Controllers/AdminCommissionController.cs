@@ -16,7 +16,8 @@ namespace RealEstateSystem.Controllers
             _context = context;
         }
 
-        // ================= LIST ALL INVOICES =================
+        // invoice List
+
         public IActionResult Index()
         {
             var invoices = _context.CommissionInvoices
@@ -30,7 +31,8 @@ namespace RealEstateSystem.Controllers
             return View(invoices);
         }
 
-        // ================= VIEW DETAILS =================
+        // Details View
+
         public IActionResult Details(int id)
         {
             var invoice = _context.CommissionInvoices
@@ -46,7 +48,7 @@ namespace RealEstateSystem.Controllers
             return View(invoice);
         }
 
-        // ================= APPROVE =================
+        // APPROVE 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Approve(int id, string adminNote)
@@ -73,7 +75,7 @@ namespace RealEstateSystem.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // ================= REJECT =================
+        //  REJECT 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Reject(int id, string adminNote)

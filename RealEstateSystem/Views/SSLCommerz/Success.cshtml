@@ -1,0 +1,70 @@
+﻿@model RealEstateSystem.ViewModels.PaymentSuccessViewModel
+@{
+    Layout = "_SellerLayout";
+    ViewData["PageTitle"] = ViewData["PageTitle"] ?? "Payment Successful";
+    ViewData["PageSubtitle"] = ViewData["PageSubtitle"] ?? "Your commission payment has been completed.";
+}
+
+<style>
+    .pay-success-wrap { min-height: calc(100vh - 140px); display:flex; align-items:center; justify-content:center; padding:2.5rem 1rem; }
+    .pay-success-card { width:100%; max-width:720px; border-radius:22px; overflow:hidden; box-shadow:0 18px 55px rgba(15,23,42,.18); background:#fff; }
+    .pay-success-top { background:linear-gradient(135deg,#16a34a,#22c55e); padding:2rem 1.5rem; text-align:center; color:#fff; }
+    .pay-success-icon { width:56px; height:56px; border-radius:14px; background:rgba(255,255,255,.18); margin:0 auto .8rem; display:grid; place-items:center; font-size:28px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.25); }
+    .pay-success-title { font-size:1.6rem; font-weight:700; margin:0; }
+    .pay-success-sub { margin:.6rem 0 0; opacity:.95; font-weight:500; }
+    .pay-success-body { padding:1.5rem 1.5rem 1.75rem; }
+    .pay-success-thank { text-align:center; font-size:1.05rem; font-weight:600; color:#15803d; margin:.3rem 0 1.25rem; }
+
+    .pay-table { width:100%; border-collapse:collapse; border-radius:14px; border:1px solid #e5e7eb; overflow:hidden; }
+    .pay-table td { padding:.9rem 1rem; border-bottom:1px solid #e5e7eb; font-size:.95rem; }
+    .pay-table tr:last-child td { border-bottom:none; }
+    .pay-table td:first-child { width:38%; background:#f8fafc; color:#334155; font-weight:600; }
+
+    .status-pill { display:inline-flex; align-items:center; padding:.25rem .65rem; border-radius:999px; background:rgba(34,197,94,.12); color:#15803d; font-weight:700; font-size:.85rem; }
+
+    .pay-actions { display:flex; justify-content:center; margin-top:1.25rem; }
+    .btn-dashboard { display:inline-flex; align-items:center; gap:.5rem; border:none; background:#15803d; color:#fff; padding:.75rem 1.25rem; border-radius:999px; font-weight:700; cursor:pointer; text-decoration:none; box-shadow:0 10px 25px rgba(21,128,61,.25); }
+</style>
+
+<div class="pay-success-wrap">
+    <div class="pay-success-card">
+        <div class="pay-success-top">
+            <div class="pay-success-icon">✓</div>
+            <h1 class="pay-success-title">Payment Successful</h1>
+            <p class="pay-success-sub">Commission paid for: <strong>@Model.PropertyTitle</strong></p>
+        </div>
+
+        <div class="pay-success-body">
+            <div class="pay-success-thank">Thank you!</div>
+
+            <table class="pay-table">
+                <tr>
+                    <td>Transaction ID</td>
+                    <td>@Model.TransactionId</td>
+                </tr>
+                <tr>
+                    <td>Amount Paid</td>
+                    <td>৳ @Model.AmountPaid.ToString("N2")</td>
+                </tr>
+                <tr>
+                    <td>Status</td>
+                    <td><span class="status-pill">@Model.StatusText</span></td>
+                </tr>
+                <tr>
+                    <td>Payment Date</td>
+                    <td>@Model.PaymentDate.ToString("dd MMM yyyy, hh:mm tt")</td>
+                </tr>
+                <tr>
+                    <td>Message</td>
+                    <td>@Model.Message</td>
+                </tr>
+            </table>
+
+            <div class="pay-actions">
+                <a class="btn-dashboard" asp-controller="SellerDashboard" asp-action="Index">
+                    🏠 Go to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

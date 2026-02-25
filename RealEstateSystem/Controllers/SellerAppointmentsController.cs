@@ -58,7 +58,7 @@ namespace RealEstateSystem.Controllers
 
             await _context.SaveChangesAsync();
 
-            // ✅ POPUP message for seller
+            //  POPUP message for seller
             string sellerPopup;
             switch (status)
             {
@@ -71,8 +71,7 @@ namespace RealEstateSystem.Controllers
                     break;
 
                 case AppointmentStatus.Cancelled:
-                    // In your project, there is NO 'Rejected' status.
-                    // So we use Cancelled as "Rejected/Cancelled" by seller.
+
                     sellerPopup = "You have cancelled this appointment.";
                     break;
 
@@ -91,7 +90,7 @@ namespace RealEstateSystem.Controllers
 
             TempData["AppointmentSuccess"] = sellerPopup;
 
-            // ✅ EMAIL TO BUYER
+            //  EMAIL TO BUYER
             try
             {
                 var buyerEmail = appointment.Buyer?.User?.Email;
@@ -112,14 +111,14 @@ New Status: {appointment.Status}
 
 Thanks,
 Real Estate Property Management System
-Developed By Abdullah Al Minhaz";
+Developed By Abdullha Al Minhaz";
 
                 if (!string.IsNullOrWhiteSpace(buyerEmail))
                     await _emailService.SendEmailAsync(buyerEmail, subject, body);
             }
             catch
             {
-                // Don't break status update if email fails
+               
             }
 
             var referer = Request.Headers["Referer"].ToString();

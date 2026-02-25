@@ -25,14 +25,14 @@ namespace RealEstateSystem.Controllers
             _httpFactory = httpFactory;
         }
 
-        // ==========================
+        
+
         // 1) INIT: Create Session + Redirect to Gateway
-        // ==========================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Init(int invoiceId)
         {
-            // Load invoice + property + seller user info (so we can send real customer fields)
+            // Load invoice + property + seller user info 
             var invoice = await _context.CommissionInvoices
                 .Include(i => i.Property)
                 .Include(i => i.Seller)
@@ -57,7 +57,6 @@ namespace RealEstateSystem.Controllers
             invoice.GatewayStatus = "INITIATED";
             await _context.SaveChangesAsync();
 
-
             // SSLCOMMERZ settings
             var storeId = _config["SSLCommerz:StoreId"];
             var storePass = _config["SSLCommerz:StorePassword"];
@@ -69,12 +68,16 @@ namespace RealEstateSystem.Controllers
                 return RedirectToAction("Index", "SellerProperties");
             }
 
-            // Callback base
-            // NOTE: For SSLCOMMERZ callbacks, you MUST use a public HTTPS URL (ngrok or deployed)
-            string callbackBase = "http://localhost:5240";
+            // Callback base:
+            // Prefer config if provided (useful for ngrok / deployed HTTPS),
+            // otherwise fall back to current request host.
+            var callbackBaseFromConfig = _config["SSLCommerz:CallbackBaseUrl"]?.TrimEnd('/');
+            string callbackBase = !string.IsNullOrWhiteSpace(callbackBaseFromConfig)
+                ? callbackBaseFromConfig
+                : $"{Request.Scheme}://{Request.Host}";
 
-            // Initiate endpoint (your email uses v3)
-            string initiateUrl = $"{baseUrl}/gwprocess/v3/api.php";
+            // Initiate endpoint
+            string initiateUrl = $"{baseUrl}/gwprocess/v4/api.php";
 
             // Real customer info
             var user = invoice.Seller?.User;
@@ -84,6 +87,13 @@ namespace RealEstateSystem.Controllers
 
             // Amount format must be dot-decimal
             string totalAmount = invoice.CommissionAmount.ToString("0.00", CultureInfo.InvariantCulture);
+
+            // Safety: amount must be positive
+            if (!decimal.TryParse(totalAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out var amt) || amt <= 0)
+            {
+                TempData["Error"] = "Invalid commission amount. Please contact admin.";
+                return RedirectToAction("Index", "SellerProperties");
+            }
 
             // SSLCOMMERZ initiate fields
             var postData = new Dictionary<string, string>
@@ -102,9 +112,9 @@ namespace RealEstateSystem.Controllers
                 // Highly recommended / often required
                 ["product_name"] = "Property Commission",
                 ["product_category"] = "Service",
-                ["product_profile"] = "general",   // IMPORTANT
+                ["product_profile"] = "general",
                 ["shipping_method"] = "NO",
-                ["cart_id"] = tranId,              // IMPORTANT
+                ["cart_id"] = tranId,
 
                 // Customer info
                 ["cus_name"] = cusName,
@@ -120,13 +130,43 @@ namespace RealEstateSystem.Controllers
                 ["value_a"] = invoice.CommissionInvoiceId.ToString()
             };
 
-            var client = _httpFactory.CreateClient();
-            using var response = await client.PostAsync(initiateUrl, new FormUrlEncodedContent(postData));
-            var json = await response.Content.ReadAsStringAsync();
+            string json;
 
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                TempData["Error"] = "SSLCOMMERZ initiate failed (HTTP). Response: " + json;
+                var client = _httpFactory.CreateClient();
+                client.Timeout = TimeSpan.FromSeconds(25);
+
+                using var response = await client.PostAsync(initiateUrl, new FormUrlEncodedContent(postData));
+                json = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    //  user-friendly message (toast)
+                    TempData["Error"] = "Payment gateway initialization failed. Please try again later.";
+
+                    //  keep details out of UI (but you can log it)
+                    Console.WriteLine("SSLCOMMERZ init HTTP failed: " + json);
+
+                    return RedirectToAction("Index", "SellerProperties");
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                TempData["Error"] = "SSLCommerz sandbox is currently unavailable. Please try again later.";
+                Console.WriteLine("SSLCOMMERZ HttpRequestException: " + ex.Message);
+                return RedirectToAction("Index", "SellerProperties");
+            }
+            catch (TaskCanceledException)
+            {
+                TempData["Warning"] = "SSLCommerz gateway timeout. Please try again.";
+                Console.WriteLine("SSLCOMMERZ timeout while initiating payment.");
+                return RedirectToAction("Index", "SellerProperties");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Payment gateway error. Please try again later.";
+                Console.WriteLine("SSLCOMMERZ unknown error: " + ex);
                 return RedirectToAction("Index", "SellerProperties");
             }
 
@@ -138,14 +178,16 @@ namespace RealEstateSystem.Controllers
             }
             catch
             {
-                TempData["Error"] = "SSLCOMMERZ returned non-JSON response: " + json;
+                TempData["Error"] = "Payment gateway returned an unexpected response. Please try again later.";
+                Console.WriteLine("SSLCOMMERZ returned non-JSON: " + json);
                 return RedirectToAction("Index", "SellerProperties");
             }
 
             // GatewayPageURL can be missing or empty when failed
             if (!doc.RootElement.TryGetProperty("GatewayPageURL", out var urlProp))
             {
-                TempData["Error"] = "SSLCOMMERZ initiate failed. Full response: " + json;
+                TempData["Error"] = "Payment gateway initialization failed. Please try again later.";
+                Console.WriteLine("SSLCOMMERZ missing GatewayPageURL. Full: " + json);
                 return RedirectToAction("Index", "SellerProperties");
             }
 
@@ -157,16 +199,16 @@ namespace RealEstateSystem.Controllers
 
             if (string.IsNullOrWhiteSpace(gatewayUrl))
             {
-                TempData["Error"] = $"SSLCOMMERZ GatewayPageURL is empty. status={status}, failedreason={failedReason}. Full response: {json}";
+                TempData["Error"] = "Payment gateway failed to start. Please try again later.";
+                Console.WriteLine($"SSLCOMMERZ GatewayPageURL empty. status={status}, failedreason={failedReason}. Full: {json}");
                 return RedirectToAction("Index", "SellerProperties");
             }
 
             return Redirect(gatewayUrl);
         }
 
-        // ==========================
-        // 2) SUCCESS: Validate payment then mark Paid
-        // ==========================
+
+
         [HttpPost]
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Success()
@@ -183,6 +225,7 @@ namespace RealEstateSystem.Controllers
             }
 
             var invoice = await _context.CommissionInvoices
+                .Include(i => i.Property)
                 .FirstOrDefaultAsync(i => i.GatewayTranId == tranId);
 
             if (invoice == null)
@@ -202,13 +245,35 @@ namespace RealEstateSystem.Controllers
                 return RedirectToAction("Index", "SellerProperties");
             }
 
-            TempData["Success"] = "Payment successful! Invoice marked as Paid.";
-            return RedirectToAction("Index", "SellerProperties");
+            // Optional: show seller name in layout if available
+            var sellerUser = await _context.Sellers
+                .Include(s => s.User)
+                .FirstOrDefaultAsync(s => s.SellerId == invoice.SellerId);
+
+            if (sellerUser?.User != null)
+                ViewData["SellerDisplayName"] = $"{sellerUser.User.FirstName} {sellerUser.User.LastName}".Trim();
+
+            ViewData["PageTitle"] = "Payment Successful";
+            ViewData["PageSubtitle"] = "Your commission payment has been completed.";
+
+            var vm = new RealEstateSystem.ViewModels.PaymentSuccessViewModel
+            {
+                InvoiceId = invoice.CommissionInvoiceId,
+                PropertyTitle = invoice.Property?.Title ?? "Property",
+                TransactionId = invoice.GatewayTranId ?? tranId,
+                AmountPaid = invoice.CommissionAmount,
+                StatusText = "Success",
+                PaymentDate = invoice.VerifiedDate ?? DateTime.Now,
+                Message = "Payment completed successfully"
+            };
+
+            return View(vm); // => Views/SSLCommerz/Success.cshtml
         }
 
-        // ==========================
+
+
         // 3) FAIL
-        // ==========================
+        
         [HttpPost]
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Fail()
@@ -229,9 +294,7 @@ namespace RealEstateSystem.Controllers
             return RedirectToAction("Index", "SellerProperties");
         }
 
-        // ==========================
         // 4) CANCEL
-        // ==========================
         [HttpPost]
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Cancel()
@@ -252,9 +315,7 @@ namespace RealEstateSystem.Controllers
             return RedirectToAction("Index", "SellerProperties");
         }
 
-        // ==========================
         // 5) IPN: Server to server notification
-        // ==========================
         [HttpPost]
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> IPN()
@@ -280,9 +341,7 @@ namespace RealEstateSystem.Controllers
             return Ok();
         }
 
-        // ==========================
         // Helper: Validation API Call + Mark Paid
-        // ==========================
         private async Task<bool> ValidateAndMarkPaid(CommissionInvoice invoice, string valId)
         {
             var storeId = _config["SSLCommerz:StoreId"];
@@ -293,8 +352,17 @@ namespace RealEstateSystem.Controllers
                 $"{baseUrl}/validator/api/validationserverAPI.php?val_id={Uri.EscapeDataString(valId)}" +
                 $"&store_id={Uri.EscapeDataString(storeId)}&store_passwd={Uri.EscapeDataString(storePass)}&format=json";
 
-            var client = _httpFactory.CreateClient();
-            var json = await client.GetStringAsync(validateUrl);
+            string json;
+            try
+            {
+                var client = _httpFactory.CreateClient();
+                client.Timeout = TimeSpan.FromSeconds(20);
+                json = await client.GetStringAsync(validateUrl);
+            }
+            catch
+            {
+                return false;
+            }
 
             JsonDocument doc;
             try
@@ -329,13 +397,26 @@ namespace RealEstateSystem.Controllers
             if (!statusOk || !amountOk || !currencyOk)
                 return false;
 
+            //  Extract SSLCommerz bank transaction id (real transaction ID)
+            string bankTranId = doc.RootElement.TryGetProperty("bank_tran_id", out var bt)
+                ? (bt.GetString() ?? "")
+                : "";
+
+            //  Mark invoice paid
             invoice.GatewayValId = valId;
             invoice.GatewayStatus = apiStatus;
             invoice.Status = CommissionInvoiceStatus.Paid;
             invoice.VerifiedDate = DateTime.Now;
 
+            //  Save Transaction ID for receipt (bank_tran_id if available, otherwise fallback)
+            invoice.TransactionId = !string.IsNullOrWhiteSpace(bankTranId)
+                ? bankTranId
+                : invoice.GatewayTranId;
+
             await _context.SaveChangesAsync();
             return true;
         }
+
+
     }
 }

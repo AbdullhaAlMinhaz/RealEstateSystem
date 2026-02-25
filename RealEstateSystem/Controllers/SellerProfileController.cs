@@ -27,7 +27,7 @@ namespace RealEstateSystem.Controllers
             _env = env;
         }
 
-        // ========== GET: /SellerProfile ==========
+        // GET: /SellerProfile 
         [HttpGet]
         public IActionResult Index()
         {
@@ -35,7 +35,7 @@ namespace RealEstateSystem.Controllers
             if (userId == null)
                 return RedirectToAction("Login", "Account");
 
-            // 👇 Load user from DB and make sure it's actually a Seller
+            //  Load user data from DB 
             var user = _context.Users.FirstOrDefault(u => u.UserId == userId && u.Role == UserRole.Seller);
             if (user == null)
             {
@@ -70,14 +70,13 @@ namespace RealEstateSystem.Controllers
                 RegisteredOn = user.CreatedDate == default ? DateTime.Now : user.CreatedDate,
                 ProfilePhoto = user.ProfilePhoto,
                 AgencyName = seller.AgencyName,
-              //  SellerType = seller.SellerType,
-              //  IsVerified = seller.IsVerified
+              
             };
 
             return View(model);
         }
 
-        // ========== UPDATE BASIC PROFILE ==========
+        //  UPDATE BASIC PROFILE 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult UpdateProfile(SellerProfileViewModel model)
@@ -98,10 +97,7 @@ namespace RealEstateSystem.Controllers
             user.UpdatedDate = DateTime.Now;
 
             seller.AgencyName = model.AgencyName;
-           // seller.SellerType = model.SellerType;
-         //   seller.IsVerified = model.IsVerified;
-           // seller.UpdatedDate = DateTime.Now;
-
+           
             // image upload
             if (model.ProfileImageFile != null && model.ProfileImageFile.Length > 0)
             {
@@ -129,7 +125,7 @@ namespace RealEstateSystem.Controllers
             return RedirectToAction("Index");
         }
 
-        // ========== UPDATE PASSWORD ==========
+        //  UPDATE PASSWORD 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult UpdatePassword(SellerProfileViewModel model)
@@ -187,8 +183,7 @@ namespace RealEstateSystem.Controllers
                 RegisteredOn = user.CreatedDate == default ? DateTime.Now : user.CreatedDate,
                 ProfilePhoto = user.ProfilePhoto,
                 AgencyName = seller?.AgencyName,
-               // SellerType = seller?.SellerType,
-              //  IsVerified = seller?.IsVerified ?? false
+               
             };
         }
     }

@@ -100,7 +100,7 @@ namespace RealEstateSystem.Controllers
 
             await _context.SaveChangesAsync();
 
-            // ✅ EMAIL TO ADMIN
+            //  EMAIL TO ADMIN
             try
             {
                 var adminEmail = _emailSettings.AdminNotificationEmail;

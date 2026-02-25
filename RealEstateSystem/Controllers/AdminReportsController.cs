@@ -22,9 +22,7 @@ namespace RealEstateSystem.Controllers
         // GET: /AdminReports
         public async Task<IActionResult> Index(string range = "30", DateTime? startDate = null, DateTime? endDate = null, string report = "sales")
         {
-            // range: "7", "30", "90", "365" or "custom"
-            // report: "revenue" | "sales" | "listings"
-
+            
             // 1) Resolve date range
             DateTime end = (endDate ?? DateTime.Today).Date.AddDays(1).AddTicks(-1); // end-of-day
             DateTime start;
@@ -45,13 +43,15 @@ namespace RealEstateSystem.Controllers
 
             // 2) Pull data from DB
             // Revenue = Paid CommissionInvoices sum (VerifiedDate in range)
+
             var paidInvoicesQuery = _context.CommissionInvoices
                 .Where(i => i.Status == CommissionInvoiceStatus.Paid && i.VerifiedDate != null)
                 .Where(i => i.VerifiedDate >= start && i.VerifiedDate <= end);
 
             decimal totalRevenue = await paidInvoicesQuery.SumAsync(i => (decimal?)i.CommissionAmount) ?? 0m;
 
-            // Completed sales = Properties marked Sold in range (we use UpdatedDate as sold date fallback)
+            // Completed sales = Properties marked Sold in range 
+
             var soldPropsQuery = _context.Properties
                 .Where(p => p.Status == PropertyStatus.Sold)
                 .Where(p =>
@@ -66,7 +66,7 @@ namespace RealEstateSystem.Controllers
                 .Where(p => p.CreatedDate >= start && p.CreatedDate <= end)
                 .CountAsync();
 
-            // Cancelled listings = Rejected in range (if your system uses Rejected as cancelled)
+            // Cancelled listings = Rejected in range 
             int cancelled = await _context.Properties
                 .Where(p => p.ApprovalStatus == PropertyApprovalStatus.Rejected)
                 .Where(p => (p.UpdatedDate ?? p.CreatedDate) >= start && (p.UpdatedDate ?? p.CreatedDate) <= end)
@@ -123,6 +123,7 @@ namespace RealEstateSystem.Controllers
             decimal bestConv = best?.ConversionPercent ?? 0;
 
             // Avg time to sell (days) from CreatedDate -> UpdatedDate (sold mark should update UpdatedDate)
+
             var soldForAvg = await _context.Properties
                 .Where(p => p.Status == PropertyStatus.Sold)
                 .Where(p => p.UpdatedDate != null)
@@ -138,6 +139,7 @@ namespace RealEstateSystem.Controllers
             }
 
             // Top category by sold count in the period
+
             string topCategory = "-";
             var topCat = await _context.Properties
                 .Where(p => p.Status == PropertyStatus.Sold)
@@ -228,7 +230,7 @@ namespace RealEstateSystem.Controllers
         // GET: /AdminReports/RevenueDetails
         public async Task<IActionResult> RevenueDetails(string range = "30", DateTime? startDate = null, DateTime? endDate = null)
         {
-            // 1) Resolve date range (same logic style as Index)
+            // 1) Resolve date range 
             DateTime end = (endDate ?? DateTime.Today).Date.AddDays(1).AddTicks(-1);
             DateTime start;
 
@@ -304,7 +306,7 @@ namespace RealEstateSystem.Controllers
                 start = DateTime.Today.AddDays(-days + 1).Date;
             }
 
-            // Sold properties in range (same logic you already use in reports)
+            // Sold properties in range 
             var soldList = await _context.Properties
                 .Include(p => p.Seller).ThenInclude(s => s.User)
                 .Where(p => p.Status == PropertyStatus.Sold)

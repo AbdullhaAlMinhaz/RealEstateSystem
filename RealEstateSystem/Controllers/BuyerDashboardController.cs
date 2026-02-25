@@ -39,7 +39,6 @@ namespace RealEstateSystem.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // buyer display name
             var buyerName = $"{buyer.User?.FirstName} {buyer.User?.LastName}".Trim();
             if (string.IsNullOrWhiteSpace(buyerName))
                 buyerName = "Buyer";

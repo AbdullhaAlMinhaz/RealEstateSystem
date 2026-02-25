@@ -54,7 +54,7 @@ namespace RealEstateSystem.Controllers
 
             await _context.SaveChangesAsync();
 
-            // ✅ EMAIL TO SELLER
+            //  EMAIL TO SELLER
             try
             {
                 var sellerEmail = property.Seller?.User?.Email;
@@ -80,7 +80,7 @@ Developed By Abdullah Al Minhaz";
             }
             catch
             {
-                // Don't break approval if email fails
+                
             }
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")

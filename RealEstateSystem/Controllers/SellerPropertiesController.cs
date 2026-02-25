@@ -22,16 +22,12 @@ namespace RealEstateSystem.Controllers
             _environment = environment;
         }
 
-        // ========== MY PROPERTIES ==========
+        // MY PROPERTIES 
         public IActionResult Index()
         {
             if (RedirectToLoginIfNotSeller(out var seller) is IActionResult redirect)
                 return redirect;
 
-            //var properties = _context.Properties
-            //    .Where(p => p.SellerId == seller.SellerId)
-            //    .OrderByDescending(p => p.CreatedDate)
-            //    .ToList();
 
             var properties = _context.Properties
                 .Include(p => p.CommissionInvoice)
@@ -54,7 +50,7 @@ namespace RealEstateSystem.Controllers
             return View(model);
         }
 
-        // ========== MARK PROPERTY AS SOLD + AUTO CREATE COMMISSION INVOICE ==========
+        // MARK PROPERTY AS SOLD + AUTO CREATE COMMISSION INVOICE 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult MarkAsSold(int id)
@@ -68,27 +64,27 @@ namespace RealEstateSystem.Controllers
             if (property == null)
                 return NotFound();
 
-            // Only allow Available -> Sold
+            // Only allow Available Sold
             if (property.Status != PropertyStatus.Available)
             {
                 TempData["Error"] = "Only Available properties can be marked as Sold.";
                 return RedirectToAction(nameof(Index));
             }
 
-            // ✅ Use transaction so Sold + Invoice happen together safely
+            //  Use transaction so Sold + Invoice happen together safely
             using var tx = _context.Database.BeginTransaction();
 
             try
             {
-                // 1) Mark Sold
+                //  Mark Sold
                 property.Status = PropertyStatus.Sold;
                 property.UpdatedDate = DateTime.Now;
 
-                // 2) Create invoice only if not exists (prevent duplicates)
+                //  Create invoice only if not exists (prevent duplicates)
                 bool invoiceExists = _context.CommissionInvoices.Any(ci => ci.PropertyId == property.PropertyId);
                 if (!invoiceExists)
                 {
-                    //int ratePercent = 2; // Default 2% (dropdown later in Step 3)
+                    //int ratePercent = 2; // Default 2%
 
                     int ratePercent = property.CommissionRatePercent;
                     if (ratePercent < 2 || ratePercent > 5)
@@ -131,7 +127,7 @@ namespace RealEstateSystem.Controllers
         }
 
 
-        // ========== PENDING PROPERTIES (OPTIONAL TAB) ==========
+        // PENDING PROPERTIES
         public IActionResult Pending()
         {
             if (RedirectToLoginIfNotSeller(out var seller) is IActionResult redirect)
@@ -161,7 +157,7 @@ namespace RealEstateSystem.Controllers
             return View("Index", model);
         }
 
-        // ========== ADD NEW PROPERTY (GET) ==========
+        // ADD NEW PROPERTY (GET)
         [HttpGet]
         public IActionResult Create()
         {
@@ -177,7 +173,7 @@ namespace RealEstateSystem.Controllers
             return View(model);
         }
 
-        // ========== ADD NEW PROPERTY (POST) ==========
+        //  ADD NEW PROPERTY (POST) 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(SellerPropertyCreateViewModel model)
@@ -232,7 +228,7 @@ namespace RealEstateSystem.Controllers
             }
         }
 
-        // ========== EDIT PROPERTY (GET) ==========
+        //  EDIT PROPERTY (GET) 
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -245,7 +241,7 @@ namespace RealEstateSystem.Controllers
             if (property == null)
                 return NotFound();
 
-            // ✅ LOCK AFTER SOLD
+            // LOCK AFTER SOLD
             if (property.Status == PropertyStatus.Sold)
             {
                 TempData["Error"] = "This property is Sold, so it can no longer be edited.";
@@ -276,7 +272,7 @@ namespace RealEstateSystem.Controllers
             return View(model);
         }
 
-        // ========== EDIT PROPERTY (POST) ==========
+        //  EDIT PROPERTY (POST) 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(SellerPropertyEditViewModel model)
@@ -300,7 +296,7 @@ namespace RealEstateSystem.Controllers
                 if (property == null)
                     return NotFound();
 
-                // ✅ LOCK AFTER SOLD
+                // LOCK AFTER SOLD
                 if (property.Status == PropertyStatus.Sold)
                 {
                     TempData["Error"] = "This property is Sold, so it can no longer be edited.";
@@ -335,7 +331,7 @@ namespace RealEstateSystem.Controllers
             }
         }
 
-        // ========== DETAILS (seller view) ==========
+        //  DETAILS (seller view) 
         [HttpGet]
         public IActionResult Details(int id)
         {
@@ -370,7 +366,7 @@ namespace RealEstateSystem.Controllers
             return View(model);
         }
 
-        // ========== DELETE PROPERTY ==========
+        //  DELETE PROPERTY 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
@@ -378,7 +374,7 @@ namespace RealEstateSystem.Controllers
             if (RedirectToLoginIfNotSeller(out var seller) is IActionResult redirect)
                 return redirect;
 
-            // ✅ Only delete seller's own property
+            //  Only delete seller's own property
             var property = _context.Properties
                 .Include(p => p.Images)
                 .FirstOrDefault(p => p.PropertyId == id && p.SellerId == seller.SellerId);
@@ -388,29 +384,29 @@ namespace RealEstateSystem.Controllers
 
             try
             {
-                // ✅ 1) Remove Wishlist references FIRST (Fix FK_Wishlists_Properties_PropertyId)
+                //  1) Remove Wishlist references FIRST (Fix FK_Wishlists_Properties_PropertyId)
                 // NOTE: Your DbSet name must be Wishlists in ApplicationDbContext
                 var wishItems = _context.Wishlists.Where(w => w.PropertyId == id).ToList();
                 if (wishItems.Any())
                     _context.Wishlists.RemoveRange(wishItems);
 
-                // ✅ 2) Delete images in DB
+                // 2) Delete images in DB
                 if (property.Images != null && property.Images.Any())
                 {
                     _context.PropertyImages.RemoveRange(property.Images);
                 }
 
-                // ✅ 3) Delete images folder from wwwroot/uploads/properties/{id}
+                //  3) Delete images folder from wwwroot/uploads/properties/{id}
                 var folder = Path.Combine(_environment.WebRootPath, "uploads", "properties", property.PropertyId.ToString());
                 if (Directory.Exists(folder))
                 {
                     Directory.Delete(folder, recursive: true);
                 }
 
-                // ✅ 4) Delete property
+                //  4) Delete property
                 _context.Properties.Remove(property);
 
-                // ✅ 5) Save once (all deletes in one transaction)
+                //  5) Save once (all deletes in one transaction)
                 _context.SaveChanges();
 
                 TempData["Success"] = "Property deleted successfully.";
@@ -423,7 +419,7 @@ namespace RealEstateSystem.Controllers
             }
         }
 
-        // ========== HELPER: SAVE UPLOADED IMAGES ==========
+        // HELPER: SAVE UPLOADED IMAGES 
         private void SaveUploadedImages(Property property, List<IFormFile> photos)
         {
             if (photos == null || photos.Count == 0)

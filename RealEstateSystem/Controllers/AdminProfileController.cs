@@ -27,7 +27,7 @@ namespace RealEstateSystem.Controllers
             _env = env;
         }
 
-        // ========== GET: /AdminProfile ==========
+        // AdminProfile 
         [HttpGet]
         public IActionResult Index()
         {
@@ -60,7 +60,7 @@ namespace RealEstateSystem.Controllers
             return View(model);
         }
 
-        // ========== UPDATE BASIC PROFILE ==========
+        //  UPDATE BASIC PROFILE 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult UpdateProfile(AdminProfileViewModel model)
@@ -76,7 +76,6 @@ namespace RealEstateSystem.Controllers
             user.PhoneNumber = model.PhoneNumber;
             user.Gender = model.Gender;
             user.DateOfBirth = model.DateOfBirth;
-            //user.PresentAddress = model.PresentAddress;
             user.UpdatedDate = DateTime.Now;
 
             // handle image upload
@@ -99,7 +98,7 @@ namespace RealEstateSystem.Controllers
                 user.ProfilePhoto = $"/uploads/profiles/{fileName}";
             }
 
-            _context.SaveChanges();   // 👈 NOW changes go to DB
+            _context.SaveChanges();   
 
             HttpContext.Session.SetString("UserName", $"{user.FirstName} {user.LastName}");
 
@@ -107,7 +106,7 @@ namespace RealEstateSystem.Controllers
             return RedirectToAction("Index");
         }
 
-        // ========== UPDATE PASSWORD ==========
+        //  UPDATE PASSWORD 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult UpdatePassword(AdminProfileViewModel model)

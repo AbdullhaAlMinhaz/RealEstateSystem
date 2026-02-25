@@ -19,7 +19,7 @@ namespace RealEstateSystem.Controllers
             _context = context;
         }
 
-        // ✅ Added: months query param for dropdown range (1,2,4,6,12)
+        //  Added: months query param for dropdown range (1,2,4,6,12)
         public IActionResult Index(int months = 6)
         {
 
@@ -34,13 +34,13 @@ namespace RealEstateSystem.Controllers
                     .Where(i => i.Status == CommissionInvoiceStatus.Paid)
                     .Sum(i => (decimal?)i.CommissionAmount) ?? 0m;
 
-            // Only allow these values (prevents invalid query values)
+            
             var allowed = new[] { 1, 2, 4, 6, 12 };
             if (!allowed.Contains(months)) months = 6;
 
-            // =========================
+            
             // Overview cards
-            // =========================
+           
             var totalUsers = _context.Users.Count();
             var totalBuyers = _context.Users.Count(u => u.Role == UserRole.Buyer);
             var totalSellers = _context.Users.Count(u => u.Role == UserRole.Seller);
@@ -50,9 +50,9 @@ namespace RealEstateSystem.Controllers
                 p.ApprovalStatus == PropertyApprovalStatus.Approved
             );
 
-            // =========================
+            
             // Pending approvals table
-            // =========================
+            
 
 
             var pending = _context.Properties
@@ -67,48 +67,21 @@ namespace RealEstateSystem.Controllers
                 SubmittedAt = p.SubmittedDate,
                 ApprovalStatus = p.ApprovalStatus,
 
-            // ✅ Modal fields
+            //  Modal fields
             Address = p.Address,
             City = p.City,
             PropertyType = p.PropertyType.ToString(),
             CommissionRatePercent = p.CommissionRatePercent
             })
             .ToList(); 
-            
 
-            //    var pending = _context.Properties
-            //        .Include(p => p.Seller)
-            //            .ThenInclude(s => s.User)
-            //        .Where(p => p.ApprovalStatus == PropertyApprovalStatus.Pending)
-            //        .OrderByDescending(p => p.CreatedDate)
-            //        .Take(4)
-
-            //        .Select(p => new PendingPropertyApprovalViewModel
-            //        {
-            //            PropertyId = p.PropertyId,
-            //            Title = p.Title,
-            //            SellerName = p.Seller != null && p.Seller.User != null
-            //? p.Seller.User.FirstName + " " + p.Seller.User.LastName
-            //: "Unknown seller",
-            //            SubmittedAt = p.CreatedDate,
-            //            ApprovalStatus = p.ApprovalStatus,
-
-            //            // ✅ for modal
-            //            Address = p.Address,
-            //            City = p.City,
-            //            PropertyType = p.PropertyType.ToString(),
-            //            CommissionRatePercent = p.CommissionRatePercent
-            //        });
-
-
-            // =========================
+           
             // Chart #1: Listing & Sales Overview (Dynamic months range)
-            // =========================
-            // For "Last N months", we include current month + (N-1) previous months
+                     
             var startMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(-(months - 1));
             var endExclusive = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(1);
 
-            // Pull only what we need
+        
             var chartProps = _context.Properties
                 .AsNoTracking()
                 .Where(p =>
@@ -179,9 +152,9 @@ namespace RealEstateSystem.Controllers
                     : Math.Max(minBarPxIfNonZero, (int)Math.Round((p.SoldListings * 1.0 / maxCount) * maxBarPx));
             }
 
-            // =========================
+           
             // Chart #2: Property Category Distribution (Current listings)
-            // =========================
+          
             var activeByType = _context.Properties
                 .AsNoTracking()
                 .Where(p => p.Status == PropertyStatus.Available &&
@@ -248,9 +221,7 @@ namespace RealEstateSystem.Controllers
             // Range label for the dropdown badge
             var rangeLabel = months == 12 ? "Last 1 year" : $"Last {months} months";
 
-            // =========================
             // Build model
-            // =========================
             var model = new AdminDashboardViewModel
             {
                 TotalUsers = totalUsers,
@@ -263,7 +234,7 @@ namespace RealEstateSystem.Controllers
                 CategoryDistribution = slices,
                 CategoryPieGradientCss = gradient,
 
-                // ✅ New fields for dropdown
+                //  New fields for dropdown
                 SelectedMonths = months,
                 RangeLabel = rangeLabel
             };

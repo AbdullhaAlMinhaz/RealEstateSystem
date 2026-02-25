@@ -34,7 +34,7 @@ namespace RealEstateSystem.Controllers
 
             if (seller == null)
             {
-                // Not a seller
+                
                 return RedirectToAction("Index", "Home");
             }
 
@@ -43,7 +43,7 @@ namespace RealEstateSystem.Controllers
             var propertiesQuery = _context.Properties
                 .Where(p => p.SellerId == sellerId);
 
-            // TOP CARDS
+            //  CARDS
             var activeListings = propertiesQuery.Count(p =>
                 p.Status == PropertyStatus.Available &&
                 p.ApprovalStatus == PropertyApprovalStatus.Approved);
@@ -118,7 +118,7 @@ namespace RealEstateSystem.Controllers
                 })
                 .ToList();
 
-            // TOP PERFORMING PROPERTIES (by ViewCount)
+            // TOP PERFORMING PROPERTIES by ViewCount
             var topPropsRaw = _context.Properties
                 .Include(p => p.Inquiries)
                 .Include(p => p.Offers)

@@ -14,6 +14,10 @@
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
 
 
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+
+
 </head>
 <body class="@(ViewData["BodyClass"] ?? "")">
 
@@ -74,5 +78,45 @@
     <script src="~/js/script.js" asp-append-version="true"></script>
 
     @RenderSection("Scripts", required: false)
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
 </body>
 </html>
+<script>
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "timeOut": "4000"
+    };
+
+    @if (TempData["Success"] != null)
+    {
+            <text>
+                toastr.success("@TempData["Success"]");
+            </text>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+            <text>
+                toastr.error("@TempData["Error"]");
+            </text>
+    }
+
+    @if (TempData["Warning"] != null)
+    {
+            <text>
+                toastr.warning("@TempData["Warning"]");
+            </text>
+    }
+
+    @if (TempData["Info"] != null)
+    {
+            <text>
+                toastr.info("@TempData["Info"]");
+            </text>
+    }
+</script>
